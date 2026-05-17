@@ -6,7 +6,7 @@ Three skills, each independently usable:
 
 | Skill | Purpose | Trigger |
 |---|---|---|
-| `literature-explorer` | Multi-perspective survey of a topic; produces hierarchical outline + BibTeX. Calls `literature-review-ml` skill for retrieval. | `/explore <topic>` |
+| `literature-explorer` | Multi-perspective survey of a topic; produces hierarchical outline + BibTeX. Uses bundled arXiv / Semantic Scholar / OpenAlex scripts; if the external `literature-review-ml` skill is installed, will prefer it. | `/explore <topic>` |
 | `algo-brainstorm` | Eight-mode pipeline for going from "I have an idea" to "I have a contribution worth submitting". Modes: `gap-analysis`, `formalize`, `ideate`, `novelty-check`, `theory-scoping`, `toy-design`, `ablation-plan`, `red-team`. | `/algo <mode>` |
 | `paper-writer` | Venue-aware drafting (NeurIPS, ICML, JMLR, AISTATS) with stage checkpoints and citation auditing via Semantic Scholar. | `/write <mode>` |
 
@@ -14,17 +14,31 @@ State carries across skills and sessions via `.research-state/<topic-slug>.md` (
 
 ## Install
 
-From the repo root:
+This plugin ships its own local marketplace. From inside Claude Code:
+
+```text
+/plugin marketplace add /Users/chenlu-hung/Documents/Projects/ResearchAI
+/plugin install research-assistant@research-assistant
+```
+
+(Substitute your own absolute path to this repo, or a Git URL once published.)
+
+Then install the Python dependencies used by the retrieval and citation-audit
+scripts:
 
 ```bash
-# As a local plugin
-ln -s "$(pwd)" ~/.claude/plugins/research-assistant
-
-# Python deps (citation audit + retrieval scripts)
 uv sync
 # Optional: STORM backend for heavy auto-surveys
 uv sync --extra storm
 ```
+
+### Optional external skill
+
+`literature-explorer` will automatically prefer an external skill named
+`literature-review-ml` for retrieval **if** it is installed in your Claude
+environment. If it is not present, the bundled scripts under
+`skills/literature-explorer/scripts/` are used instead — no configuration
+needed.
 
 ## Quickstart
 

@@ -37,9 +37,12 @@ implemented as prompt orchestration (no STORM dependency required).
    - `scripts/search_semantic_scholar.py "<query>"` — Semantic Scholar Graph API
    - `scripts/search_openalex.py "<query>"` — OpenAlex
 
-   If the `literature-review-ml` skill is available in the environment,
-   prefer delegating retrieval to it — it already handles dedup, PRISMA
-   tracking, and ML-specific metadata.
+   The bundled scripts are the default and require only the Python deps
+   from `pyproject.toml`. **Optional**: if a `literature-review-ml` skill
+   is independently installed in the environment, prefer delegating
+   retrieval to it — it adds dedup, PRISMA tracking, and ML-specific
+   metadata. It is *not* a hard dependency of this plugin; do not assume
+   its presence.
 
 4. **Dedup + rank**. Merge by normalized title + first author + year.
    Rank by (citations × recency-decay × perspective-match).

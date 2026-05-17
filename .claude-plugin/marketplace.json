@@ -1,0 +1,31 @@
+{
+  "name": "research-assistant",
+  "owner": {
+    "name": "Lu-Hung Chen",
+    "email": "luhung@email.nchu.edu.tw"
+  },
+  "metadata": {
+    "description": "Local marketplace for the research-assistant plugin — literature exploration, algorithm brainstorming, and paper writing for Stats/ML researchers."
+  },
+  "plugins": [
+    {
+      "name": "research-assistant",
+      "source": "./",
+      "description": "Three skills: literature-explorer, algo-brainstorm, paper-writer.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Lu-Hung Chen",
+        "email": "luhung@email.nchu.edu.tw"
+      },
+      "license": "MIT",
+      "keywords": [
+        "research",
+        "statistics",
+        "machine-learning",
+        "algorithm-design",
+        "literature-review",
+        "academic-writing"
+      ]
+    }
+  ]
+}

@@ -19,10 +19,13 @@ script-based metadata verification + LLM-based claim-support check.
 ### Stage 1 — Metadata verification (`scripts/verify_citations.py`)
 
 ```bash
-python skills/paper-writer/scripts/verify_citations.py \
+uv run python skills/paper-writer/scripts/verify_citations.py \
   --bib refs/<slug>.bib \
   --out .research-state/<slug>-audit.json
 ```
+
+(`uv run` ensures the project's virtualenv with `httpx`, `tenacity`, and
+`pybtex` is used. If running outside `uv`, activate the venv first.)
 
 For each entry in `.bib`:
 
