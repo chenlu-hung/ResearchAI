@@ -1,0 +1,24 @@
+# Per-project Claude settings (user-specific, not part of plugin)
+.claude/
+
+# Per-topic research state (generated at runtime)
+.research-state/
+
+# Drafts and retrieved literature (user-specific outputs)
+docs/
+refs/
+paper/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.uv-cache/
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
