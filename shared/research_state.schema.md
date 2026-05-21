@@ -75,6 +75,24 @@ theory_targets:
     statement: "E[|Ĉ(X)|] → E[|C*(X)|] as n→∞"
     must_have: false
 
+# --- interview answers (filled by grill protocol) -----------------
+interview_ideate:
+  asked_at: 2026-05-21
+  primitive: "conformal"
+  contribution_type: theoretical
+  constraints: "must work without known shift ratio"
+  diversity: max_diversity
+  follow_ups: []   # list of {question, answer} pairs for any dynamic follow-ups
+
+interview_drafting:
+  asked_at: 2026-05-21
+  contribution_claim: "First finite-sample marginal coverage guarantee under unknown w(x) without exchangeability."
+  reader: applied_ml_practitioners
+  tone: formal_proof_heavy
+  proactive_weaknesses:
+    - "If w(x) estimation error is heavy-tailed, weighted quantile is not consistent."
+  follow_ups: []
+
 # --- red team findings (filled by `red-team`) --------------------
 red_team_findings:
   - finding: "If w(x) estimation error is heavy-tailed, weighted quantile is not consistent."
@@ -114,6 +132,11 @@ new entries; they do not rewrite history.
    `dropped:` subsection with `drop_reason`, do not delete.
 5. **Cross-references**: `audit_status` on `key_claims` is set by paper-writer's
    `citation-audit` mode; brainstorm modes must not touch it.
+6. **Interview answers are append-only and stage-scoped**. Modes that invoke the
+   grill protocol (`shared/prompts/grill_protocol.md`) skip the interview iff an
+   `interview_<mode>:` block already exists in the frontmatter. Skills must not
+   modify interview blocks belonging to other modes. To re-grill, the user
+   deletes the block manually or starts a new slug.
 
 ## Slug rules
 

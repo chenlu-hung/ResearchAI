@@ -9,6 +9,43 @@ motivation, different primitives.
 - A `formalize` block from research state (required)
 - Optional: user's preferred direction or constraint
 
+## Pre-flight grill
+
+Run the interview protocol in `shared/prompts/grill_protocol.md` **after**
+Step 1 below (state read + refuse-if-blank check) and **before** Step 2
+(candidate generation). If `interview_ideate:` is already present in the
+research-state frontmatter, skip the interview and proceed.
+
+**Essentials** (ask in this order, one at a time):
+
+1. **Algorithmic primitive preference** — `AskUserQuestion`, header
+   "Primitive". Options drawn from Step 2's primitive list: proximal /
+   score-matching / conformal / DML / variational / Bayesian /
+   sampling-based. Recommended = the primitive most consistent with the
+   formalization's `loss:` and `nuisance:` fields (cite the grounding in
+   the option's `description`).
+2. **Contribution type** — `AskUserQuestion`, header "Contribution".
+   Options: theoretical (target theorem in mind) / empirical (fixing
+   observed failure) / methodological (new framework). Recommended =
+   `theoretical` if `theory_targets:` is non-empty, else `empirical` if
+   `gap-analysis` has populated failure modes, else `methodological`.
+3. **Hard constraints / no-go zones** — free-form. Recommended phrasing:
+   "Candidates must not rely on knowing the nuisance exactly; must
+   remain valid at finite-sample n." User can replace, extend, or accept.
+4. **Diversity target** — `AskUserQuestion`, header "Diversity".
+   Options: max diversity across primitives / deep dive within one
+   primitive / mixed (2 primitives, 2 variants each). Recommended = max
+   diversity (default, matches Step 3's existing diversity requirement).
+
+On `Proceed`, append an `interview_ideate:` block to research-state
+frontmatter per the protocol's persistence rules. Use the answers to
+constrain Step 2: the primitive answer narrows the primitive list, the
+contribution-type answer biases each candidate's `motivation:` field,
+constraints filter the candidate set, and diversity target shapes the
+spread (Step 3's `≥1 theoretical`, `≥1 empirical` requirements still
+apply under "max diversity"; under "deep dive" relax the
+distinct-primitive rule but keep the motivation diversity).
+
 ## Procedure
 
 1. **Read the formalization**. If `formalization:` is empty in research
