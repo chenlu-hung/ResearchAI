@@ -87,6 +87,21 @@ populated with the algorithm-card contents.
 - Open risks from `red-team`.
 ```
 
+## Council panel (opt-in)
+
+When invoked with `--council`, get alternative structures from a multi-model panel before
+committing to one outline. Follow `shared/prompts/council_panel.md`.
+
+- **Panel prompt**: the venue + page budget + the algorithm-card → section mapping (Step 2),
+  asking each member to propose a **section-by-section skeleton with a page-budget split**
+  and a one-line rationale for any non-obvious ordering. Strip any citations they add.
+- **Cross-review**: this is a ranking mode — run the anonymized review pass so members rank
+  each other's skeletons for venue fit and narrative flow.
+- **Synthesis**: produce one outline that takes the best structural choices, justified
+  against the venue profile (not member popularity). Apply the Anti-sycophancy thin/overflow
+  flags below to the *merged* outline. Citations stay card/bib-sourced — panel skeletons
+  contribute structure only, never references.
+
 ## Anti-sycophancy
 
 After producing outline, list:

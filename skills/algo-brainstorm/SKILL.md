@@ -112,3 +112,18 @@ only with user confirmation.
 
 If `venue_target` is set in research state, `theory-scoping` and `red-team`
 load `shared/venue_profiles.md` to tailor expectations.
+
+## Council panel (opt-in)
+
+`gap-analysis` and `ideate` can widen their search with a multi-model panel — Codex,
+Gemini, Claude, and DeepSeek, each reached through its **own subscription/sign-in CLI**
+(no API keys), merged by this session as chair. Pass `--council` (e.g.
+`/algo ideate --council`) to convene it; without the flag the mode runs single-model
+exactly as before. Protocol and guardrails: `shared/prompts/council_panel.md` (engine:
+`shared/council.py`, stdlib-only — `python3 shared/council.py`).
+
+**Requires** the member CLIs you want on PATH and signed in (`codex`, `agy`, `claude`,
+`opencode`); any that are missing simply drop out of the panel. Panel output is **ideation
+only**: every citation, theorem name, or number it produces is marked `[VERIFY]` and must
+pass the normal Anti-sycophancy prior-art check and `shared/prompts/anti_hallucination.md`
+before entering research-state. A panel member is never a source for novelty claims.

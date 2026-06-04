@@ -1,6 +1,6 @@
 ---
 description: Run a mode of the paper-writer skill. Modes: outline, full-draft, revision, citation-audit, self-review, submission-check.
-argument-hint: <mode> [--venue neurips|icml|jmlr|aistats]
+argument-hint: <mode> [--venue neurips|icml|jmlr|aistats] [--council]
 ---
 
 Invoke the `paper-writer` skill in the mode specified: $ARGUMENTS
@@ -20,3 +20,12 @@ Pre-flight: refuse to emit `full-draft` if `red-team` mode has any
 `blocking: true` finding unresolved, or if `algorithm_card` / `refs/<slug>.bib`
 are missing. Refer to `shared/venue_profiles.md` and the per-venue style
 files in `skills/paper-writer/style/` for tone and structure.
+
+If the arguments include `--council` (supported by `outline` and
+`self-review`), additionally run the multi-model panel in
+`shared/prompts/council_panel.md` after the mode's gating — fan out to
+Codex / Gemini / Claude / DeepSeek via `python3 shared/council.py`, then chair
+the synthesis (`self-review` becomes a multi-reviewer meta-review; `outline`
+becomes a structure bake-off). The panel never bypasses citation discipline —
+any `\cite{...}` it emits is stripped or `[BIBKEY MISSING — verify]`. Without
+`--council`, run the mode single-model.

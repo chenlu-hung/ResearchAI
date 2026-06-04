@@ -42,19 +42,38 @@ environment. If it is not present, the bundled scripts under
 `skills/literature-explorer/scripts/` are used instead — no configuration
 needed.
 
+### Council panel (opt-in multi-model)
+
+Four modes — `algo gap-analysis`, `algo ideate`, `write outline`, `write
+self-review` — accept a `--council` flag that convenes a multi-model panel
+(Codex, Gemini, Claude, DeepSeek), each reached through its **own
+subscription/sign-in CLI** rather than an API key, with the running session as
+chair. It widens divergent search (more gaps, more candidate algorithms) and
+turns `self-review` into a real multi-reviewer meta-review. Inspired by
+[karpathy/llm-council](https://github.com/karpathy/llm-council).
+
+- Engine: `shared/council.py` (stdlib-only). Protocol + anti-hallucination
+  guardrails: `shared/prompts/council_panel.md`.
+- Needs the member CLIs on PATH and signed in (`codex`, `agy`, `claude`,
+  `opencode`); any missing one drops out of the panel. Without `--council`,
+  every mode runs single-model exactly as before.
+- Panel output is **ideation/critique only** — citations and prior-art claims
+  it produces are `[VERIFY]`-flagged and must pass the normal audit before
+  entering research-state.
+
 ## Quickstart
 
 ```text
 /explore conformal prediction under covariate shift
 /algo gap-analysis
 /algo formalize
-/algo ideate
+/algo ideate --council          # optional: multi-model brainstorm
 /algo novelty-check
 /algo red-team
 /write outline --venue neurips
 /write full-draft
 /write citation-audit
-/write self-review
+/write self-review --council     # optional: multi-reviewer panel
 /write submission-check
 ```
 

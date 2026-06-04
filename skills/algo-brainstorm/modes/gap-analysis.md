@@ -54,6 +54,22 @@ missing*. The output feeds `formalize` or `ideate`.
    For each, write a one-paragraph "attack sketch": what would a new method
    need to address to close this gap?
 
+## Council panel (opt-in)
+
+When invoked with `--council`, widen the failure-mode search with a multi-model panel
+before building the gap table — diversity surfaces gaps one model misses. Follow
+`shared/prompts/council_panel.md`.
+
+- **Panel prompt**: the restated method (Step 1) plus the failure-mode axes (Step 2),
+  asking each member to **independently list distinct gaps / failure regimes / broken
+  assumptions**, one per line with the regime where each bites. No ranking — you want the
+  union.
+- **Synthesis**: merge member gaps into the Step 3 gap table, dedup (note convergence,
+  e.g. "3/4 flagged heavy-tail miscalibration"), and tag panel-sourced rows `source:
+  panel`. Every panel gap enters "Supporting evidence" as `[VERIFY]` with a search query —
+  a member is **not** a citation source. Then run the Anti-sycophancy prior-art check below
+  on the merged set before picking the top 3.
+
 ## Anti-sycophancy
 
 Required before emitting any "this is a promising gap" assessment:

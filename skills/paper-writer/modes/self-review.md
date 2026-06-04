@@ -8,7 +8,8 @@ produce actionable comments. This is distinct from `algo-brainstorm`'s
 - `self-review` attacks whether the **manuscript persuades this venue** —
   completeness, positioning, evidence, clarity. It assumes the method is sound.
 
-Single pass, single reviewer persona. No multi-agent panel.
+Single pass, single reviewer persona **by default**. A real multi-reviewer panel is
+available opt-in via `--council` (see "Council panel" below).
 
 ## Inputs
 
@@ -32,6 +33,23 @@ Single pass, single reviewer persona. No multi-agent panel.
    - **Minor comments**: clarity, notation, figure/table issues.
    - **Red-flag check**: go down the venue's `Common reviewer red flags` list
      and mark each present / absent / N/A.
+
+## Council panel (opt-in)
+
+The procedure above is one reviewer. When invoked with `--council`, convene a **real
+panel**: each model plays an independent venue reviewer, then you chair a meta-review.
+Follow `shared/prompts/council_panel.md`.
+
+- **Panel prompt**: the full draft + the venue reviewer profile and red-flag list from
+  `shared/venue_profiles.md`, asking each member for a review in the Step-3 format (summary,
+  recommendation on the venue scale, major comments tied to sections, minor comments,
+  red-flag check). Each member adopts the venue's dominant persona.
+- **Cross-review (optional)**: have members react to the anonymized set of reviews to expose
+  where reviewers disagree on severity.
+- **Synthesis → meta-review**: merge into one review. Dedup overlapping comments and note
+  agreement ("3/4 reviewers flag the missing baseline" → a major weakness); keep genuine
+  disagreement explicit (split decision). Apply the Anti-sycophancy rule below to the
+  *merged* review, and record each reviewer's recommendation alongside the aggregate.
 
 ## Anti-sycophancy
 

@@ -97,6 +97,22 @@ distinct-primitive rule but keep the motivation diversity).
    | 2 | ...
    ```
 
+## Council panel (opt-in)
+
+When invoked with `--council`, run a multi-model brainstorm to widen Step 2's candidate
+pool — diversity is exactly what `ideate` optimizes for. Follow
+`shared/prompts/council_panel.md`. Run it after Step 1 (read formalization), feeding Step 2.
+
+- **Panel prompt**: the `formalize` block (loss, assumptions, nuisance, estimand) plus the
+  interview constraints, asking each member to propose **2–3 candidate algorithmic
+  approaches** in the Step 2 schema (name, core idea, primitive, motivation, trade-off,
+  cost). No ranking — collect the union.
+- **Synthesis**: pool member candidates with your own, dedup by (primitive, motivation),
+  then apply Step 4's forbidden-candidate filter and the Step 3 diversity requirements to
+  the merged pool. Tag panel-originated candidates `source: panel` in the state block. Run
+  the Anti-sycophancy check below on every survivor — a member's say-so is never novelty
+  evidence; unresolved prior art stays `novelty: uncertain`.
+
 ## Anti-sycophancy
 
 For each candidate, **before** writing it, briefly check (one sentence

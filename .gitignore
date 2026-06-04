@@ -22,3 +22,6 @@ venv/
 .idea/
 .vscode/
 *.swp
+
+# Antigravity CLI session artifacts (local, user-specific)
+.antigravitycli/

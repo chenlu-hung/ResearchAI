@@ -1,6 +1,6 @@
 ---
 description: Run a mode of the algo-brainstorm skill for developing new Stats/ML algorithms.
-argument-hint: <mode> [extra args]
+argument-hint: <mode> [--council]
 ---
 
 Invoke the `algo-brainstorm` skill in the mode specified by the first
@@ -20,3 +20,10 @@ Valid modes (see `skills/algo-brainstorm/SKILL.md`):
 Follow the procedure in `skills/algo-brainstorm/modes/<mode>.md`. Read
 research state on entry; update on exit. Apply anti-sycophancy and
 statistical-rigor protocols as documented in the SKILL.md.
+
+If the arguments include `--council` (supported by `gap-analysis` and
+`ideate`), additionally run the multi-model panel in
+`shared/prompts/council_panel.md` after the mode's gating — fan out to
+Codex / Gemini / Claude / DeepSeek via `python3 shared/council.py`, then
+chair the synthesis. Panel output is ideation only and is `[VERIFY]`-flagged
+before it enters research-state. Without `--council`, run the mode single-model.

@@ -118,3 +118,18 @@ Writes:
 - Flips `key_claims[*].audit_status` to `verified` after citation audit
 
 Reads everything else.
+
+## Council panel (opt-in)
+
+`outline` and `self-review` can convene a multi-model panel — Codex, Gemini, Claude, and
+DeepSeek, each reached through its **own subscription/sign-in CLI** (no API keys), with this
+session as chair. Pass `--council` (e.g. `/write self-review --council`) to turn
+`self-review` into a real multi-reviewer panel, or `outline` into a structure bake-off;
+without the flag both run single-model as documented above. Protocol and guardrails:
+`shared/prompts/council_panel.md` (engine: `shared/council.py`, stdlib-only —
+`python3 shared/council.py`).
+
+**Requires** the member CLIs on PATH and signed in (`codex`, `agy`, `claude`, `opencode`);
+missing ones drop out. The panel never bypasses citation discipline — members do not share
+`refs/<slug>.bib`, so any `\cite{...}` they emit is stripped or marked
+`[BIBKEY MISSING — verify]`, per hard-discipline rule 3.
