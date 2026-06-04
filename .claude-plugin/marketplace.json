@@ -12,7 +12,7 @@
       "name": "research-assistant",
       "source": "./",
       "description": "Three skills: literature-explorer, algo-brainstorm, paper-writer.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Lu-Hung Chen",
         "email": "luhung@email.nchu.edu.tw"
