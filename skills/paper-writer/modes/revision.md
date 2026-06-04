@@ -30,6 +30,7 @@
    - Notation still consistent
    - Theorem numbering unchanged unless intentional
    - Bibliography keys all in `.bib`
+   - Prose hygiene pass on edited text (`shared/prompts/prose_hygiene.md`)
 
 ## Reviewer-response sub-mode
 

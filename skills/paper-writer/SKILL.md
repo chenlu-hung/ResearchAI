@@ -16,6 +16,8 @@ blocking findings.
 - "Outline a NeurIPS paper from my algorithm card"
 - "Audit my citations"
 - "Help me revise the intro"
+- "Review my draft like a reviewer would"
+- "Is my paper submission-ready?"
 - `/write <mode>` slash command
 
 ## When NOT to invoke
@@ -31,6 +33,8 @@ blocking findings.
 | `full-draft` | Section-by-section draft from algorithm card + outline | `modes/full-draft.md` |
 | `revision` | Targeted edits to a specific section | `modes/revision.md` |
 | `citation-audit` | Verify each citation exists and supports the claim | `modes/citation-audit.md` |
+| `self-review` | One-pass venue-reviewer critique of the draft | `modes/self-review.md` |
+| `submission-check` | Submission-readiness gate before `final` | `modes/submission-check.md` |
 
 ## Hard discipline
 
@@ -56,6 +60,12 @@ blocking findings.
 5. **Math notation consistency**: maintain a notation table at the top
    of the draft (`docs/notation-<slug>.md`); reuse symbols across sections.
 
+6. **Prose hygiene**: run `shared/prompts/prose_hygiene.md` (or the
+   `stop-slop` skill) on every drafted or edited prose section before saving.
+
+7. **Submission gate**: never advance `stage` to `final` until
+   `submission-check` passes and the latest `citation-audit` is clean.
+
 ## Style files
 
 `style/neurips.md`, `style/icml.md`, `style/jmlr.md`, `style/aistats.md`
@@ -63,8 +73,9 @@ blocking findings.
 
 ## Citation audit
 
-`scripts/verify_citations.py` reads a `.bib` file, queries Semantic Scholar
-for each entry, and reports:
+`scripts/verify_citations.py` reads a `.bib` file and, per entry, queries
+Semantic Scholar → OpenAlex → Crossref (a resolving DOI short-circuits to
+`verified`; multi-source fallback avoids false `fabricated` on new preprints):
 
 - `verified` — paper exists with matching title + first author + year
 - `mismatched` — paper exists but metadata differs (likely wrong key or
@@ -79,12 +90,30 @@ citation that is invoked in the draft, check whether the *paper's
 abstract or known content* actually supports the *claim it is cited for*.
 Flag mismatches.
 
+## Scripts
+
+- `scripts/verify_citations.py` — citation audit (above). `uv run python ...`.
+- `scripts/figs.py` — one colorblind-safe, vector-PDF figure style for
+  experiment/ablation plots; import and adapt to real results, never invent
+  numbers. `uv run --extra figures python ...` (needs the `figures` extra).
+- `scripts/build_paper.sh` — `compile` (build gate; non-zero if it won't
+  build) and `docx` (lossy LaTeX→DOCX export for co-authors via pandoc).
+
+## Drafting aids
+
+- **Style calibration** (optional): `shared/prompts/style_calibration.md` —
+  `full-draft` can match your voice from 1–3 prior papers (soft guidance,
+  never overrides venue style or anti-hallucination).
+- **Prose hygiene**: `shared/prompts/prose_hygiene.md` — AI-tell checklist
+  applied per section (see hard discipline #6).
+
 ## State integration
 
 Writes:
 
-- `paper/main.tex` (and `paper/sections/*.tex`)
+- `paper/main.tex` (and `paper/sections/*.tex`), `paper/figures/*.pdf`
 - `docs/notation-<slug>.md`
+- `style_profile:` (if style calibration run)
 - Updates `draft:` field in research state
 - Flips `key_claims[*].audit_status` to `verified` after citation audit
 

@@ -20,7 +20,9 @@ Refuse if:
 
 ## Pre-flight grill
 
-After the refuse-if checks pass, run the interview protocol in
+After the refuse-if checks pass, optionally offer **style calibration** once
+(`shared/prompts/style_calibration.md`) — match the user's voice from 1–3 prior
+papers, or skip. Then run the interview protocol in
 `shared/prompts/grill_protocol.md` before Step 1 of Procedure. If
 `interview_drafting:` is already present in research-state frontmatter,
 skip the interview and proceed.
@@ -79,13 +81,16 @@ drafting context throughout Procedure:
      - Every named theorem either proved here or cited
      - Notation consistent with `docs/notation-<slug>.md` (add new symbols
        to the notation file as introduced)
+     - Prose hygiene pass (`shared/prompts/prose_hygiene.md`)
    - Save as `paper/sections/<n>-<name>.tex`.
 
 3. **Section ordering** (for efficiency):
    1. **Notation + Setup** (Section 2) — most constrained, foundational
    2. **Method** (Section 3) — directly from algorithm card
    3. **Theory** (Section 4) — from `theory-scoping`
-   4. **Experiments** (Section 5) — from `toy-design` + `ablation-plan`
+   4. **Experiments** (Section 5) — from `toy-design` + `ablation-plan`;
+      generate plots with `scripts/figs.py` (consistent vector-PDF style;
+      plot only real results, never invented numbers)
    5. **Related Work** — after Method so positioning is clear
    6. **Introduction** — after the body; hooks land cleaner
    7. **Abstract** — last
@@ -131,7 +136,12 @@ Glue:
 
 ## After full draft
 
-Trigger `citation-audit` mode before declaring "draft done".
+Before declaring "draft done", in order:
+
+1. `citation-audit` — must be clean (no `fabricated` / `contradicts`).
+2. `scripts/build_paper.sh compile paper/main.tex` — the draft must build.
+3. `self-review` — one venue-reviewer pass; feed findings into `revision`.
+4. `submission-check` — the gate to `final`.
 
 ## State update
 

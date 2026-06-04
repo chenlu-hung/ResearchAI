@@ -1,10 +1,18 @@
 #!/usr/bin/env python3
-"""Verify entries in a BibTeX file against Semantic Scholar.
+"""Verify BibTeX entries against Semantic Scholar, with OpenAlex + Crossref fallback.
 
-Outputs JSON with per-entry classification: verified / mismatched / fabricated / unreachable.
+Per entry -> verified | mismatched | fabricated | unreachable.
+
+A DOI in the .bib that resolves on Crossref/OpenAlex short-circuits to
+`verified`; title/author search then tries S2 -> OpenAlex -> Crossref and stops
+at the first match. Multi-source fallback avoids false `fabricated` verdicts on
+very recent preprints that one index has not yet ingested.
 
 Usage:
-    python verify_citations.py --bib refs/<slug>.bib --out audit.json
+    uv run python skills/paper-writer/scripts/verify_citations.py \
+        --bib refs/<slug>.bib --out audit.json
+
+Env: SEMANTIC_SCHOLAR_API_KEY (optional), OPENALEX_MAILTO (polite pool).
 """
 from __future__ import annotations
 
@@ -12,18 +20,27 @@ import argparse
 import difflib
 import json
 import os
+import re
 import sys
 import time
 from dataclasses import asdict, dataclass
 
 import httpx
 from pybtex.database import parse_file
-from tenacity import retry, stop_after_attempt, wait_exponential
+from tenacity import (
+    retry,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_exponential,
+)
 
-S2_SEARCH = "https://api.semanticscholar.org/graph/v1/paper/search"
-S2_FIELDS = "paperId,externalIds,title,authors.name,year,abstract,venue"
-TITLE_SIM_THRESHOLD = 0.85
-TITLE_SOFT_THRESHOLD = 0.70
+TITLE_SIM = 0.85
+TITLE_SOFT = 0.70
+MAILTO = os.environ.get("OPENALEX_MAILTO", "research-assistant@example.org")
+
+
+class Retryable(httpx.HTTPError):
+    """Transient failure (429 / timeout / transport) — worth retrying."""
 
 
 @dataclass
@@ -36,34 +53,143 @@ class AuditRow:
     matched_title: str | None = None
     matched_authors: list[str] | None = None
     matched_year: int | None = None
-    matched_paper_id: str | None = None
+    matched_doi: str | None = None
+    matched_source: str | None = None  # s2 | openalex | crossref | doi
     title_similarity: float | None = None
     notes: str = ""
 
 
-@retry(stop=stop_after_attempt(4), wait=wait_exponential(min=2, max=20))
-def _search(query: str, headers: dict) -> dict:
-    r = httpx.get(
-        S2_SEARCH,
-        params={"query": query, "limit": 5, "fields": S2_FIELDS},
-        headers=headers,
-        timeout=30,
-    )
+@retry(
+    retry=retry_if_exception_type(Retryable),
+    stop=stop_after_attempt(4),
+    wait=wait_exponential(min=2, max=20),
+    reraise=True,  # re-raise the underlying Retryable (an httpx.HTTPError), not RetryError,
+    # so callers' `except httpx.HTTPError` triggers the next-source fallback.
+)
+def _get(url: str, params: dict | None = None, headers: dict | None = None) -> dict:
+    try:
+        r = httpx.get(url, params=params, headers=headers or {}, timeout=30)
+    except (httpx.TimeoutException, httpx.TransportError) as e:
+        raise Retryable(str(e)) from e
     if r.status_code == 429:
-        raise httpx.HTTPError("rate limited")
-    r.raise_for_status()
+        raise Retryable("rate limited")
+    r.raise_for_status()  # 4xx (e.g. DOI 404) -> HTTPStatusError, not retried
     return r.json()
+
+
+# --- per-source candidate fetch; each returns [{title, authors, year, doi}] ---
+
+
+def _s2(title: str, first: str, headers: dict) -> list[dict]:
+    d = _get(
+        "https://api.semanticscholar.org/graph/v1/paper/search",
+        {"query": f"{title} {first}".strip(), "limit": 5,
+         "fields": "title,authors.name,year,externalIds"},
+        headers,
+    )
+    return [
+        {
+            "title": c.get("title") or "",
+            "authors": [a.get("name", "") for a in c.get("authors") or []],
+            "year": c.get("year"),
+            "doi": (c.get("externalIds") or {}).get("DOI"),
+        }
+        for c in d.get("data") or []
+    ]
+
+
+def _oa_row(w: dict) -> dict:
+    return {
+        "title": w.get("title") or "",
+        "authors": [
+            a["author"]["display_name"]
+            for a in w.get("authorships") or []
+            if a.get("author")
+        ],
+        "year": w.get("publication_year"),
+        "doi": (w.get("doi") or "").replace("https://doi.org/", "") or None,
+    }
+
+
+def _openalex(title: str, first: str | None = None, doi: str | None = None) -> list[dict]:
+    if doi:
+        try:
+            return [_oa_row(_get(f"https://api.openalex.org/works/doi:{doi}", {"mailto": MAILTO}))]
+        except httpx.HTTPError:
+            return []
+    if not title:
+        return []
+    # title.search filter matches the title field specifically — far more
+    # precise than the generic `search` param, which buries exact titles.
+    # `,` and `|` are OpenAlex filter separators (a raw comma -> 400); strip
+    # them — title.search is fuzzy, so dropping punctuation is harmless.
+    safe = re.sub(r"[,|:]", " ", title)
+    d = _get("https://api.openalex.org/works",
+             {"filter": f"title.search:{safe}", "per-page": 5, "mailto": MAILTO})
+    return [_oa_row(w) for w in d.get("results") or []]
+
+
+def _cr_row(m: dict) -> dict:
+    dp = (m.get("published") or m.get("issued") or {}).get("date-parts")
+    return {
+        "title": (m.get("title") or [""])[0],
+        "authors": [
+            " ".join(filter(None, [a.get("given"), a.get("family")]))
+            for a in m.get("author") or []
+        ],
+        "year": dp[0][0] if dp and dp[0] else None,
+        "doi": m.get("DOI"),
+    }
+
+
+def _crossref(title: str, first: str | None = None, doi: str | None = None) -> list[dict]:
+    base = "https://api.crossref.org/works"
+    if doi:
+        try:
+            return [_cr_row(_get(f"{base}/{doi}", {"mailto": MAILTO}).get("message", {}))]
+        except httpx.HTTPError:
+            return []
+    if not title:
+        return []
+    q = f"{title} {first}".strip() if first else title
+    d = _get(base, {"query.bibliographic": q, "rows": 5, "mailto": MAILTO})
+    return [_cr_row(m) for m in d.get("message", {}).get("items") or []]
+
+
+# --- matching helpers ---------------------------------------------------------
 
 
 def _norm(s: str) -> str:
     return " ".join(s.lower().split())
 
 
-def _title_sim(a: str, b: str) -> float:
+def _sim(a: str, b: str) -> float:
     return difflib.SequenceMatcher(None, _norm(a), _norm(b)).ratio()
 
 
-def _first_author_lastname(entry) -> str:
+def _best(title: str, cands: list[dict]) -> tuple[dict | None, float]:
+    best, bs = None, -1.0
+    for c in cands:
+        s = _sim(title, c["title"])
+        if s > bs:
+            best, bs = c, s
+    return best, bs
+
+
+def _year_int(y) -> int | None:
+    """Leading 4-digit year, or None. Tolerates '2019a', 'in press', '2019--2020'."""
+    m = re.match(r"\s*(\d{4})", str(y or ""))
+    return int(m.group(1)) if m else None
+
+
+def _matches(title: str, first: str, year: str, c: dict, sim: float) -> tuple[bool, bool, bool]:
+    by = _year_int(year)
+    year_ok = (by is None) or (c["year"] is not None and abs(int(c["year"]) - by) <= 1)
+    author_ok = (not first) or any(first.lower() in (a or "").lower() for a in c["authors"])
+    return (sim >= TITLE_SIM and year_ok and author_ok), year_ok, author_ok
+
+
+def _first_author(entry) -> str:
     persons = entry.persons.get("author", [])
     if not persons:
         return ""
@@ -71,72 +197,88 @@ def _first_author_lastname(entry) -> str:
     return last[0] if last else ""
 
 
+def _bib_doi(entry) -> str | None:
+    return entry.fields.get("doi", "").strip().replace("https://doi.org/", "") or None
+
+
+def _fill(row: AuditRow, c: dict, src: str, sim: float) -> None:
+    row.matched_title = c["title"]
+    row.matched_authors = c["authors"]
+    row.matched_year = c["year"]
+    row.matched_doi = c["doi"]
+    row.matched_source = src
+    row.title_similarity = round(sim, 3)
+
+
 def audit_entry(bibkey: str, entry, headers: dict) -> AuditRow:
     title = " ".join(entry.fields.get("title", "").replace("{", "").replace("}", "").split())
-    first_author = _first_author_lastname(entry)
+    first = _first_author(entry)
     year = entry.fields.get("year", "")
-    row = AuditRow(
-        bibkey=bibkey,
-        bib_title=title,
-        bib_first_author=first_author,
-        bib_year=year,
-        status="unreachable",
-    )
-    if not title:
-        row.status = "fabricated"
-        row.notes = "Empty title in .bib"
-        return row
-    query = f"{title} {first_author}".strip()
-    try:
-        data = _search(query, headers)
-    except httpx.HTTPError as e:
-        row.notes = f"API error: {e}"
+    doi = _bib_doi(entry)
+    row = AuditRow(bibkey, title, first, year, "unreachable")
+    if not title and not doi:
+        row.status, row.notes = "fabricated", "Empty title and no DOI in .bib"
         return row
 
-    candidates = data.get("data") or []
-    if not candidates:
-        row.status = "fabricated"
-        row.notes = "No candidates returned by Semantic Scholar"
+    # 1. DOI exact resolution (strongest signal).
+    if doi:
+        for src, fn in (("crossref", _crossref), ("openalex", _openalex)):
+            cands = fn(title, doi=doi)
+            if cands and cands[0]["title"]:
+                c = cands[0]
+                sim = _sim(title, c["title"]) if title else 1.0
+                _fill(row, c, "doi", sim)
+                row.status = "verified" if (not title or sim >= TITLE_SOFT) else "mismatched"
+                if row.status == "mismatched":
+                    row.notes = f"DOI resolves on {src} but title sim {sim:.2f} low"
+                return row
+
+    # 2. Title + author search across sources; stop at first verified. Each
+    # source builds its own optimal query (S2/Crossref: title+author;
+    # OpenAlex: title filter).
+    sources = [
+        ("s2", lambda: _s2(title, first, headers)),
+        ("openalex", lambda: _openalex(title, first)),
+        ("crossref", lambda: _crossref(title, first)),
+    ]
+    best_overall: tuple[dict, float, str, bool, bool] | None = None
+    for src, fn in sources:
+        try:
+            cands = fn()
+        except Exception as e:  # noqa: BLE001 — one bad source/entry must not abort the audit
+            row.notes = f"{src} error: {type(e).__name__}: {e}"
+            continue
+        if not cands:
+            continue
+        c, sim = _best(title, cands)
+        ok, yok, aok = _matches(title, first, year, c, sim)
+        if ok:
+            _fill(row, c, src, sim)
+            row.status = "verified"
+            return row
+        if best_overall is None or sim > best_overall[1]:
+            best_overall = (c, sim, src, yok, aok)
+
+    if best_overall is None:
+        row.status = "unreachable" if row.notes else "fabricated"
+        row.notes = row.notes or "No candidates from s2/openalex/crossref"
         return row
 
-    best = None
-    best_sim = -1.0
-    for c in candidates:
-        sim = _title_sim(title, c.get("title") or "")
-        if sim > best_sim:
-            best = c
-            best_sim = sim
-    assert best is not None
-    row.matched_title = best.get("title")
-    row.matched_year = best.get("year")
-    row.matched_authors = [a.get("name") for a in (best.get("authors") or [])]
-    row.matched_paper_id = best.get("paperId")
-    row.title_similarity = round(best_sim, 3)
-
-    year_ok = (not year) or (
-        best.get("year") is not None and abs(int(best["year"]) - int(year)) <= 1
-    )
-    author_ok = (not first_author) or any(
-        first_author.lower() in (a or "").lower() for a in (row.matched_authors or [])
-    )
-
-    if best_sim >= TITLE_SIM_THRESHOLD and year_ok and author_ok:
-        row.status = "verified"
-    elif best_sim >= TITLE_SOFT_THRESHOLD:
+    c, sim, src, yok, aok = best_overall
+    _fill(row, c, src, sim)
+    if sim >= TITLE_SOFT:
         row.status = "mismatched"
-        problems = []
-        if not year_ok:
-            problems.append(f"year mismatch (.bib={year}, S2={best.get('year')})")
-        if not author_ok:
-            problems.append(
-                f"first author mismatch (.bib={first_author}, S2={row.matched_authors[:2] if row.matched_authors else []})"
-            )
-        if best_sim < TITLE_SIM_THRESHOLD:
-            problems.append(f"title similarity {best_sim:.2f} below {TITLE_SIM_THRESHOLD}")
-        row.notes = "; ".join(problems)
+        probs = []
+        if not yok:
+            probs.append(f"year (.bib={year}, src={c['year']})")
+        if not aok:
+            probs.append("first author")
+        if sim < TITLE_SIM:
+            probs.append(f"title sim {sim:.2f}<{TITLE_SIM}")
+        row.notes = "mismatch: " + ", ".join(probs)
     else:
         row.status = "fabricated"
-        row.notes = f"Best title similarity {best_sim:.2f} below soft threshold"
+        row.notes = f"best title sim {sim:.2f}<{TITLE_SOFT} across s2/openalex/crossref"
     return row
 
 
@@ -144,7 +286,7 @@ def main() -> int:
     p = argparse.ArgumentParser()
     p.add_argument("--bib", required=True)
     p.add_argument("--out", required=True)
-    p.add_argument("--sleep", type=float, default=1.0, help="Sec between S2 calls")
+    p.add_argument("--sleep", type=float, default=1.0, help="Sec between entries")
     args = p.parse_args()
 
     headers = {}
@@ -153,25 +295,16 @@ def main() -> int:
 
     db = parse_file(args.bib)
     rows: list[AuditRow] = []
+    label = {"verified": "OK", "mismatched": "WARN", "fabricated": "FAIL", "unreachable": "RETRY"}
     for bibkey, entry in db.entries.items():
         row = audit_entry(bibkey, entry, headers)
         rows.append(row)
-        status_label = {
-            "verified": "OK",
-            "mismatched": "WARN",
-            "fabricated": "FAIL",
-            "unreachable": "RETRY",
-        }[row.status]
-        print(f"[{status_label}] {bibkey}: {row.notes or row.matched_title or ''}", file=sys.stderr)
+        src = f" via {row.matched_source}" if row.matched_source else ""
+        print(f"[{label[row.status]}] {bibkey}{src}: {row.notes or row.matched_title or ''}", file=sys.stderr)
         time.sleep(args.sleep)
 
-    summary = {
-        "total": len(rows),
-        "verified": sum(1 for r in rows if r.status == "verified"),
-        "mismatched": sum(1 for r in rows if r.status == "mismatched"),
-        "fabricated": sum(1 for r in rows if r.status == "fabricated"),
-        "unreachable": sum(1 for r in rows if r.status == "unreachable"),
-    }
+    summary = {k: sum(1 for r in rows if r.status == k) for k in label}
+    summary["total"] = len(rows)
     out = {"summary": summary, "rows": [asdict(r) for r in rows]}
     with open(args.out, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, indent=2)
