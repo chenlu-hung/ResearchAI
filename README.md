@@ -8,7 +8,7 @@ Three skills, each independently usable:
 |---|---|---|
 | `literature-explorer` | Multi-perspective survey of a topic; produces hierarchical outline + BibTeX. Uses bundled arXiv / Semantic Scholar / OpenAlex scripts; if the external `literature-review-ml` skill is installed, will prefer it. | `/explore <topic>` |
 | `algo-brainstorm` | Eight-mode pipeline for going from "I have an idea" to "I have a contribution worth submitting". Modes: `gap-analysis`, `formalize`, `ideate`, `novelty-check`, `theory-scoping`, `toy-design`, `ablation-plan`, `red-team`. | `/algo <mode>` |
-| `paper-writer` | Venue-aware drafting (NeurIPS, ICML, JMLR, AISTATS) with stage checkpoints and citation auditing via Semantic Scholar. | `/write <mode>` |
+| `paper-writer` | Venue-aware drafting (NeurIPS, ICML, JMLR, AISTATS, Annals of Stats) with stage checkpoints. Modes: `outline`, `full-draft`, `revision`, `citation-audit`, `self-review`, `submission-check`. Multi-source citation audit (Semantic Scholar → OpenAlex → Crossref + DOI match), publication figures, LaTeX compile gate + DOCX export, AI-tell prose hygiene, optional voice calibration. | `/write <mode>` |
 
 State carries across skills and sessions via `.research-state/<topic-slug>.md` (schema in `shared/research_state.schema.md`).
 
@@ -30,6 +30,8 @@ scripts:
 uv sync
 # Optional: STORM backend for heavy auto-surveys
 uv sync --extra storm
+# Optional: matplotlib + numpy for paper-writer figures
+uv sync --extra figures
 ```
 
 ### Optional external skill
@@ -50,7 +52,10 @@ needed.
 /algo novelty-check
 /algo red-team
 /write outline --venue neurips
+/write full-draft
 /write citation-audit
+/write self-review
+/write submission-check
 ```
 
 ## Design Philosophy
