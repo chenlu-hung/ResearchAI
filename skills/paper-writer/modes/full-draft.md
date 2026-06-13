@@ -81,7 +81,10 @@ drafting context throughout Procedure:
      - Every named theorem either proved here or cited
      - Notation consistent with `docs/notation-<slug>.md` (add new symbols
        to the notation file as introduced)
-     - Prose hygiene pass (`shared/prompts/prose_hygiene.md`)
+     - Prose hygiene pass — `stop-slop` skill if available, then the
+       academic overlay `shared/prompts/prose_hygiene.md`. Kill the
+       structural AI tells (binary contrasts, false agency like "the data
+       reveals", vague declaratives), not just filler words.
    - Save as `paper/sections/<n>-<name>.tex`.
 
 3. **Section ordering** (for efficiency):

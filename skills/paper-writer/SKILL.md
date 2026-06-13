@@ -60,8 +60,14 @@ blocking findings.
 5. **Math notation consistency**: maintain a notation table at the top
    of the draft (`docs/notation-<slug>.md`); reuse symbols across sections.
 
-6. **Prose hygiene**: run `shared/prompts/prose_hygiene.md` (or the
-   `stop-slop` skill) on every drafted or edited prose section before saving.
+6. **Prose hygiene (no AI tells)**: on every drafted or edited prose
+   section, before saving, run the `stop-slop` skill if available, then
+   the academic overlay `shared/prompts/prose_hygiene.md` (adds ML/Stats
+   tells and the exceptions that stop stop-slop's essay rules from harming
+   a paper — passive voice, technical adverbs, three-item lists). The
+   overlay is self-contained, so the pass still works when `stop-slop` is
+   absent. This catches the structural "AI smell" (binary contrasts, false
+   agency, vague declaratives), not just filler words.
 
 7. **Submission gate**: never advance `stage` to `final` until
    `submission-check` passes and the latest `citation-audit` is clean.

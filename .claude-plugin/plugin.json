@@ -1,6 +1,6 @@
 {
   "name": "research-assistant",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A Claude Code plugin for Stats/ML researchers developing new algorithms. Three skills: literature-explorer (multi-perspective survey), algo-brainstorm (gap → formalize → ideate → novelty-check → theory → toy → ablation → red-team), and paper-writer (venue-aware drafting with citation auditing).",
   "author": {
     "name": "Lu-Hung Chen",

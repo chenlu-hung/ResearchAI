@@ -31,6 +31,14 @@ available opt-in via `--council` (see "Council panel" below).
      baseline, assumption not discussed, theory–experiment mismatch, novelty
      not delimited. Each tied to a section.
    - **Minor comments**: clarity, notation, figure/table issues.
+   - **AI-tell scan**: read as a reviewer alert to machine-written prose.
+     Flag any structural tells from `shared/prompts/prose_hygiene.md` §B
+     (binary contrasts, false agency like "the data reveals", vague
+     declaratives, dramatic fragmentation) and §A filler, tied to a
+     section/line. "Reads as LLM-generated" is a credibility hit reviewers
+     act on — surface it so `revision` can fix it. Respect the academic
+     exceptions (§E): do not flag conventional passive voice, technical
+     adverbs, or three-item lists.
    - **Red-flag check**: go down the venue's `Common reviewer red flags` list
      and mark each present / absent / N/A.
 

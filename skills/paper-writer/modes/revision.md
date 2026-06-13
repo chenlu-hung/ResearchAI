@@ -30,7 +30,9 @@
    - Notation still consistent
    - Theorem numbering unchanged unless intentional
    - Bibliography keys all in `.bib`
-   - Prose hygiene pass on edited text (`shared/prompts/prose_hygiene.md`)
+   - Prose hygiene pass on edited text — `stop-slop` skill if available,
+     then the academic overlay `shared/prompts/prose_hygiene.md` (structural
+     AI tells, not just filler)
 
 ## Reviewer-response sub-mode
 
