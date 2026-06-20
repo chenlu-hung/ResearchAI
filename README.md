@@ -2,7 +2,24 @@
 
 A Claude Code plugin for Stats/ML researchers whose core output is **developing new algorithms**.
 
-Three skills, each independently usable:
+## Autopilot: idea → paper
+
+Start from a rough idea and let the **`research-conductor`** skill drive the whole
+pipeline — it reads the shared research-state, decides which skill/mode to call
+next, and loops until you have a submission-ready paper:
+
+```text
+/research conformal prediction under covariate shift
+```
+
+It runs **full auto until blocked**: it auto-chains the stages below and only
+pauses when a real gate needs you — a mode's grill, a "not novel" verdict, a
+red-team blocking finding, fabricated citations, or a failed submission check. Add
+`--gates` to also pause at high-leverage decision points, or `--step` to confirm
+before every mode. It never bypasses a gate; it only sequences the three skills,
+which all remain independently usable below.
+
+## The three skills (each independently usable)
 
 | Skill | Purpose | Trigger |
 |---|---|---|
@@ -62,6 +79,14 @@ turns `self-review` into a real multi-reviewer meta-review. Inspired by
   entering research-state.
 
 ## Quickstart
+
+Let the conductor drive the whole thing:
+
+```text
+/research conformal prediction under covariate shift   # then just say "continue"
+```
+
+…or hand-drive the stages yourself:
 
 ```text
 /explore conformal prediction under covariate shift

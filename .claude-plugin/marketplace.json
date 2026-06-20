@@ -11,8 +11,8 @@
     {
       "name": "research-assistant",
       "source": "./",
-      "description": "Three skills: literature-explorer, algo-brainstorm, paper-writer.",
-      "version": "0.2.1",
+      "description": "A /research autopilot conductor plus three skills: literature-explorer, algo-brainstorm, paper-writer.",
+      "version": "0.3.0",
       "author": {
         "name": "Lu-Hung Chen",
         "email": "luhung@email.nchu.edu.tw"
