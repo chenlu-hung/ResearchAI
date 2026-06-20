@@ -1,0 +1,24 @@
+{
+  "generated": "2026-06-20T10:30:04+00:00",
+  "mode": "update",
+  "depth": 2,
+  "source": "git",
+  "files": 6,
+  "modules": {
+    "shared": {
+      "hash": "e78ed6bea037d842d66cc177bcd1cc08cd84079a575bd6032c5d9c540311ce81",
+      "files": 1,
+      "doc": "modules/shared.md"
+    },
+    "skills/literature-explorer": {
+      "hash": "2bcd9ba059fe6f5a6c7d05c120fbf39e9345fd3eab304c08578b37606bc46e3b",
+      "files": 3,
+      "doc": "modules/skills__literature-explorer.md"
+    },
+    "skills/paper-writer": {
+      "hash": "4e1511c2b379467106664379743577ae2adbb9314d070475c3b1380544aefaca",
+      "files": 2,
+      "doc": "modules/skills__paper-writer.md"
+    }
+  }
+}
