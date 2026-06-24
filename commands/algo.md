@@ -21,9 +21,12 @@ Follow the procedure in `skills/algo-brainstorm/modes/<mode>.md`. Read
 research state on entry; update on exit. Apply anti-sycophancy and
 statistical-rigor protocols as documented in the SKILL.md.
 
-If the arguments include `--council` (supported by `gap-analysis` and
-`ideate`), additionally run the multi-model panel in
+If the arguments include `--council` (supported by `gap-analysis`, `ideate`,
+`novelty-check`, and `red-team`), additionally run the multi-model panel in
 `shared/prompts/council_panel.md` after the mode's gating — fan out to
 Codex / Gemini / Claude / DeepSeek via `python3 shared/council.py`, then
-chair the synthesis. Panel output is ideation only and is `[VERIFY]`-flagged
-before it enters research-state. Without `--council`, run the mode single-model.
+chair the synthesis. For `gap-analysis`/`ideate` the panel is divergence (union of
+ideas); for `novelty-check`/`red-team` it is adversarial cross-examination (members
+attack, then a conditional single rebuttal round) and every attack is a hypothesis the
+chair must verify before it changes a verdict. Panel output is `[VERIFY]`-flagged before
+it enters research-state. Without `--council`, run the mode single-model.

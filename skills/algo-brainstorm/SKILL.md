@@ -115,12 +115,20 @@ load `shared/venue_profiles.md` to tailor expectations.
 
 ## Council panel (opt-in)
 
-`gap-analysis` and `ideate` can widen their search with a multi-model panel — Codex,
-Gemini, Claude, and DeepSeek, each reached through its **own subscription/sign-in CLI**
-(no API keys), merged by this session as chair. Pass `--council` (e.g.
-`/algo ideate --council`) to convene it; without the flag the mode runs single-model
-exactly as before. Protocol and guardrails: `shared/prompts/council_panel.md` (engine:
-`shared/council.py`, stdlib-only — `python3 shared/council.py`).
+`gap-analysis`, `ideate`, `novelty-check`, and `red-team` can widen their search with a
+multi-model panel — Codex, Gemini, Claude, and DeepSeek, each reached through its **own
+subscription/sign-in CLI** (no API keys), merged by this session as chair. Pass `--council`
+(e.g. `/algo ideate --council`, `/algo red-team --council`) to convene it; without the flag
+the mode runs single-model exactly as before. Two flavors:
+
+- **Divergence** (`gap-analysis`, `ideate`) — fan out and take the union of ideas.
+- **Adversarial cross-examination** (`novelty-check`, `red-team`) — members attack the Δ /
+  the contribution, then a *conditional single rebuttal round* on real disagreement. Every
+  attack is a **hypothesis the chair must verify** (novelty claims against the retrieved
+  set) before it changes a verdict — see the Cross-examination section of the protocol.
+
+Protocol and guardrails: `shared/prompts/council_panel.md` (engine: `shared/council.py`,
+stdlib-only — `python3 shared/council.py`).
 
 **Requires** the member CLIs you want on PATH and signed in (`codex`, `agy`, `claude`,
 `opencode`); any that are missing simply drop out of the panel. Panel output is **ideation
