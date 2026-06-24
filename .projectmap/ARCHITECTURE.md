@@ -9,16 +9,21 @@ researchers whose core output is **developing new algorithms**. It bundles three
 independently-usable skills — `literature-explorer` (`/explore`), `algo-brainstorm`
 (`/algo`), and `paper-writer` (`/write`) — plus a `research-conductor` autopilot
 (`/research`) that sequences the other three from idea to paper by reading the
-shared `stage` machine. They share state across sessions via
-`.research-state/<topic-slug>.md`. The plugin is overwhelmingly prompt-driven:
+shared `stage` machine. A fifth, **stateless** skill `peer-reviewer` (`/review`)
+sits outside the pipeline: it referees *other people's* manuscripts from a file
+(no `.research-state`), reusing the venue profiles, prose-hygiene, and council
+machinery behind a review-ethics gate. The four pipeline skills share state
+across sessions via `.research-state/<topic-slug>.md`. The plugin is
+overwhelmingly prompt-driven:
 behaviour lives in Markdown (per-skill `SKILL.md`, per-mode files, shared prompts,
 venue/style profiles); the indexed Python is just the deterministic glue — literature
 retrieval, citation auditing, figures, and multi-model council dispatch.
 
 ## Entry points
-User-facing entry points are four slash commands (`commands/research.md`,
-`commands/explore.md`, `commands/algo.md`, `commands/write.md`) that load the
-matching `SKILL.md`. `/research` loads `skills/research-conductor/SKILL.md`, a
+User-facing entry points are five slash commands (`commands/research.md`,
+`commands/explore.md`, `commands/algo.md`, `commands/write.md`,
+`commands/review.md`) that load the matching `SKILL.md`. `commands/review.md`
+loads the standalone `skills/peer-reviewer/SKILL.md`. `/research` loads `skills/research-conductor/SKILL.md`, a
 prompt-only orchestration loop (`routing.md` + `bootstrap.md`, no Python) that
 drives the other three. The runnable Python/shell scripts the skills invoke:
 - `shared/council.py` — multi-model `--council` panel dispatcher (CLI; stdlib-only)

@@ -1,7 +1,7 @@
 {
   "name": "research-assistant",
-  "version": "0.3.0",
-  "description": "A Claude Code plugin for Stats/ML researchers developing new algorithms. A research-conductor autopilot (/research) sequences three skills from idea to paper: literature-explorer (multi-perspective survey), algo-brainstorm (gap → formalize → ideate → novelty-check → theory → toy → ablation → red-team), and paper-writer (venue-aware drafting with citation auditing).",
+  "version": "0.4.0",
+  "description": "A Claude Code plugin for Stats/ML researchers developing new algorithms. A research-conductor autopilot (/research) sequences three skills from idea to paper: literature-explorer (multi-perspective survey), algo-brainstorm (gap → formalize → ideate → novelty-check → theory → toy → ablation → red-team), and paper-writer (venue-aware drafting with citation auditing). A standalone, stateless peer-reviewer (/review) referees other people's manuscripts with a venue-tailored report and a review-ethics gate.",
   "author": {
     "name": "Lu-Hung Chen",
     "email": "luhung@email.nchu.edu.tw"

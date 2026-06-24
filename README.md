@@ -29,6 +29,25 @@ which all remain independently usable below.
 
 State carries across skills and sessions via `.research-state/<topic-slug>.md` (schema in `shared/research_state.schema.md`).
 
+## Reviewing other people's papers
+
+The three skills above critique *your own* work. To referee *someone else's*
+manuscript, use the standalone, **stateless** `peer-reviewer` skill:
+
+```text
+/review path/to/manuscript.pdf --venue neurips
+```
+
+Plug-and-play: point it at a local PDF / `.tex` (or an arXiv id) and it produces
+a venue-tailored referee report — summary, recommendation, method-validity
+attacks, novelty positioning, evidence/clarity comments, AI-tell scan, and the
+venue's reviewer red-flag checklist. `--depth quick|standard|deep` scales
+thoroughness; `--council` convenes a multi-model multi-reviewer panel; `triage`
+mode does a fast desk-screen. It needs no `.research-state` and writes to
+`reviews/`. It runs a **review-ethics gate first** (confidentiality, conflict of
+interest, the venue's LLM-in-reviewing policy) and treats its output as a draft
+to inform the human reviewer — never a review to submit verbatim.
+
 ## Install
 
 This plugin ships its own local marketplace. From inside Claude Code:

@@ -50,6 +50,23 @@ uses these to predict reviewer concerns.
 - **Reviewer profile**: pure statisticians. Will challenge assumption minimality, novelty vs. classical literature, and require sharp rates with explicit constants where possible.
 - **Distinct asks**: minimax lower bounds expected when claiming optimality. Identifiability and regularity conditions must be stated precisely with citation to standard textbooks.
 
+## Generic (used by `peer-reviewer` `/review --venue generic`)
+
+Fallback persona when refereeing a paper for a venue not profiled above (a
+workshop, a journal not listed, an unspecified target).
+
+- **Reviewer profile**: a balanced Stats/ML referee weighing five axes equally —
+  **correctness, novelty, evidence, clarity, reproducibility**. Neither the
+  empirical nor the pure-theory persona dominates; calibrate to whatever the
+  paper claims (a theory paper is judged on its theorems, an applied paper on its
+  experiments).
+- **Empirical bar**: results should support the claims made — appropriate
+  baselines, more than one seed/dataset where variance matters, honest ablations.
+- **Common reviewer red flags**: claim not supported by the evidence shown,
+  missing obvious baseline, single-seed or no variance reporting, novelty not
+  delimited against prior work, key assumption unstated, unreproducible setup,
+  figures/tables that cannot be read on their own.
+
 ---
 
 ## Defaults by venue (consumed by paper-writer)

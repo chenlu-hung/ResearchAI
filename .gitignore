@@ -25,3 +25,6 @@ venv/
 
 # Antigravity CLI session artifacts (local, user-specific)
 .antigravitycli/
+
+# Peer-review outputs — confidential manuscripts under review; never commit
+reviews/
