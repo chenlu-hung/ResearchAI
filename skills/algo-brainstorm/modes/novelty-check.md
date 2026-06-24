@@ -75,6 +75,36 @@ related works and articulating Δ against each. Bare "I couldn't find
 anything similar" is not acceptable — that's a retrieval failure, not
 a novelty result.
 
+## Council panel (opt-in)
+
+When invoked with `--council`, convene a panel to **attack the Δ** before you commit a
+verdict. Heterogeneous models surface prior art and subsumption angles a single model
+misses. Follow `shared/prompts/council_panel.md` — novelty-check is a **critique** *and*
+**adversarial** mode, so cross-review and the conditional cross-examination both apply.
+
+- **Panel prompt**: each active candidate's contribution statement + Same/Different/Δ table,
+  asking each member: "Where is this *not* novel? Name the closest prior work and say what
+  Δ it kills." Frame it as adversarial — you want the strongest subsumption case, not praise.
+- **Cross-examination (conditional)**: when members disagree on a verdict
+  (`novel`/`incremental`/`subsumed`), run **one** rebuttal round — send the contested
+  candidate back with the strongest "this is subsumed by X" objection and ask the author to
+  defend the Δ or concede.
+- **Evidence gate — NON-NEGOTIABLE**: a member's "subsumed by X" is a **hypothesis, not a
+  result**. You may **not** flip a verdict to `incremental`/`subsumed` on a member's say-so.
+  For each proposed prior work, **verify against the retrieved set** (and a citation-graph
+  chase via `skills/literature-explorer/scripts/search_semantic_scholar.py`):
+  - If X exists and genuinely subsumes the Δ → flip the verdict, cite X from the verified
+    bibliography, and record it in `closest_prior`.
+  - If X is unretrievable or doesn't actually subsume → **discard the attack**, note why in
+    one line. Bare "a model said it's not novel" is a retrieval/verification task, **never**
+    a novelty result — the same hard rule as the Anti-sycophancy section above.
+
+  Members reasoning about novelty from parametric memory only converge on shared priors;
+  the retrieval gate is exactly what stops a confident hallucinated citation from sinking a
+  good candidate. Panel-proposed works enter state only after verification, `[VERIFY]`-clean.
+
+Without `--council`, run novelty-check single-model exactly as above.
+
 ## State update
 
 ```yaml
