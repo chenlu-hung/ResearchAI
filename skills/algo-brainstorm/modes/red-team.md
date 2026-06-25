@@ -99,6 +99,34 @@ Imagine the paper is rejected. Write the 2–3 most likely reasons in the
 reviewer's voice. Then for each, check whether the current research state
 addresses it. If not, plan the fix.
 
+## Council panel (opt-in)
+
+The six attacks above are one model red-teaming itself. When invoked with `--council`,
+convene a **real adversarial panel**: each member plays the meanest reviewer at the target
+venue against the full contribution, then you chair the merge. Follow
+`shared/prompts/council_panel.md` (this is a **critique mode** → cross-review applies, and
+red-team is an **adversarial mode** → conditional cross-examination applies).
+
+- **Panel prompt**: the contribution statement + theory + experiment plan from research
+  state, plus the venue's `Common reviewer red flags` from `shared/venue_profiles.md`. Ask
+  each member for objections in the six-attack frame (venue red flags, edge cases,
+  statistical pitfalls, compute reality, sycophancy, pre-mortem rejection reasons), each
+  tied to a specific part of the work.
+- **Cross-review**: anonymize the reviews and have members rank which objections are most
+  damaging — this surfaces where reviewers disagree on severity.
+- **Cross-examination (conditional)**: when reviewers split on whether an objection is fatal,
+  run **one** rebuttal round per `council_panel.md` — send the contested objection back to
+  its author to substantiate (concrete edge case / pitfall / missing baseline) or concede.
+  An objection counts only if it is **checkable against the work or the venue red-flag list**;
+  a member's unverified "reviewers will hate this" is a hypothesis, not a finding.
+- **Synthesis → six-attack output**: fold surviving objections into the sections below,
+  deduping and noting agreement ("3/4 reviewers flag single-seed runs" → high severity).
+  Every panel-originated attack is `[VERIFY]`-flagged and run through the
+  Anti-hallucination guardrails before it becomes a finding. The chair owns correctness —
+  discard stale or out-of-scope attacks and say why in one line.
+
+Without `--council`, run the six attacks single-model exactly as above.
+
 ## Output
 
 ```markdown
