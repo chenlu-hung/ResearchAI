@@ -1,14 +1,19 @@
 # Module: `skills/paper-writer`
 
 ## Summary
-The Python helpers behind the `paper-writer` skill (`/write`). `verify_citations.py` is the citation auditor: it matches each BibTeX entry against Semantic Scholar → OpenAlex → Crossref (DOI plus fuzzy title/author/year matching via `difflib`) to flag fabricated or mismatched references before submission. `figs.py` is a small matplotlib/numpy styling library (consistent fonts, confidence bands, ablation bars) imported by the auditor and runnable standalone as a figure smoketest. Not indexed here: `build_paper.sh` (LaTeX compile gate + DOCX export) and the skill's mode/style Markdown.
+The Python helpers behind the `paper-writer` skill (`/write`). `verify_citations.py` is the citation auditor: it matches each BibTeX entry against Semantic Scholar → OpenAlex → Crossref (DOI plus fuzzy title/author/year matching via `difflib`) to flag fabricated or mismatched references before submission. `check_tex.py` (stdlib-only, no LaTeX needed) is the static gate in front of it — Stage 0 of `citation-audit` and the evidence source for `submission-check`: undefined `\cite`/`\ref`, missing figure files, venue `must_include` tokens. `figs.py` is a small matplotlib/numpy styling library runnable standalone as a smoketest; not indexed here: `build_paper.sh` (compile gate + DOCX export) and the skill's mode/style Markdown.
 
 <!-- projectmap:auto:start (generated — do not edit by hand) -->
-## Files (2)
+## Files (3)
+- `skills/paper-writer/scripts/check_tex.py`
 - `skills/paper-writer/scripts/figs.py`
 - `skills/paper-writer/scripts/verify_citations.py`
 
-## Public symbols (27)
+## Public symbols (31)
+- `function strip_comments` — skills/paper-writer/scripts/check_tex.py:56
+- `function gather_sources` — skills/paper-writer/scripts/check_tex.py:60
+- `function find_graphic` — skills/paper-writer/scripts/check_tex.py:90
+- `function main` — skills/paper-writer/scripts/check_tex.py:98
 - `function apply_style` — skills/paper-writer/scripts/figs.py:28
 - `namespace mpl` — skills/paper-writer/scripts/figs.py:29
 - `function save` — skills/paper-writer/scripts/figs.py:51
@@ -48,6 +53,7 @@ The Python helpers behind the `paper-writer` skill (`/write`). `verify_citations
 - `matplotlib`
 - `numpy`
 - `os`
+- `pathlib`
 - `pybtex`
 - `re`
 - `sys`

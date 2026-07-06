@@ -52,6 +52,25 @@ CLI_BIN	shared/council.py	151;"	variable
 dispatch	shared/council.py	154;"	function
 read_prompt	shared/council.py	169;"	function
 main	shared/council.py	180;"	function
+_dt	skills/literature-explorer/scripts/dedupe_rank.py	22;"	namespace	nameref:module:datetime
+_NON_ALNUM	skills/literature-explorer/scripts/dedupe_rank.py	29;"	variable
+_WS	skills/literature-explorer/scripts/dedupe_rank.py	30;"	variable
+norm_title	skills/literature-explorer/scripts/dedupe_rank.py	33;"	function	typeref:typename:str
+first_author_lastname	skills/literature-explorer/scripts/dedupe_rank.py	38;"	function	typeref:typename:str
+_to_year	skills/literature-explorer/scripts/dedupe_rank.py	44;"	function	typeref:typename:int|None
+_norm_doi	skills/literature-explorer/scripts/dedupe_rank.py	52;"	function	typeref:typename:str|None
+_arxiv_id	skills/literature-explorer/scripts/dedupe_rank.py	60;"	function	typeref:typename:str|None
+keys_for	skills/literature-explorer/scripts/dedupe_rank.py	70;"	function	typeref:typename:list[tuple[str,str]]
+_Groups	skills/literature-explorer/scripts/dedupe_rank.py	82;"	class
+__init__	skills/literature-explorer/scripts/dedupe_rank.py	85;"	member	class:_Groups	typeref:typename:None
+add	skills/literature-explorer/scripts/dedupe_rank.py	89;"	member	class:_Groups	typeref:typename:None
+_year_compatible	skills/literature-explorer/scripts/dedupe_rank.py	108;"	member	class:_Groups	typeref:typename:bool
+merge_group	skills/literature-explorer/scripts/dedupe_rank.py	116;"	function	typeref:typename:dict
+longest	skills/literature-explorer/scripts/dedupe_rank.py	117;"	function	function:merge_group	typeref:typename:str	file:
+score	skills/literature-explorer/scripts/dedupe_rank.py	143;"	function	typeref:typename:float
+load	skills/literature-explorer/scripts/dedupe_rank.py	149;"	function	typeref:typename:list[dict]
+to_markdown	skills/literature-explorer/scripts/dedupe_rank.py	169;"	function	typeref:typename:str
+main	skills/literature-explorer/scripts/dedupe_rank.py	189;"	function	typeref:typename:int
 ET	skills/literature-explorer/scripts/search_arxiv.py	9;"	namespace	nameref:module:xml.etree.ElementTree
 ARXIV_API	skills/literature-explorer/scripts/search_arxiv.py	13;"	variable
 NS	skills/literature-explorer/scripts/search_arxiv.py	14;"	variable
@@ -67,6 +86,19 @@ FIELDS	skills/literature-explorer/scripts/search_semantic_scholar.py	14;"	variab
 _get	skills/literature-explorer/scripts/search_semantic_scholar.py	18;"	function	typeref:typename:dict
 search	skills/literature-explorer/scripts/search_semantic_scholar.py	26;"	function	typeref:typename:list[dict]
 main	skills/literature-explorer/scripts/search_semantic_scholar.py	51;"	function	typeref:typename:int
+CITE_RE	skills/paper-writer/scripts/check_tex.py	31;"	variable
+REF_RE	skills/paper-writer/scripts/check_tex.py	32;"	variable
+LABEL_RE	skills/paper-writer/scripts/check_tex.py	33;"	variable
+GRAPHICS_RE	skills/paper-writer/scripts/check_tex.py	34;"	variable
+INPUT_RE	skills/paper-writer/scripts/check_tex.py	35;"	variable
+BIBKEY_RE	skills/paper-writer/scripts/check_tex.py	36;"	variable
+COMMENT_RE	skills/paper-writer/scripts/check_tex.py	37;"	variable
+MUST_INCLUDE_PATTERNS	skills/paper-writer/scripts/check_tex.py	40;"	variable	typeref:typename:dict[str, str]
+GRAPHIC_EXTS	skills/paper-writer/scripts/check_tex.py	53;"	variable
+strip_comments	skills/paper-writer/scripts/check_tex.py	56;"	function	typeref:typename:str
+gather_sources	skills/paper-writer/scripts/check_tex.py	60;"	function	typeref:typename:tuple[dict[str,str],list[str]]
+find_graphic	skills/paper-writer/scripts/check_tex.py	90;"	function	typeref:typename:bool
+main	skills/paper-writer/scripts/check_tex.py	98;"	function	typeref:typename:int
 PALETTE	skills/paper-writer/scripts/figs.py	24;"	variable
 apply_style	skills/paper-writer/scripts/figs.py	28;"	function	typeref:typename:None
 mpl	skills/paper-writer/scripts/figs.py	29;"	namespace	function:apply_style	file:	nameref:module:matplotlib
@@ -109,3 +141,30 @@ _bib_doi	skills/paper-writer/scripts/verify_citations.py	200;"	function	typeref:
 _fill	skills/paper-writer/scripts/verify_citations.py	204;"	function	typeref:typename:None
 audit_entry	skills/paper-writer/scripts/verify_citations.py	213;"	function	typeref:typename:AuditRow
 main	skills/paper-writer/scripts/verify_citations.py	285;"	function	typeref:typename:int
+PATTERNS	skills/peer-reviewer/scripts/scan_injection.py	29;"	variable	typeref:typename:dict[str, str]
+_WS	skills/peer-reviewer/scripts/scan_injection.py	40;"	variable
+scan_text	skills/peer-reviewer/scripts/scan_injection.py	43;"	function	typeref:typename:list[dict]
+_substantive_lines	skills/peer-reviewer/scripts/scan_injection.py	63;"	function	typeref:typename:set[str]
+compare_extractions	skills/peer-reviewer/scripts/scan_injection.py	72;"	function	typeref:typename:dict
+main	skills/peer-reviewer/scripts/scan_injection.py	82;"	function	typeref:typename:int
+REPO	tests/conftest.py	7;"	variable
+run_script	tests/conftest.py	11;"	function
+_run	tests/conftest.py	14;"	function	function:run_script	file:
+SCRIPT	tests/test_check_tex.py	3;"	variable
+BIB	tests/test_check_tex.py	5;"	variable
+_paper	tests/test_check_tex.py	18;"	function
+test_blocking_findings_detected	tests/test_check_tex.py	36;"	function
+test_clean_paper_exits_zero	tests/test_check_tex.py	63;"	function
+test_unknown_must_include_token_blocks	tests/test_check_tex.py	76;"	function
+SCRIPT	tests/test_dedupe_rank.py	3;"	variable
+_write_jsonl	tests/test_dedupe_rank.py	6;"	function
+test_merges_across_sources_and_ranks	tests/test_dedupe_rank.py	10;"	function
+test_same_title_far_apart_years_not_merged	tests/test_dedupe_rank.py	74;"	function
+test_top_limit_and_bad_lines_skipped	tests/test_dedupe_rank.py	90;"	function
+SCRIPT	tests/test_scan_injection.py	3;"	variable
+CLEAN	tests/test_scan_injection.py	5;"	variable
+DIRTY	tests/test_scan_injection.py	11;"	variable
+test_clean_text_exits_zero	tests/test_scan_injection.py	18;"	function
+test_injected_text_flagged_with_patterns	tests/test_scan_injection.py	26;"	function
+test_extractor_divergence_flagged	tests/test_scan_injection.py	38;"	function
+test_identical_extractions_routine	tests/test_scan_injection.py	53;"	function

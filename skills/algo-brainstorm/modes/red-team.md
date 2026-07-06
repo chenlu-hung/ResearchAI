@@ -170,3 +170,22 @@ red_team_findings:
 
 If any `blocking: true` finding exists, `paper-writer` should refuse to
 emit a full draft until resolved (it can still produce outline).
+
+## Exit checklist
+
+Verify each item before emitting; fix violations first
+(`shared/prompts/execution_discipline.md` rule 2):
+
+- [ ] All six attacks have content or an explicit `N/A — <reason>`;
+      none skipped silently.
+- [ ] Venue red-flag table rates **every** flag ✅/⚠️/❌ with a note.
+- [ ] Every finding carries severity + mitigation + `blocking:` bool
+      in state.
+- [ ] Sycophancy check answered honestly in ≥1 full sentence; if the verdict
+      is "padded", the output routes back to `ideate`, not forward.
+- [ ] Pre-mortem lists ≥2 rejection reasons in the reviewer's voice, each
+      mapped to addressed / action item.
+- [ ] Action items emitted; user told paper-writer is gated if any
+      `blocking: true` finding exists.
+- [ ] (`--council`) surviving objections passed the evidence gate; discarded
+      ones noted with a one-line reason.

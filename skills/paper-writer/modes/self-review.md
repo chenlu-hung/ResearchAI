@@ -73,3 +73,19 @@ Follow `shared/prompts/council_panel.md`.
 ## State update
 
 No stage change. Surface to the user; they decide what to act on.
+
+## Exit checklist
+
+Verify each item before emitting; fix violations first
+(`shared/prompts/execution_discipline.md` rule 2):
+
+- [ ] Full draft, venue profile, and `style/<venue>.md` read *this session*
+      — not recalled from earlier context.
+- [ ] All report parts present: summary, recommendation + one-line reason,
+      major comments, minor comments, AI-tell scan, red-flag check.
+- [ ] ≥3 concrete weaknesses, each tied to a section/line; none invented.
+- [ ] Every venue red flag marked present / absent / N-A — the list was
+      walked to the end.
+- [ ] AI-tell scan respects the §E academic exceptions.
+- [ ] Written to `.research-state/<slug>-selfreview-<date>.md`;
+      no stage change.

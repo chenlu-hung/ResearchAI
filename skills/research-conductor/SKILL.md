@@ -50,6 +50,18 @@ reach those steps:
 - `routing.md` — the `stage → next mode` table, branch rules, loop-backs, and the
   bib-before-novelty precondition.
 
+### Hop checklist (every loop iteration)
+
+Verify before each hop — per `shared/prompts/execution_discipline.md`
+(rule 6 especially; the loop runs long and memory of state goes stale):
+
+- [ ] `.research-state/<slug>.md` re-read from disk **this turn**, not
+      recalled from earlier context.
+- [ ] Completeness rule applied (routing.md): the stage's own mode runs iff
+      its output is missing; otherwise its successor.
+- [ ] Hard-stop list scanned against the fresh state; none firing.
+- [ ] Roadmap printed; hop announced in one line.
+
 ## Autonomy
 
 Default: **full auto until blocked.** Auto-chain stage→stage; only the hard stops

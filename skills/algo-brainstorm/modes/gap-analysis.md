@@ -112,3 +112,18 @@ open_questions:
 - Method too vaguely specified → ask for clarification
 - No retrieved literature available → suggest running `literature-explorer` first
   (you can proceed but only with heavy `[VERIFY]` flagging)
+
+## Exit checklist
+
+Verify each item before emitting; fix violations first
+(`shared/prompts/execution_discipline.md` rule 2):
+
+- [ ] Step 1 restatement is ≤3 sentences and names what the method computes,
+      its inputs, and its claimed guarantee — or you refused and asked.
+- [ ] Every Step 2 axis has ≥1 failure mode or an explicit `N/A — <reason>`.
+- [ ] Every gap-table row's "Supporting evidence" is a verified bibkey or
+      `[VERIFY]` + a concrete search query.
+- [ ] Prior-art check ran on each candidate gap; unresolved ones are flagged
+      *novelty uncertain*, not presented as open.
+- [ ] Top-3 gaps each meet all three criteria and carry an attack sketch.
+- [ ] State updated: body entry + `stage` / `open_questions` per Output.

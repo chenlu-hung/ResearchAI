@@ -120,3 +120,19 @@ ablation_plan:
     necessary: [cross_fitting, weighted_quantile]
     helpful: [clipping, DML]
 ```
+
+## Exit checklist
+
+Verify each item before emitting; fix violations first
+(`shared/prompts/execution_discipline.md` rule 2):
+
+- [ ] Every listed component has a meaningful "without this" variant.
+- [ ] Pre-commit written: which components you expect necessary vs. helpful,
+      before any results exist.
+- [ ] Baselines include the closest prior art, a ≤12-month method, and a
+      no-method baseline — each with exact version and tuning protocol.
+- [ ] Primary metric tied to a theorem/claim; seeds meet the venue minimum;
+      significance protocol stated (no bare mean tables).
+- [ ] Every ablation row answers a specific reviewer question; rows that
+      didn't were cut.
+- [ ] State updated: `ablation_plan:` block + body entry.

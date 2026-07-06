@@ -28,9 +28,12 @@ prompt-only orchestration loop (`routing.md` + `bootstrap.md`, no Python) that
 drives the other three. The runnable Python/shell scripts the skills invoke:
 - `shared/council.py` — multi-model `--council` panel dispatcher (CLI; stdlib-only)
 - `skills/literature-explorer/scripts/search_{arxiv,openalex,semantic_scholar}.py` — retrieval CLIs
+- `skills/literature-explorer/scripts/dedupe_rank.py` — deterministic merge/dedup/rank of retrieval JSONL (stdlib-only)
 - `skills/paper-writer/scripts/verify_citations.py` — citation auditor CLI
+- `skills/paper-writer/scripts/check_tex.py` — static TeX cross-checks: `\cite`↔`.bib`, `\ref`↔`\label`, figures, venue `must_include` (stdlib-only)
 - `skills/paper-writer/scripts/build_paper.sh` — LaTeX compile gate + DOCX export (not in `tags`)
 - `skills/paper-writer/scripts/figs.py` — figure-style library; also a standalone smoketest
+- `skills/peer-reviewer/scripts/scan_injection.py` — injection-pattern scan + two-extractor divergence check (stdlib-only)
 
 ## Build / test
 - **install**: `pip install -e .`
@@ -51,13 +54,20 @@ drives the other three. The runnable Python/shell scripts the skills invoke:
 - **Anti-sycophancy / anti-hallucination** are baked into the prompts: brainstorm responses
   must surface weaknesses first, and `--council` output is ideation-only — its citations are
   `[VERIFY]`-flagged and must pass the citation audit before entering research-state.
+- **Model-robustness:** every mode file ends with an `## Exit checklist` and all skills obey
+  `shared/prompts/execution_discipline.md` (two-pass emission, declared skips, scripts-over-
+  recall) so quality holds on smaller Claude models. Keep new mechanical steps in
+  deterministic scripts (`dedupe_rank.py`, `check_tex.py`, `scan_injection.py` pattern), and
+  give any new mode an Exit checklist.
 
 <!-- projectmap:modules:start (generated — do not edit by hand) -->
-## Modules (3) — grouping depth 2
+## Modules (5) — grouping depth 2
 
 | Module | Files | Doc | One-liner |
 |---|---|---|---|
 | `shared` | 1 | [doc](modules/shared.md) | Stdlib-only multi-model council dispatcher (`--council`) + shared prompts/profiles. |
-| `skills/literature-explorer` | 3 | [doc](modules/skills__literature-explorer.md) | arXiv / OpenAlex / Semantic Scholar retrieval CLIs (fallback when `literature-review-ml` absent). |
-| `skills/paper-writer` | 2 | [doc](modules/skills__paper-writer.md) | Citation auditor (S2→OpenAlex→Crossref) + matplotlib figure-style helper. |
+| `skills/literature-explorer` | 4 | [doc](modules/skills__literature-explorer.md) | Retrieval CLIs (arXiv/OpenAlex/S2) + deterministic `dedupe_rank.py` merge/rank. |
+| `skills/paper-writer` | 3 | [doc](modules/skills__paper-writer.md) | Citation auditor (S2→OpenAlex→Crossref) + `check_tex.py` static gate + figure styles. |
+| `skills/peer-reviewer` | 1 | [doc](modules/skills__peer-reviewer.md) | `scan_injection.py`: hidden-prompt scan + two-extractor divergence check. |
+| `tests` | 4 | [doc](modules/tests.md) | Subprocess pytest suite for the three deterministic helper scripts (no network). |
 <!-- projectmap:modules:end -->

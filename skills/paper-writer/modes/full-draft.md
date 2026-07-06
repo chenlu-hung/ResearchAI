@@ -77,7 +77,10 @@ drafting context throughout Procedure:
    - Identify which bibkeys are needed; verify each is in the `.bib`.
    - Draft the section.
    - Run a self-check:
-     - Every `\cite{key}` resolves in `.bib`
+     - Every `\cite{key}` resolves in `.bib` — verify with the script, not
+       by eye: `uv run python skills/paper-writer/scripts/check_tex.py
+       paper/main.tex --bib refs/<slug>.bib` (rule 4 of
+       `execution_discipline.md`; paste its result line)
      - Every named theorem either proved here or cited
      - Notation consistent with `docs/notation-<slug>.md` (add new symbols
        to the notation file as introduced)
@@ -141,7 +144,8 @@ Glue:
 
 Before declaring "draft done", in order:
 
-1. `citation-audit` — must be clean (no `fabricated` / `contradicts`).
+1. `citation-audit` — must be clean (no `fabricated` / `contradicts`);
+   its Stage 0 static check (`check_tex.py`) must also be clean.
 2. `scripts/build_paper.sh compile paper/main.tex` — the draft must build.
 3. `self-review` — one venue-reviewer pass; feed findings into `revision`.
 4. `submission-check` — the gate to `final`.
@@ -157,3 +161,23 @@ When all sections checkpointed and `citation-audit` clean:
 ```yaml
 stage: revision
 ```
+
+## Exit checklist
+
+Verify each item before declaring the draft done; fix violations first
+(`shared/prompts/execution_discipline.md` rule 2):
+
+- [ ] Grill ran or the skip notice shown; style calibration offered once.
+- [ ] Every section drafted via the Step 2 per-section protocol,
+      checkpointed with the user, and saved under `paper/sections/`.
+- [ ] `check_tex.py` ran on the full draft with real output pasted — no
+      undefined cites/refs, no missing figures.
+- [ ] Notation file carries every symbol introduced; no symbol was
+      reintroduced with a different meaning.
+- [ ] Prose-hygiene pass ran per section (stop-slop if available, then
+      `prose_hygiene.md`).
+- [ ] Limitations names concrete failure cases from `red-team`; Related
+      Work articulates Δ per work; no unscoped "novel"/"first".
+- [ ] The After-full-draft sequence (audit → compile → self-review →
+      submission-check) was scheduled with the user.
+- [ ] State updated: `stage: drafting`, `draft: paper/main.tex`.

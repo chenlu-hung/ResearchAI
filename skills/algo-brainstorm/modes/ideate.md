@@ -151,3 +151,22 @@ Append to body under `## <date> — ideate`.
 After ideate completes, the immediate next step is `novelty-check`, which
 resolves the `novelty: uncertain` flags. Do not advance to `theory-scoping`
 without a novelty pass.
+
+## Exit checklist
+
+Verify each item before emitting; fix violations first
+(`shared/prompts/execution_discipline.md` rule 2):
+
+- [ ] Grill ran, or the one-line skip notice was shown
+      (`interview_ideate` already in state).
+- [ ] 3–5 candidates; every Step 2 field filled for each (name, core idea,
+      primitive, motivation, trade-off, cost class).
+- [ ] Diversity holds: ≥1 theoretical, ≥1 empirical, no two candidates share
+      primitive+motivation (unless the interview chose deep-dive).
+- [ ] Step 4 forbidden-candidate filter applied; any near-miss says why it
+      is not a forbidden pattern.
+- [ ] Each candidate has a `novelty:` flag and one-line answers to
+      "has someone done this?" and "why hasn't this been done?".
+- [ ] If fewer than 3 candidates survived, that was said outright — no
+      padding with weak entries.
+- [ ] State updated with the full candidate schema + body entry.

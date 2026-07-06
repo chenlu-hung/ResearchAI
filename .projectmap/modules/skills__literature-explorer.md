@@ -1,15 +1,30 @@
 # Module: `skills/literature-explorer`
 
 ## Summary
-Bundled retrieval backends for the `literature-explorer` skill (`/explore`), one script per source: arXiv (Atom/XML via `xml.etree`), OpenAlex, and Semantic Scholar (both JSON over `httpx` with `tenacity` retries). Each exposes a `search()` plus a CLI `main()` and prints normalized records the skill folds into its multi-perspective survey + BibTeX. These are the fallback path: if the external `literature-review-ml` skill is installed the skill prefers it, otherwise these run with no configuration. The skill's prompt logic lives in the sibling Markdown (`SKILL.md`, `perspectives.md`, `expert-dialogue.md`), not here.
+Bundled retrieval + ranking backends for the `literature-explorer` skill (`/explore`): one search script per source — arXiv (Atom/XML via `xml.etree`), OpenAlex, and Semantic Scholar (JSON over `httpx` with `tenacity` retries) — each exposing `search()` plus a CLI `main()` that prints normalized JSONL. `dedupe_rank.py` (stdlib-only) then owns the pipeline's "Dedup + rank" step deterministically: it merges records across sources on arXiv id / DOI / normalized title+author and scores by citations × recency-decay × perspective-hits, so the merge never depends on the running model. Search scripts are the fallback path (the external `literature-review-ml` skill is preferred when installed); the skill's prompt logic lives in the sibling Markdown, not here.
 
 <!-- projectmap:auto:start (generated — do not edit by hand) -->
-## Files (3)
+## Files (4)
+- `skills/literature-explorer/scripts/dedupe_rank.py`
 - `skills/literature-explorer/scripts/search_arxiv.py`
 - `skills/literature-explorer/scripts/search_openalex.py`
 - `skills/literature-explorer/scripts/search_semantic_scholar.py`
 
-## Public symbols (10)
+## Public symbols (24)
+- `namespace _dt` — skills/literature-explorer/scripts/dedupe_rank.py:22
+- `function norm_title` — skills/literature-explorer/scripts/dedupe_rank.py:33
+- `function first_author_lastname` — skills/literature-explorer/scripts/dedupe_rank.py:38
+- `function _to_year` — skills/literature-explorer/scripts/dedupe_rank.py:44
+- `function _norm_doi` — skills/literature-explorer/scripts/dedupe_rank.py:52
+- `function _arxiv_id` — skills/literature-explorer/scripts/dedupe_rank.py:60
+- `function keys_for` — skills/literature-explorer/scripts/dedupe_rank.py:70
+- `class _Groups` — skills/literature-explorer/scripts/dedupe_rank.py:82
+- `function merge_group` — skills/literature-explorer/scripts/dedupe_rank.py:116
+- `function longest` — skills/literature-explorer/scripts/dedupe_rank.py:117
+- `function score` — skills/literature-explorer/scripts/dedupe_rank.py:143
+- `function load` — skills/literature-explorer/scripts/dedupe_rank.py:149
+- `function to_markdown` — skills/literature-explorer/scripts/dedupe_rank.py:169
+- `function main` — skills/literature-explorer/scripts/dedupe_rank.py:189
 - `namespace ET` — skills/literature-explorer/scripts/search_arxiv.py:9
 - `function search` — skills/literature-explorer/scripts/search_arxiv.py:17
 - `function main` — skills/literature-explorer/scripts/search_arxiv.py:59
@@ -24,9 +39,13 @@ Bundled retrieval backends for the `literature-explorer` skill (`/explore`), one
 ## Dependencies (imports)
 - `__future__`
 - `argparse`
+- `datetime`
 - `httpx`
 - `json`
+- `math`
 - `os`
+- `pathlib`
+- `re`
 - `sys`
 - `tenacity`
 - `time`

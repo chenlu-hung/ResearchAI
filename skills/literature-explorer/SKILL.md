@@ -37,6 +37,8 @@ implemented as prompt orchestration (no STORM dependency required).
    - `scripts/search_semantic_scholar.py "<query>"` — Semantic Scholar Graph API
    - `scripts/search_openalex.py "<query>"` — OpenAlex
 
+   Save each perspective's results to its own file (e.g.
+   `theorist.jsonl`) — step 4 uses the filenames as perspective labels.
    The bundled scripts are the default and require only the Python deps
    from `pyproject.toml`. **Optional**: if a `literature-review-ml` skill
    is independently installed in the environment, prefer delegating
@@ -44,8 +46,19 @@ implemented as prompt orchestration (no STORM dependency required).
    metadata. It is *not* a hard dependency of this plugin; do not assume
    its presence.
 
-4. **Dedup + rank**. Merge by normalized title + first author + year.
-   Rank by (citations × recency-decay × perspective-match).
+4. **Dedup + rank** — deterministic, via the bundled script. Do **not**
+   merge or rank by hand (rule 4 of
+   `shared/prompts/execution_discipline.md`):
+
+   ```bash
+   uv run python skills/literature-explorer/scripts/dedupe_rank.py \
+     <perspective>.jsonl ... --out ranked.jsonl --md ranked.md --top 60
+   ```
+
+   It merges on arXiv id / DOI / normalized title+author, scores by
+   citations × recency-decay × perspective-hits (papers surfaced by
+   several perspectives rank higher), and prints a
+   `merged N -> M unique papers` summary — paste that line.
 
 5. **Build hierarchical outline**. Top level = perspectives; second level =
    sub-themes within each perspective; leaves = paper bundles (3–8 papers
@@ -63,6 +76,9 @@ implemented as prompt orchestration (no STORM dependency required).
 
 ## Output discipline
 
+- Execution discipline per `shared/prompts/execution_discipline.md`:
+  pipeline steps run in order, scripts over hand-work, and the Exit
+  checklist below gates emission.
 - Every claim cited; no `[citation needed]` placeholders.
 - Mark recent preprints (≤6 months) with `[PREPRINT]` flag — they are
   important for `novelty-check` but unstable.
@@ -81,3 +97,22 @@ implemented as prompt orchestration (no STORM dependency required).
 Follow `shared/prompts/anti_hallucination.md`. Specifically: no `\cite{...}`
 to a paper not in this session's retrieved set. If a famous result feels
 relevant but you cannot retrieve it, add to a `[VERIFY]` queue at the end.
+
+## Exit checklist
+
+Verify each item before emitting the survey; fix violations first
+(`shared/prompts/execution_discipline.md` rule 2):
+
+- [ ] 3–5 perspectives, each with a motivation + query list; the ≤40%
+      query-overlap rule applied.
+- [ ] Retrieval actually ran (scripts or `literature-review-ml`) with real
+      output; per-perspective JSONL files kept.
+- [ ] `dedupe_rank.py` did the merge/rank; its summary line pasted — no
+      hand-merged list.
+- [ ] Every survey claim cites a bibkey from the retrieved set;
+      unretrievable "famous results" sit in the `[VERIFY]` queue instead.
+- [ ] Papers ≤6 months old flagged `[PREPRINT]`.
+- [ ] Survey body ≤ ~3000 words; each section's dialogue passed the
+      health check in `expert-dialogue.md`.
+- [ ] `docs/survey-<slug>.md` + `refs/<slug>.bib` written; state updated
+      (`literature:`, `citations:`, `stage`).

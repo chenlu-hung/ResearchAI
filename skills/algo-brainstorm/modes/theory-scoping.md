@@ -94,3 +94,21 @@ theory_targets:
 If proof sketches are produced, save them to `docs/proof-sketch-<kind>.md`
 (separate file per theorem so they can be edited in isolation later by
 paper-writer).
+
+## Exit checklist
+
+Verify each item before emitting; fix violations first
+(`shared/prompts/execution_discipline.md` rule 2):
+
+- [ ] Every theorem type in the Step 1 table was considered — proposed or
+      `N/A — <reason>`; none silently ignored.
+- [ ] Each proposed theorem has a target statement specific to this problem,
+      a named proof technique, and any non-standard ingredient flagged.
+- [ ] Must-have vs. nice-to-have justified against a named line of the venue
+      profile, not taste.
+- [ ] Each must-have has a 5–10 bullet proof sketch saved to
+      `docs/proof-sketch-<kind>.md`.
+- [ ] Each theorem lists the closest existing theorem + one concrete reason
+      the proof might fail (Anti-sycophancy).
+- [ ] Every unproved statement is marked `[CONJECTURE — not yet proved]`.
+- [ ] State updated: `theory_targets:` with `must_have`/`status` + body entry.

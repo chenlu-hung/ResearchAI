@@ -115,3 +115,19 @@ formalization:
 ```
 
 Append the LaTeX block to body under `## <date> — formalize`.
+
+## Exit checklist
+
+Verify each item before emitting; fix violations first
+(`shared/prompts/execution_discipline.md` rule 2):
+
+- [ ] All six Procedure outputs present: setup, estimand/target,
+      loss/construction, assumptions, quantities of interest, LaTeX block.
+- [ ] Estimand vs. estimator vs. target functional vs. nuisance explicitly
+      distinguished — a referee could not confuse them.
+- [ ] Every assumption carries a textbook name + source or `[VERIFY]`.
+- [ ] Every symbol in the LaTeX block is introduced in it or in Setup;
+      none appears from nowhere.
+- [ ] Anti-sycophancy done: ≥1 filled-in ambiguity and ≥1 almost-matching
+      textbook setup listed, with why this isn't a special case.
+- [ ] State updated: `formalization:` block + body entry.

@@ -117,3 +117,17 @@ After producing outline, list:
 stage: outline
 draft: paper/outline.md
 ```
+
+## Exit checklist
+
+Verify each item before emitting; fix violations first
+(`shared/prompts/execution_discipline.md` rule 2):
+
+- [ ] Venue profile loaded; the skeleton matches its section template.
+- [ ] Every algorithm-card section is mapped to a paper section
+      (Step 2 table complete — no card content homeless).
+- [ ] Page budget allocated per section and sums to the venue limit.
+- [ ] Every outline bullet resting on external work carries a bibkey from
+      `refs/<slug>.bib`.
+- [ ] ≥1 thin section and ≥1 overflowing section flagged (Anti-sycophancy).
+- [ ] State updated: `stage: outline`, `draft: paper/outline.md`.
