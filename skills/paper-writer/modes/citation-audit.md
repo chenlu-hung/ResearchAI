@@ -16,6 +16,18 @@ script-based metadata verification + LLM-based claim-support check.
 
 ## Procedure
 
+### Stage 0 — Static cross-check (`scripts/check_tex.py`)
+
+```bash
+uv run python skills/paper-writer/scripts/check_tex.py \
+  paper/main.tex --bib refs/<slug>.bib --json
+```
+
+Catches undefined `\cite` keys, dangling `\ref`s, and missing figure files
+*before* any API call. Fix undefined keys first — Stages 1–2 can only audit
+keys that resolve. Paste the script's real output (rule 4 of
+`execution_discipline.md`); never assert "all cites resolve" from reading.
+
 ### Stage 1 — Metadata verification (`scripts/verify_citations.py`)
 
 ```bash
@@ -125,3 +137,17 @@ to `final`) unless the most recent audit is clean.
 - Conference proceedings sometimes have different titles than arXiv
   versions; treat title similarity > 0.7 + author + year as soft-match
   and surface for user review.
+
+## Exit checklist
+
+Verify each item before emitting; fix violations first
+(`shared/prompts/execution_discipline.md` rule 2):
+
+- [ ] Stage 0 ran with pasted output; no undefined citation keys remain.
+- [ ] Stage 1 script ran (real output, not simulated); every bib entry
+      classified verified / mismatched / fabricated / unreachable.
+- [ ] Stage 2 claim-support verdict exists for every verified citation
+      invoked in the draft; `unreachable` queued for retry, not dropped.
+- [ ] Stage 3 report written with per-category action items.
+- [ ] `audit_status` flipped only per the rule; any `fabricated` or
+      `contradicts` → `audit_status: failed` and `stage` NOT advanced.

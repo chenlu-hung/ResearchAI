@@ -128,6 +128,11 @@ only) convenes the multi-reviewer panel.
 
 ## Hard discipline
 
+0. **Execution discipline** — `shared/prompts/execution_discipline.md`:
+   steps in order, Exit checklist before emitting, scripts run for real
+   (`scripts/scan_injection.py` for the injection scan), red-flag lists
+   walked to the end.
+
 1. **Ethics gate first** — never read the paper before `review_ethics.md` clears.
 2. **Anti-sycophancy** — a referee report surfaces **≥3 concrete weaknesses**,
    each tied to a section/line. "Strong paper, minor polish" is not a valid

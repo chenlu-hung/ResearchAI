@@ -135,3 +135,23 @@ the comparisons made.
   attack a different gap").
 - If multiple candidates are equally novel: do not pick a winner. Present
   trade-offs and let the user choose.
+
+## Exit checklist
+
+Verify each item before emitting; fix violations first
+(`shared/prompts/execution_discipline.md` rule 2):
+
+- [ ] Retrieval present (`literature:` + `citations:` non-empty) — or you
+      refused with the exact message in Inputs.
+- [ ] Every active candidate has ≥3 related works, each with a filled
+      Same / Different / Δ row.
+- [ ] Citation-graph chase ran per most-similar paper (5 refs + 5 citers),
+      or `Skipped step: <reason>` appears in the output.
+- [ ] Verdict per candidate ∈ {novel, incremental, subsumed}; `novel` only
+      with the ≥3-works rule met — never from "couldn't find anything".
+- [ ] Subsumed candidates moved to `dropped:` with `drop_reason` citing the
+      subsuming work; nothing silently deleted.
+- [ ] `key_claims` written with `supporting_refs` from the verified set and
+      `audit_status: pending`.
+- [ ] (`--council`) every panel attack was verified against retrieval or
+      discarded with a one-line reason; no verdict flipped on say-so.

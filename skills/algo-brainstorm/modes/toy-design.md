@@ -127,3 +127,20 @@ toy_design:
 ```
 
 Save the full toy spec to `docs/toy-spec-<slug>.md`.
+
+## Exit checklist
+
+Verify each item before emitting; fix violations first
+(`shared/prompts/execution_discipline.md` rule 2):
+
+- [ ] The toy demonstrates ≥1 named theory target or an explicit Step 1 goal
+      (sanity / graceful failure / outperform / phase transition / rate).
+- [ ] Data spec fully explicit: distribution, $d$, $n$ grid, noise model,
+      ≥30 seeds, and a closed-form/oracle truth.
+- [ ] Oracle and optimal baselines defined; the proposed→oracle convergence
+      expectation is stated.
+- [ ] Expected curves written *before* any implementation discussion.
+- [ ] ≥2 smoke tests with numeric thresholds (the "⇒ bug" form).
+- [ ] ≥1 non-trivial baseline (not just "no method").
+- [ ] Compute estimate present; state updated (`toy_design:` +
+      `docs/toy-spec-<slug>.md`).

@@ -1,9 +1,9 @@
 {
-  "generated": "2026-06-20T10:30:04+00:00",
+  "generated": "2026-07-05T19:34:25+00:00",
   "mode": "update",
   "depth": 2,
   "source": "git",
-  "files": 6,
+  "files": 13,
   "modules": {
     "shared": {
       "hash": "e78ed6bea037d842d66cc177bcd1cc08cd84079a575bd6032c5d9c540311ce81",
@@ -11,14 +11,24 @@
       "doc": "modules/shared.md"
     },
     "skills/literature-explorer": {
-      "hash": "2bcd9ba059fe6f5a6c7d05c120fbf39e9345fd3eab304c08578b37606bc46e3b",
-      "files": 3,
+      "hash": "84609edd0861fb14f42449ec0c5832f7bf6729a52541ab368b7fcf691532b343",
+      "files": 4,
       "doc": "modules/skills__literature-explorer.md"
     },
     "skills/paper-writer": {
-      "hash": "4e1511c2b379467106664379743577ae2adbb9314d070475c3b1380544aefaca",
-      "files": 2,
+      "hash": "faa79e387c49765f3fcb7ffb8062a47c60f436b7d19605577ddeb9c250821739",
+      "files": 3,
       "doc": "modules/skills__paper-writer.md"
+    },
+    "skills/peer-reviewer": {
+      "hash": "5d12265046a6d153d41330b8e068104de82617e6b688e069c149e4d377c5a3a8",
+      "files": 1,
+      "doc": "modules/skills__peer-reviewer.md"
+    },
+    "tests": {
+      "hash": "8757d352fc444e280cbeb1745a261df61d35965440bb568879e00facfe766718",
+      "files": 4,
+      "doc": "modules/tests.md"
     }
   }
 }

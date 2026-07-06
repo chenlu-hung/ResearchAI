@@ -63,3 +63,20 @@ When the edit intent is "respond to reviewer X":
 
 No stage change for routine revision. After full pass of all reviewer
 comments, advance `stage` to `revision` → `final`.
+
+## Exit checklist
+
+Verify each item before emitting; fix violations first
+(`shared/prompts/execution_discipline.md` rule 2):
+
+- [ ] Step 3 edit plan (stays / changes / new claims / cross-refs) was
+      written *before* the file was touched.
+- [ ] Diff is minimal — untouched prose preserved verbatim.
+- [ ] Citations still resolve after the edit: `uv run python
+      skills/paper-writer/scripts/check_tex.py paper/main.tex --bib
+      refs/<slug>.bib` is clean (pasted, not eyeballed).
+- [ ] Coherence check ran: notation, theorem numbering, prose hygiene on
+      the edited text.
+- [ ] Reviewer-response: every comment has an (a)/(b)/(c) decision and a
+      `response.md` entry; no "we have improved…" filler; no capitulation
+      without evidence and no stonewalling on a real issue.

@@ -38,6 +38,10 @@ blocking findings.
 
 ## Hard discipline
 
+0. **Execution discipline**: follow `shared/prompts/execution_discipline.md`
+   in every mode — steps in order, Exit checklist before emitting, scripts
+   run for real (never simulated), exhaustive checklist walks.
+
 1. **Pre-flight check**: on entry, read research state. Refuse to emit
    a full draft if:
    - `algorithm_card` is missing
@@ -99,6 +103,10 @@ Flag mismatches.
 ## Scripts
 
 - `scripts/verify_citations.py` — citation audit (above). `uv run python ...`.
+- `scripts/check_tex.py` — static cross-checks, no LaTeX needed: every
+  `\cite` resolves in the `.bib`, every `\ref` has a `\label`, figure files
+  exist, venue `must_include` tokens present. Stage 0 of `citation-audit`;
+  evidence source for `submission-check`; run after every draft/revision.
 - `scripts/figs.py` — one colorblind-safe, vector-PDF figure style for
   experiment/ablation plots; import and adapt to real results, never invent
   numbers. `uv run --extra figures python ...` (needs the `figures` extra).

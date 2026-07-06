@@ -56,6 +56,13 @@ Each mode updates `research_state` and the `algorithm_card.md`.
 
 Applied to **every mode**:
 
+### 0. Execution discipline
+
+Follow `shared/prompts/execution_discipline.md`: numbered Procedure steps
+run in order (skips are declared, never silent), output is emitted only
+after the mode's **Exit checklist** passes, checklist axes are answered
+exhaustively, and bundled scripts are run for real — never simulated.
+
 ### 1. Anti-sycophancy
 
 Before any positive response to a user proposal, you must list:
