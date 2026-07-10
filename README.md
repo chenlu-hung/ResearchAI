@@ -25,9 +25,15 @@ which all remain independently usable below.
 |---|---|---|
 | `literature-explorer` | Multi-perspective survey of a topic; produces hierarchical outline + BibTeX. Uses bundled arXiv / Semantic Scholar / OpenAlex scripts; if the external `literature-review-ml` skill is installed, will prefer it. | `/explore <topic>` |
 | `algo-brainstorm` | Eight-mode pipeline for going from "I have an idea" to "I have a contribution worth submitting". Modes: `gap-analysis`, `formalize`, `ideate`, `novelty-check`, `theory-scoping`, `toy-design`, `ablation-plan`, `red-team`. | `/algo <mode>` |
-| `paper-writer` | Venue-aware drafting (NeurIPS, ICML, JMLR, AISTATS, Annals of Stats) with stage checkpoints. Modes: `outline`, `full-draft`, `revision`, `citation-audit`, `self-review`, `submission-check`. Multi-source citation audit (Semantic Scholar → OpenAlex → Crossref + DOI match), publication figures, LaTeX compile gate + DOCX export, AI-tell prose hygiene, optional voice calibration. | `/write <mode>` |
+| `paper-writer` | Venue-aware drafting (NeurIPS, ICML, JMLR, AISTATS, Annals of Stats) with stage checkpoints. Modes: `outline`, `full-draft`, `revision`, `citation-audit`, `self-review`, `submission-check`, `venue-calibration`, `grant-nstc`. Multi-source citation audit (Semantic Scholar → OpenAlex → Crossref + DOI match), publication figures, LaTeX compile gate + DOCX export, AI-tell prose hygiene, optional voice calibration. | `/write <mode>` |
 
 State carries across skills and sessions via `.research-state/<topic-slug>.md` (schema in `shared/research_state.schema.md`).
+
+Two `paper-writer` modes work out-of-band of the paper pipeline:
+`venue-calibration` adds or re-verifies a venue profile from official
+sources with provenance, and `grant-nstc` drafts an NSTC (國科會)
+專題研究計畫 CM03 into your own LaTeX template — proposal register
+(vision + feasibility), review-weight-aware, no research state required.
 
 ## Reviewing other people's papers
 

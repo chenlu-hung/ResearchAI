@@ -1,5 +1,5 @@
 ---
-description: Run a mode of the paper-writer skill. Modes: outline, full-draft, revision, citation-audit, self-review, submission-check, venue-calibration.
+description: Run a mode of the paper-writer skill. Modes: outline, full-draft, revision, citation-audit, self-review, submission-check, venue-calibration, grant-nstc.
 argument-hint: <mode> [--venue <key from shared/venue_profiles.md>] [--council]
 ---
 
@@ -19,6 +19,9 @@ Modes (see `skills/paper-writer/SKILL.md`):
   sources (CFP / author guidelines), optionally grounded in exemplar
   papers, with provenance; the only mode that edits
   `shared/venue_profiles.md` and `style/`
+- `grant-nstc` — draft/revise an NSTC (國科會) 專題研究計畫 CM03 in the
+  proposal register (vision + feasibility, review-weight-aware); needs no
+  research state, reuses one if present
 
 Pre-flight: refuse to emit `full-draft` if `red-team` mode has any
 `blocking: true` finding unresolved, or if `algorithm_card` / `refs/<slug>.bib`

@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-10T12:02:08+00:00",
+  "generated": "2026-07-10T12:37:45+00:00",
   "mode": "update",
   "depth": 2,
   "source": "git",
@@ -16,7 +16,7 @@
       "doc": "modules/skills__literature-explorer.md"
     },
     "skills/paper-writer": {
-      "hash": "3050f18fb88a50961352389c3a2aab9c4aea6b82cc949c108b0e3dd9934de959",
+      "hash": "fb64fd28ee83b86bcf4f2cad64ddf66afd741b2114fcb675a62a3b4970a03526",
       "files": 5,
       "doc": "modules/skills__paper-writer.md"
     },

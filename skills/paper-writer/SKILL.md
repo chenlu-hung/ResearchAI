@@ -1,6 +1,6 @@
 ---
 name: paper-writer
-description: Venue-aware academic paper drafting for Stats/ML algorithm papers. Modes for outline, full-draft, revision, and citation-audit. Loads venue profiles (NeurIPS, ICML, JMLR, AISTATS, Annals of Stats) for style and reviewer-expectation tailoring. Includes a Semantic-Scholar-based citation auditor that flags fabricated or mismatched references before submission.
+description: Venue-aware academic paper drafting for Stats/ML algorithm papers. Modes for outline, full-draft, revision, citation-audit, and grant-nstc (國科會專題研究計畫 CM03 proposals). Loads venue profiles (NeurIPS, ICML, JMLR, AISTATS, Annals of Stats) for style and reviewer-expectation tailoring. Includes a Semantic-Scholar-based citation auditor that flags fabricated or mismatched references before submission.
 ---
 
 # paper-writer
@@ -18,6 +18,7 @@ blocking findings.
 - "Help me revise the intro"
 - "Review my draft like a reviewer would"
 - "Is my paper submission-ready?"
+- "幫我寫國科會計畫書" / "Draft my NSTC proposal"
 - `/write <mode>` slash command
 
 ## When NOT to invoke
@@ -36,6 +37,7 @@ blocking findings.
 | `self-review` | One-pass venue-reviewer critique of the draft | `modes/self-review.md` |
 | `submission-check` | Submission-readiness gate before `final` | `modes/submission-check.md` |
 | `venue-calibration` | Add or re-verify a venue profile from official sources + optional exemplar papers | `modes/venue-calibration.md` |
+| `grant-nstc` | Draft/revise an NSTC (國科會) 專題研究計畫 CM03 — vision + feasibility register, review-weight-aware | `modes/grant-nstc.md` |
 
 ## Hard discipline
 

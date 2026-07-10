@@ -20,6 +20,9 @@ exceptions here win — `stop-slop` is tuned for blog/essay prose, not papers.
   "we believe / feel". Delete, or replace with the claim itself.
 - **Throat-clearing openers**: "In this section, we will…", "It is important to
   understand…", "To begin with…". Start with the content.
+- **Formulaic survey openers**: "In recent years, X has attracted increasing
+  attention", "With the rapid development of…". Name the specific problem or
+  failure that motivates the work instead.
 - **AI-tell vocabulary**: "delve", "crucial", "pivotal", "leverage" (verb; use
   "use"/"exploit"), "rich tapestry", "showcase", "underscore", "realm",
   "harness", "intricate", "seamless", "robustly" (when not a robustness claim),
@@ -70,6 +73,9 @@ survive a vocabulary pass, so check them explicitly.
 - Do not end every paragraph on a punchy one-liner — that cadence reads as
   generated. Some paragraphs should end on a qualification or a forward pointer.
 - Do not stack three short staccato sentences for emphasis.
+- Do not stack sentence-initial connectives: two or more consecutive sentences
+  (or paragraphs) opening with "Moreover", "Furthermore", "Additionally", "In
+  addition". Subordinate, merge, or just drop the connective.
 
 ## D. ML / Stats-specific
 
@@ -80,6 +86,10 @@ survive a vocabulary pass, so check them explicitly.
 - **Voice**: active for claims and contributions ("We prove…", "We propose…");
   past tense for what was done ("We trained…", "We evaluated…").
 - Drop "to the best of our knowledge"; state the Δ to specific prior work instead.
+- **Verb strength = evidence strength**: "prove"/"establish" only for theorems;
+  empirical results "show" or "provide evidence". Calibrate both ways — upgrade
+  "suggests" → "shows" when the evidence is direct, downgrade "demonstrates" →
+  "suggests" when it is indirect or single-dataset.
 
 ## E. Academic exceptions (relax these stop-slop rules)
 
@@ -112,7 +122,9 @@ paste its result line instead of eyeballing.
   Work, Method prose, Theory discussion, Experiments analysis, Discussion,
   Limitations — write paragraphs. Budget: ≤ 1 list environment per section,
   0 in the sections just named. A list outside the slots gets **rewritten as
-  prose**, not trimmed.
+  prose**, not trimmed. Within the Intro contribution slot, each bullet must
+  name a specific result (theorem number, rate, dataset + Δ) — a bullet that
+  restates the abstract gets rewritten, not kept.
 - **Bold-label pseudo-lists**: ≥ 3 consecutive `\paragraph{...}` heads (or
   `**Label.** sentence` blocks) of under ~90 words each is a list in
   disguise — merge into paragraphs, keeping at most the strongest head.
@@ -131,7 +143,8 @@ paste its result line instead of eyeballing.
 1. Any phrase from §A? Cut or replace.
 2. Any "not X, but Y" / "the data reveals" / "what makes this work is…"? Restructure (§B).
 3. Any superlative or improvement claim without scope/numbers? Add them or soften.
-4. Do three paragraphs in a row have the same length or punchy ending? Break the pattern (§C).
+4. Do three paragraphs in a row have the same length or punchy ending? Stacked
+   "Moreover/Furthermore" openers? Break the pattern (§C).
 5. Active voice for our claims (§D); passive only where conventional (§E).
 6. Format pass (§F): lists only in the allowed slots, no pseudo-list runs,
    no outline residue — `check_prose.py` ran, result line pasted, blocking

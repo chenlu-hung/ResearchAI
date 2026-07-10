@@ -16,7 +16,8 @@ Per .tex/.md file it reports:
     * conditional §A words ("significantly", "leverage", "novel", ...)
     * §B structural patterns (binary contrast, false agency, rhetorical setups)
     * wrap-up closers ("In summary, ...")
-    * §C rhythm: uniform paragraph lengths, punchy-ending runs, same-opener runs
+    * §C rhythm: uniform paragraph lengths, punchy-ending runs, same-opener runs,
+      connective stacking (≥2 consecutive Moreover/Furthermore/... openers)
 
 Comments, math, and non-prose environments (equations, algorithms, tables,
 figures, verbatim) are excluded. \\input/\\include are followed recursively.
@@ -71,6 +72,10 @@ BLOCKING_PHRASES = [
     ("holistic", r"\bholistic(?:ally)?\b"),
     ("to the best of our knowledge", r"to\s+the\s+best\s+of\s+our\s+knowledge"),
     ("we believe/feel", r"\bwe\s+(?:believe|feel)\b"),
+    ("attracted increasing attention (name the gap)",
+     r"ha(?:s|ve)\s+(?:attracted|gained|received|garnered)\s+"
+     r"(?:increasing|growing|considerable|significant|substantial|much|great)\s+"
+     r"(?:attention|interest)"),
 ]
 
 # §A/§D words with legitimate uses — warnings for the LLM pass to judge.
@@ -89,6 +94,7 @@ WARNING_PHRASES = [
     ("underscore", r"\bunderscor(?:e|es|ed|ing)\b"),
     ("robustly (unless a robustness claim)", r"\brobustly\b"),
     ("novel (scope it: relative to what?)", r"\bnovel\b"),
+    ("in recent years (formulaic opener)", r"\bin\s+recent\s+years\b"),
 ]
 
 # §B structural patterns — regexable subset, warnings.
@@ -109,6 +115,9 @@ STRUCTURAL_PATTERNS = [
 
 CLOSER_RE = re.compile(
     r"^(?:in\s+summary|in\s+conclusion|to\s+summarize|overall,|taken\s+together)",
+    re.IGNORECASE)
+CONNECTIVE_RE = re.compile(
+    r"(?:moreover|furthermore|additionally|in\s+addition|besides)\b",
     re.IGNORECASE)
 BOLD_LABEL_RE = re.compile(r"^\s*(?:\\textbf\{[^}]{1,60}\}|\*\*[^*]{1,60}\*\*)\s*[:.]?\s")
 
@@ -434,6 +443,17 @@ def check_file(path: Path, args: argparse.Namespace) -> dict:
         runs.append({"line": paras[i - 1][0], "word": openers[i], "paragraphs": n + 1})
     if runs:
         warnings["same_opener_runs"] = runs
+
+    sents = []
+    for ln, p in a["phrase_paras"]:
+        plain = re.sub(r"\s+", " ", strip_commands(p)).strip()
+        sents.extend((ln, s) for s in split_sentences(plain))
+    stacked = [bool(re.match(r"\W*" + CONNECTIVE_RE.pattern, s, re.IGNORECASE))
+               for _, s in sents]
+    runs = [{"line": sents[i][0], "sentences": n}
+            for i, n in maximal_runs(stacked, min_len=2)]
+    if runs:
+        warnings["connective_stacking"] = runs
 
     return report
 

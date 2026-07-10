@@ -101,44 +101,45 @@ FIELDS	skills/literature-explorer/scripts/search_semantic_scholar.py	14;"	variab
 _get	skills/literature-explorer/scripts/search_semantic_scholar.py	18;"	function	typeref:typename:dict
 search	skills/literature-explorer/scripts/search_semantic_scholar.py	26;"	function	typeref:typename:list[dict]
 main	skills/literature-explorer/scripts/search_semantic_scholar.py	51;"	function	typeref:typename:int
-COMMENT_RE	skills/paper-writer/scripts/check_prose.py	41;"	variable
-INPUT_RE	skills/paper-writer/scripts/check_prose.py	42;"	variable
-WORD_RE	skills/paper-writer/scripts/check_prose.py	43;"	variable
-HEAD_RE	skills/paper-writer/scripts/check_prose.py	44;"	variable
-LIST_TOKEN_RE	skills/paper-writer/scripts/check_prose.py	45;"	variable
-EMDASH_TEX_RE	skills/paper-writer/scripts/check_prose.py	46;"	variable
-EMDASH_MD_RE	skills/paper-writer/scripts/check_prose.py	47;"	variable
-MD_LIST_LINE_RE	skills/paper-writer/scripts/check_prose.py	48;"	variable
-MD_HEAD_RE	skills/paper-writer/scripts/check_prose.py	49;"	variable
-NONPROSE_ENVS	skills/paper-writer/scripts/check_prose.py	51;"	variable
-BLOCKING_PHRASES	skills/paper-writer/scripts/check_prose.py	59;"	variable
-WARNING_PHRASES	skills/paper-writer/scripts/check_prose.py	77;"	variable
-STRUCTURAL_PATTERNS	skills/paper-writer/scripts/check_prose.py	95;"	variable
-CLOSER_RE	skills/paper-writer/scripts/check_prose.py	110;"	variable
-BOLD_LABEL_RE	skills/paper-writer/scripts/check_prose.py	113;"	variable
-ABBREVIATIONS	skills/paper-writer/scripts/check_prose.py	115;"	variable
-blank_keep_newlines	skills/paper-writer/scripts/check_prose.py	122;"	function	typeref:typename:str
-strip_comments	skills/paper-writer/scripts/check_prose.py	126;"	function	typeref:typename:str
-blank_envs	skills/paper-writer/scripts/check_prose.py	130;"	function	typeref:typename:str
-blank_math	skills/paper-writer/scripts/check_prose.py	138;"	function	typeref:typename:str
-repl	skills/paper-writer/scripts/check_prose.py	139;"	function	function:blank_math	typeref:typename:str	file:
-strip_commands	skills/paper-writer/scripts/check_prose.py	148;"	function	typeref:typename:str
-count_words	skills/paper-writer/scripts/check_prose.py	156;"	function	typeref:typename:int
-line_of	skills/paper-writer/scripts/check_prose.py	160;"	function	typeref:typename:int
-extract_list_spans	skills/paper-writer/scripts/check_prose.py	164;"	function	typeref:typename:list[tuple[int,int]]
-blank_spans	skills/paper-writer/scripts/check_prose.py	181;"	function	typeref:typename:str
-build_paragraphs	skills/paper-writer/scripts/check_prose.py	192;"	function	typeref:typename:list[tuple[int,str]]
-split_sentences	skills/paper-writer/scripts/check_prose.py	209;"	function	typeref:typename:list[str]
-maximal_runs	skills/paper-writer/scripts/check_prose.py	218;"	function	typeref:typename:list[tuple[int,int]]
-uniform_length_runs	skills/paper-writer/scripts/check_prose.py	234;"	function	typeref:typename:list[tuple[int,int]]
-snippet	skills/paper-writer/scripts/check_prose.py	256;"	function	typeref:typename:str
-scan_phrases	skills/paper-writer/scripts/check_prose.py	262;"	function	typeref:typename:tuple[list[dict],list[dict]]
-paragraph_head_runs	skills/paper-writer/scripts/check_prose.py	279;"	function	typeref:typename:list[dict]
-analyze_tex	skills/paper-writer/scripts/check_prose.py	304;"	function	typeref:typename:dict
-analyze_md	skills/paper-writer/scripts/check_prose.py	327;"	function	typeref:typename:dict
-check_file	skills/paper-writer/scripts/check_prose.py	364;"	function	typeref:typename:dict
-gather_tex_files	skills/paper-writer/scripts/check_prose.py	441;"	function	typeref:typename:list[Path]
-main	skills/paper-writer/scripts/check_prose.py	462;"	function	typeref:typename:int
+COMMENT_RE	skills/paper-writer/scripts/check_prose.py	42;"	variable
+INPUT_RE	skills/paper-writer/scripts/check_prose.py	43;"	variable
+WORD_RE	skills/paper-writer/scripts/check_prose.py	44;"	variable
+HEAD_RE	skills/paper-writer/scripts/check_prose.py	45;"	variable
+LIST_TOKEN_RE	skills/paper-writer/scripts/check_prose.py	46;"	variable
+EMDASH_TEX_RE	skills/paper-writer/scripts/check_prose.py	47;"	variable
+EMDASH_MD_RE	skills/paper-writer/scripts/check_prose.py	48;"	variable
+MD_LIST_LINE_RE	skills/paper-writer/scripts/check_prose.py	49;"	variable
+MD_HEAD_RE	skills/paper-writer/scripts/check_prose.py	50;"	variable
+NONPROSE_ENVS	skills/paper-writer/scripts/check_prose.py	52;"	variable
+BLOCKING_PHRASES	skills/paper-writer/scripts/check_prose.py	60;"	variable
+WARNING_PHRASES	skills/paper-writer/scripts/check_prose.py	82;"	variable
+STRUCTURAL_PATTERNS	skills/paper-writer/scripts/check_prose.py	101;"	variable
+CLOSER_RE	skills/paper-writer/scripts/check_prose.py	116;"	variable
+CONNECTIVE_RE	skills/paper-writer/scripts/check_prose.py	119;"	variable
+BOLD_LABEL_RE	skills/paper-writer/scripts/check_prose.py	122;"	variable
+ABBREVIATIONS	skills/paper-writer/scripts/check_prose.py	124;"	variable
+blank_keep_newlines	skills/paper-writer/scripts/check_prose.py	131;"	function	typeref:typename:str
+strip_comments	skills/paper-writer/scripts/check_prose.py	135;"	function	typeref:typename:str
+blank_envs	skills/paper-writer/scripts/check_prose.py	139;"	function	typeref:typename:str
+blank_math	skills/paper-writer/scripts/check_prose.py	147;"	function	typeref:typename:str
+repl	skills/paper-writer/scripts/check_prose.py	148;"	function	function:blank_math	typeref:typename:str	file:
+strip_commands	skills/paper-writer/scripts/check_prose.py	157;"	function	typeref:typename:str
+count_words	skills/paper-writer/scripts/check_prose.py	165;"	function	typeref:typename:int
+line_of	skills/paper-writer/scripts/check_prose.py	169;"	function	typeref:typename:int
+extract_list_spans	skills/paper-writer/scripts/check_prose.py	173;"	function	typeref:typename:list[tuple[int,int]]
+blank_spans	skills/paper-writer/scripts/check_prose.py	190;"	function	typeref:typename:str
+build_paragraphs	skills/paper-writer/scripts/check_prose.py	201;"	function	typeref:typename:list[tuple[int,str]]
+split_sentences	skills/paper-writer/scripts/check_prose.py	218;"	function	typeref:typename:list[str]
+maximal_runs	skills/paper-writer/scripts/check_prose.py	227;"	function	typeref:typename:list[tuple[int,int]]
+uniform_length_runs	skills/paper-writer/scripts/check_prose.py	243;"	function	typeref:typename:list[tuple[int,int]]
+snippet	skills/paper-writer/scripts/check_prose.py	265;"	function	typeref:typename:str
+scan_phrases	skills/paper-writer/scripts/check_prose.py	271;"	function	typeref:typename:tuple[list[dict],list[dict]]
+paragraph_head_runs	skills/paper-writer/scripts/check_prose.py	288;"	function	typeref:typename:list[dict]
+analyze_tex	skills/paper-writer/scripts/check_prose.py	313;"	function	typeref:typename:dict
+analyze_md	skills/paper-writer/scripts/check_prose.py	336;"	function	typeref:typename:dict
+check_file	skills/paper-writer/scripts/check_prose.py	373;"	function	typeref:typename:dict
+gather_tex_files	skills/paper-writer/scripts/check_prose.py	461;"	function	typeref:typename:list[Path]
+main	skills/paper-writer/scripts/check_prose.py	482;"	function	typeref:typename:int
 CITE_RE	skills/paper-writer/scripts/check_tex.py	31;"	variable
 REF_RE	skills/paper-writer/scripts/check_tex.py	32;"	variable
 LABEL_RE	skills/paper-writer/scripts/check_tex.py	33;"	variable
