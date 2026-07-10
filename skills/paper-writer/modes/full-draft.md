@@ -20,9 +20,10 @@ Refuse if:
 
 ## Pre-flight grill
 
-After the refuse-if checks pass, optionally offer **style calibration** once
+After the refuse-if checks pass, offer **style calibration** once
 (`shared/prompts/style_calibration.md`) — match the user's voice from 1–3 prior
-papers, or skip. Then run the interview protocol in
+papers. Recommend accepting: a calibrated voice with rhythm anchors is the
+strongest positive lever against AI-flavored prose. The user may still skip. Then run the interview protocol in
 `shared/prompts/grill_protocol.md` before Step 1 of Procedure. If
 `interview_drafting:` is already present in research-state frontmatter,
 skip the interview and proceed.
@@ -61,10 +62,11 @@ drafting context throughout Procedure:
   `\begin{theorem}`-driven prose; empirical-results-forward → results
   tables introduced earlier and more prominently; framework-paper →
   Method section emphasizes the framework's interfaces).
-- Proactive weaknesses populate Limitations section bullets and may also
-  trigger defensive moves in Method / Experiments (e.g., a stated
-  failure case becomes an explicit subsection rather than a glossed
-  caveat).
+- Proactive weaknesses seed the Limitations section — written as
+  paragraphs, one per failure case (prose_hygiene §F; not a bullet
+  dump) — and may also trigger defensive moves in Method / Experiments
+  (e.g., a stated failure case becomes an explicit subsection rather
+  than a glossed caveat).
 
 ## Procedure
 
@@ -75,7 +77,12 @@ drafting context throughout Procedure:
 2. **Per-section protocol**:
    - Restate the outline bullets for this section.
    - Identify which bibkeys are needed; verify each is in the `.bib`.
-   - Draft the section.
+   - Draft the section **as connected prose**. The outline's bullets are a
+     content checklist, not a paragraph plan: merge, reorder, and connect
+     them so transitions carry the argument. Do not expand one bullet into
+     one paragraph in order, and do not let bullets survive as `itemize` —
+     list environments only in the §F slots of `prose_hygiene.md`
+     (Intro contributions, enumerated assumptions, pseudocode).
    - Run a self-check:
      - Every `\cite{key}` resolves in `.bib` — verify with the script, not
        by eye: `uv run python skills/paper-writer/scripts/check_tex.py
@@ -87,7 +94,13 @@ drafting context throughout Procedure:
      - Prose hygiene pass — `stop-slop` skill if available, then the
        academic overlay `shared/prompts/prose_hygiene.md`. Kill the
        structural AI tells (binary contrasts, false agency like "the data
-       reveals", vague declaratives), not just filler words.
+       reveals", vague declaratives) and the §F format tells (lists outside
+       the allowed slots, pseudo-list `\paragraph` runs, outline residue),
+       not just filler words. Mechanical subset via script, not by eye:
+       `uv run python skills/paper-writer/scripts/check_prose.py
+       paper/sections/<n>-<name>.tex` — paste its result line; fix blocking
+       findings or state the waiver (e.g. "Intro contribution bullets, §F
+       slot") before saving.
    - Save as `paper/sections/<n>-<name>.tex`.
 
 3. **Section ordering** (for efficiency):
@@ -175,7 +188,11 @@ Verify each item before declaring the draft done; fix violations first
 - [ ] Notation file carries every symbol introduced; no symbol was
       reintroduced with a different meaning.
 - [ ] Prose-hygiene pass ran per section (stop-slop if available, then
-      `prose_hygiene.md`).
+      `prose_hygiene.md`), and `check_prose.py` ran per section with its
+      result line pasted — every blocking finding fixed or explicitly
+      waived as a §F slot.
+- [ ] No section is a bullet-expansion of its outline: outline bullets were
+      dissolved into connected paragraphs; lists appear only in §F slots.
 - [ ] Limitations names concrete failure cases from `red-team`; Related
       Work articulates Δ per work; no unscoped "novel"/"first".
 - [ ] The After-full-draft sequence (audit → compile → self-review →

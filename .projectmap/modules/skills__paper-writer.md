@@ -1,19 +1,49 @@
 # Module: `skills/paper-writer`
 
 ## Summary
-The Python helpers behind the `paper-writer` skill (`/write`). `verify_citations.py` is the citation auditor: it matches each BibTeX entry against Semantic Scholar → OpenAlex → Crossref (DOI plus fuzzy title/author/year matching via `difflib`) to flag fabricated or mismatched references before submission. `check_tex.py` (stdlib-only, no LaTeX needed) is the static gate in front of it — Stage 0 of `citation-audit` and the evidence source for `submission-check`: undefined `\cite`/`\ref`, missing figure files, venue `must_include` tokens. `figs.py` is a small matplotlib/numpy styling library runnable standalone as a smoketest; not indexed here: `build_paper.sh` (compile gate + DOCX export) and the skill's mode/style Markdown.
+The Python helpers behind the `paper-writer` skill (`/write`) — one networked auditor plus four stdlib-only static gates. `verify_citations.py` matches each BibTeX entry against Semantic Scholar → OpenAlex → Crossref (DOI plus fuzzy title/author/year matching via `difflib`) to flag fabricated or mismatched references. `check_tex.py` is the static TeX gate — Stage 0 of `citation-audit` and the evidence source for `submission-check`: undefined `\cite`/`\ref`, missing figure files, venue `must_include` tokens. `check_prose.py` lints paper prose against `shared/prompts/prose_hygiene.md` (list budget, pseudo-list runs, heading fragmentation, banned phrases, em-dash rate as blocking findings; rhythm/structural patterns as warnings for the LLM hygiene pass). `check_venues.py` cross-checks the venue-knowledge triple — `venue_profiles.md` Defaults ↔ `style/<venue>.md` ↔ `check_tex.py`'s `MUST_INCLUDE_PATTERNS` — for drift and stale provenance; meant to run after every venue-calibration. `figs.py` is a small matplotlib/numpy styling library runnable standalone as a smoketest; not indexed here: `build_paper.sh` (compile gate + DOCX export) and the skill's mode/style Markdown.
 
 <!-- projectmap:auto:start (generated — do not edit by hand) -->
-## Files (3)
+## Files (5)
+- `skills/paper-writer/scripts/check_prose.py`
 - `skills/paper-writer/scripts/check_tex.py`
+- `skills/paper-writer/scripts/check_venues.py`
 - `skills/paper-writer/scripts/figs.py`
 - `skills/paper-writer/scripts/verify_citations.py`
 
-## Public symbols (31)
+## Public symbols (59)
+- `function blank_keep_newlines` — skills/paper-writer/scripts/check_prose.py:122
+- `function strip_comments` — skills/paper-writer/scripts/check_prose.py:126
+- `function blank_envs` — skills/paper-writer/scripts/check_prose.py:130
+- `function blank_math` — skills/paper-writer/scripts/check_prose.py:138
+- `function repl` — skills/paper-writer/scripts/check_prose.py:139
+- `function strip_commands` — skills/paper-writer/scripts/check_prose.py:148
+- `function count_words` — skills/paper-writer/scripts/check_prose.py:156
+- `function line_of` — skills/paper-writer/scripts/check_prose.py:160
+- `function extract_list_spans` — skills/paper-writer/scripts/check_prose.py:164
+- `function blank_spans` — skills/paper-writer/scripts/check_prose.py:181
+- `function build_paragraphs` — skills/paper-writer/scripts/check_prose.py:192
+- `function split_sentences` — skills/paper-writer/scripts/check_prose.py:209
+- `function maximal_runs` — skills/paper-writer/scripts/check_prose.py:218
+- `function uniform_length_runs` — skills/paper-writer/scripts/check_prose.py:234
+- `function snippet` — skills/paper-writer/scripts/check_prose.py:256
+- `function scan_phrases` — skills/paper-writer/scripts/check_prose.py:262
+- `function paragraph_head_runs` — skills/paper-writer/scripts/check_prose.py:279
+- `function analyze_tex` — skills/paper-writer/scripts/check_prose.py:304
+- `function analyze_md` — skills/paper-writer/scripts/check_prose.py:327
+- `function check_file` — skills/paper-writer/scripts/check_prose.py:364
+- `function gather_tex_files` — skills/paper-writer/scripts/check_prose.py:441
+- `function main` — skills/paper-writer/scripts/check_prose.py:462
 - `function strip_comments` — skills/paper-writer/scripts/check_tex.py:56
 - `function gather_sources` — skills/paper-writer/scripts/check_tex.py:60
 - `function find_graphic` — skills/paper-writer/scripts/check_tex.py:90
 - `function main` — skills/paper-writer/scripts/check_tex.py:98
+- `namespace dt` — skills/paper-writer/scripts/check_venues.py:32
+- `function slug` — skills/paper-writer/scripts/check_venues.py:51
+- `function strip_quotes` — skills/paper-writer/scripts/check_venues.py:56
+- `function parse_value` — skills/paper-writer/scripts/check_venues.py:62
+- `function parse_defaults` — skills/paper-writer/scripts/check_venues.py:71
+- `function main` — skills/paper-writer/scripts/check_venues.py:124
 - `function apply_style` — skills/paper-writer/scripts/figs.py:28
 - `namespace mpl` — skills/paper-writer/scripts/figs.py:29
 - `function save` — skills/paper-writer/scripts/figs.py:51
@@ -45,7 +75,9 @@ The Python helpers behind the `paper-writer` skill (`/write`). `verify_citations
 ## Dependencies (imports)
 - `__future__`
 - `argparse`
+- `check_tex`
 - `dataclasses`
+- `datetime`
 - `difflib`
 - `figs`
 - `httpx`

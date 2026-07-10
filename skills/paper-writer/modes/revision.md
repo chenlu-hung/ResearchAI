@@ -32,7 +32,9 @@
    - Bibliography keys all in `.bib`
    - Prose hygiene pass on edited text — `stop-slop` skill if available,
      then the academic overlay `shared/prompts/prose_hygiene.md` (structural
-     AI tells, not just filler)
+     AI tells and §F format tells, not just filler); mechanical subset via
+     `uv run python skills/paper-writer/scripts/check_prose.py <edited
+     file>` — paste its result line
 
 ## Reviewer-response sub-mode
 
@@ -76,7 +78,8 @@ Verify each item before emitting; fix violations first
       skills/paper-writer/scripts/check_tex.py paper/main.tex --bib
       refs/<slug>.bib` is clean (pasted, not eyeballed).
 - [ ] Coherence check ran: notation, theorem numbering, prose hygiene on
-      the edited text.
+      the edited text (`check_prose.py` on the edited file, result line
+      pasted; blocking findings fixed or waived as a §F slot).
 - [ ] Reviewer-response: every comment has an (a)/(b)/(c) decision and a
       `response.md` entry; no "we have improved…" filler; no capitulation
       without evidence and no stonewalling on a real issue.

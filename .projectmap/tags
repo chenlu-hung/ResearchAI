@@ -86,6 +86,44 @@ FIELDS	skills/literature-explorer/scripts/search_semantic_scholar.py	14;"	variab
 _get	skills/literature-explorer/scripts/search_semantic_scholar.py	18;"	function	typeref:typename:dict
 search	skills/literature-explorer/scripts/search_semantic_scholar.py	26;"	function	typeref:typename:list[dict]
 main	skills/literature-explorer/scripts/search_semantic_scholar.py	51;"	function	typeref:typename:int
+COMMENT_RE	skills/paper-writer/scripts/check_prose.py	41;"	variable
+INPUT_RE	skills/paper-writer/scripts/check_prose.py	42;"	variable
+WORD_RE	skills/paper-writer/scripts/check_prose.py	43;"	variable
+HEAD_RE	skills/paper-writer/scripts/check_prose.py	44;"	variable
+LIST_TOKEN_RE	skills/paper-writer/scripts/check_prose.py	45;"	variable
+EMDASH_TEX_RE	skills/paper-writer/scripts/check_prose.py	46;"	variable
+EMDASH_MD_RE	skills/paper-writer/scripts/check_prose.py	47;"	variable
+MD_LIST_LINE_RE	skills/paper-writer/scripts/check_prose.py	48;"	variable
+MD_HEAD_RE	skills/paper-writer/scripts/check_prose.py	49;"	variable
+NONPROSE_ENVS	skills/paper-writer/scripts/check_prose.py	51;"	variable
+BLOCKING_PHRASES	skills/paper-writer/scripts/check_prose.py	59;"	variable
+WARNING_PHRASES	skills/paper-writer/scripts/check_prose.py	77;"	variable
+STRUCTURAL_PATTERNS	skills/paper-writer/scripts/check_prose.py	95;"	variable
+CLOSER_RE	skills/paper-writer/scripts/check_prose.py	110;"	variable
+BOLD_LABEL_RE	skills/paper-writer/scripts/check_prose.py	113;"	variable
+ABBREVIATIONS	skills/paper-writer/scripts/check_prose.py	115;"	variable
+blank_keep_newlines	skills/paper-writer/scripts/check_prose.py	122;"	function	typeref:typename:str
+strip_comments	skills/paper-writer/scripts/check_prose.py	126;"	function	typeref:typename:str
+blank_envs	skills/paper-writer/scripts/check_prose.py	130;"	function	typeref:typename:str
+blank_math	skills/paper-writer/scripts/check_prose.py	138;"	function	typeref:typename:str
+repl	skills/paper-writer/scripts/check_prose.py	139;"	function	function:blank_math	typeref:typename:str	file:
+strip_commands	skills/paper-writer/scripts/check_prose.py	148;"	function	typeref:typename:str
+count_words	skills/paper-writer/scripts/check_prose.py	156;"	function	typeref:typename:int
+line_of	skills/paper-writer/scripts/check_prose.py	160;"	function	typeref:typename:int
+extract_list_spans	skills/paper-writer/scripts/check_prose.py	164;"	function	typeref:typename:list[tuple[int,int]]
+blank_spans	skills/paper-writer/scripts/check_prose.py	181;"	function	typeref:typename:str
+build_paragraphs	skills/paper-writer/scripts/check_prose.py	192;"	function	typeref:typename:list[tuple[int,str]]
+split_sentences	skills/paper-writer/scripts/check_prose.py	209;"	function	typeref:typename:list[str]
+maximal_runs	skills/paper-writer/scripts/check_prose.py	218;"	function	typeref:typename:list[tuple[int,int]]
+uniform_length_runs	skills/paper-writer/scripts/check_prose.py	234;"	function	typeref:typename:list[tuple[int,int]]
+snippet	skills/paper-writer/scripts/check_prose.py	256;"	function	typeref:typename:str
+scan_phrases	skills/paper-writer/scripts/check_prose.py	262;"	function	typeref:typename:tuple[list[dict],list[dict]]
+paragraph_head_runs	skills/paper-writer/scripts/check_prose.py	279;"	function	typeref:typename:list[dict]
+analyze_tex	skills/paper-writer/scripts/check_prose.py	304;"	function	typeref:typename:dict
+analyze_md	skills/paper-writer/scripts/check_prose.py	327;"	function	typeref:typename:dict
+check_file	skills/paper-writer/scripts/check_prose.py	364;"	function	typeref:typename:dict
+gather_tex_files	skills/paper-writer/scripts/check_prose.py	441;"	function	typeref:typename:list[Path]
+main	skills/paper-writer/scripts/check_prose.py	462;"	function	typeref:typename:int
 CITE_RE	skills/paper-writer/scripts/check_tex.py	31;"	variable
 REF_RE	skills/paper-writer/scripts/check_tex.py	32;"	variable
 LABEL_RE	skills/paper-writer/scripts/check_tex.py	33;"	variable
@@ -99,6 +137,18 @@ strip_comments	skills/paper-writer/scripts/check_tex.py	56;"	function	typeref:ty
 gather_sources	skills/paper-writer/scripts/check_tex.py	60;"	function	typeref:typename:tuple[dict[str,str],list[str]]
 find_graphic	skills/paper-writer/scripts/check_tex.py	90;"	function	typeref:typename:bool
 main	skills/paper-writer/scripts/check_tex.py	98;"	function	typeref:typename:int
+dt	skills/paper-writer/scripts/check_venues.py	32;"	namespace	nameref:module:datetime
+SCRIPT_DIR	skills/paper-writer/scripts/check_venues.py	41;"	variable
+DEFAULT_PROFILES	skills/paper-writer/scripts/check_venues.py	42;"	variable
+DEFAULT_STYLE_DIR	skills/paper-writer/scripts/check_venues.py	43;"	variable
+DEFAULTS_HEADING_RE	skills/paper-writer/scripts/check_venues.py	45;"	variable
+SECTION_RE	skills/paper-writer/scripts/check_venues.py	47;"	variable
+PERSONA_ONLY_SECTIONS	skills/paper-writer/scripts/check_venues.py	48;"	variable
+slug	skills/paper-writer/scripts/check_venues.py	51;"	function	typeref:typename:str
+strip_quotes	skills/paper-writer/scripts/check_venues.py	56;"	function	typeref:typename:str
+parse_value	skills/paper-writer/scripts/check_venues.py	62;"	function
+parse_defaults	skills/paper-writer/scripts/check_venues.py	71;"	function	typeref:typename:tuple[dict,list[str]]
+main	skills/paper-writer/scripts/check_venues.py	124;"	function	typeref:typename:int
 PALETTE	skills/paper-writer/scripts/figs.py	24;"	variable
 apply_style	skills/paper-writer/scripts/figs.py	28;"	function	typeref:typename:None
 mpl	skills/paper-writer/scripts/figs.py	29;"	namespace	function:apply_style	file:	nameref:module:matplotlib
@@ -150,12 +200,38 @@ main	skills/peer-reviewer/scripts/scan_injection.py	82;"	function	typeref:typena
 REPO	tests/conftest.py	7;"	variable
 run_script	tests/conftest.py	11;"	function
 _run	tests/conftest.py	14;"	function	function:run_script	file:
+SCRIPT	tests/test_check_prose.py	3;"	variable
+CLEAN_SECTION	tests/test_check_prose.py	5;"	variable
+LISTY_SECTION	tests/test_check_prose.py	29;"	variable
+PSEUDO_LIST_SECTION	tests/test_check_prose.py	53;"	variable
+UNIFORM_SECTION	tests/test_check_prose.py	64;"	variable
+test_listy_ai_section_blocks	tests/test_check_prose.py	82;"	function
+test_clean_section_passes	tests/test_check_prose.py	96;"	function
+test_pseudo_list_run_blocks	tests/test_check_prose.py	104;"	function
+test_rhythm_warnings_do_not_block	tests/test_check_prose.py	114;"	function
+test_comments_math_and_envs_ignored	tests/test_check_prose.py	127;"	function
+test_follows_inputs_and_reports_per_file	tests/test_check_prose.py	148;"	function
+test_markdown_lists_and_phrases	tests/test_check_prose.py	165;"	function
 SCRIPT	tests/test_check_tex.py	3;"	variable
 BIB	tests/test_check_tex.py	5;"	variable
 _paper	tests/test_check_tex.py	18;"	function
 test_blocking_findings_detected	tests/test_check_tex.py	36;"	function
 test_clean_paper_exits_zero	tests/test_check_tex.py	63;"	function
 test_unknown_must_include_token_blocks	tests/test_check_tex.py	76;"	function
+test_pattern_flag_supplies_new_token	tests/test_check_tex.py	83;"	function
+test_pattern_flag_rejects_bad_spec	tests/test_check_tex.py	101;"	function
+dt	tests/test_check_venues.py	1;"	namespace	nameref:module:datetime
+SCRIPT	tests/test_check_venues.py	4;"	variable
+TODAY	tests/test_check_venues.py	6;"	variable
+PROFILES_TMPL	tests/test_check_venues.py	8;"	variable
+_setup	tests/test_check_venues.py	35;"	function
+_run	tests/test_check_venues.py	55;"	function
+test_consistent_profile_passes	tests/test_check_venues.py	60;"	function
+test_unknown_token_without_pattern_blocks	tests/test_check_venues.py	69;"	function
+test_venue_pattern_resolves_custom_token	tests/test_check_venues.py	77;"	function
+test_missing_style_file_blocks	tests/test_check_venues.py	85;"	function
+test_missing_as_of_blocks_and_stale_warns	tests/test_check_venues.py	92;"	function
+test_repo_venue_knowledge_is_consistent	tests/test_check_venues.py	104;"	function
 SCRIPT	tests/test_dedupe_rank.py	3;"	variable
 _write_jsonl	tests/test_dedupe_rank.py	6;"	function
 test_merges_across_sources_and_ranks	tests/test_dedupe_rank.py	10;"	function

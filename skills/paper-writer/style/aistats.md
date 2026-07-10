@@ -4,7 +4,11 @@ Position: theory-leaning ML venue, between ICML and JMLR.
 
 ## Section template
 
-- 9 pp main + unlimited refs + appendix
+- **8 pp main at submission** (9 for camera-ready); references,
+  reproducibility checklist, and appendix excluded. Appendix in the same
+  PDF; US Letter; fonts must match the style file.
+- Reproducibility checklist is part of the submission — fill it honestly,
+  don't stub it.
 - Same skeleton as ICML/NeurIPS but theory section is mandatory and gets
   more weight
 
@@ -33,3 +37,5 @@ are the spine.
 
 - No "we observe empirically that..." as the main contribution
 - No vague theorem statements
+- No bulleted Related Work or Discussion — paragraphs with explicit Δ;
+  lists only in the §F slots of `prose_hygiene.md`

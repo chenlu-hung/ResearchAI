@@ -2,10 +2,15 @@
 
 ## Section template
 
-- Page limit: none (typical 25–40 pp)
+- Page policy (author guide): >35 pp (appendices included) reviews slowly
+  and may be rejected for lack of reviewers; >50 pp needs cover-letter
+  justification and risks desk rejection. Target ≤35 pp.
+- **JMLR style file mandatory** — papers not in it are rejected without
+  review. Abstract ≤200 words; running title ≤50 chars; five keywords.
 - More expansive sections, proofs in main text
 - Sections: Introduction → Background → Method → Theory → Experiments →
-  Discussion → Conclusion. Appendix integrated.
+  Discussion → Conclusion. Appendix integrated; online appendices possible
+  for data/code.
 
 ## Tone
 
@@ -37,3 +42,5 @@
 
 - No proof-by-citation for the main theorem. Reviewers want to see it.
 - No vague "regularity conditions" — list them.
+- No bulleted Related Work or Discussion — JMLR expects flowing prose;
+  enumerate only assumptions (A1, A2, …) and algorithm steps.

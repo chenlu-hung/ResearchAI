@@ -12,7 +12,13 @@
 6. **Theory** (1.0–2.0 pp, optional): theorems with proof sketch; full proofs in appendix.
 7. **Experiments** (1.5–2.5 pp): toy, real data, ablations.
 8. **Discussion + Limitations** (0.3–0.5 pp): honest, specific.
-9. **Broader Impact** (0.1–0.3 pp): mandatory; concrete, not boilerplate.
+9. **Paper checklist** (mandatory, after references; not counted): every
+   item answered honestly — reviewers read it. A separate "Broader Impacts"
+   section is **not required** (as of 2026); cover societal impact where the
+   checklist probes it.
+
+Budget: 9 content pages at submission (figures/tables count; references,
+appendices, checklist do not). Camera-ready gets +1.
 
 ## Tone
 
@@ -27,8 +33,8 @@
 - Will check arXiv for recent baselines (≤6 months). Include them.
 - Will demand multi-seed empirical results with statistical significance.
 - Will examine the ablation table for completeness.
-- Limitations and Broader Impact sections must be specific. Generic
-  "could be misused" → automatic complaint.
+- Limitations discussion must be specific (checklist probes it). Generic
+  "could be misused" societal-impact boilerplate → automatic complaint.
 
 ## Don'ts
 
@@ -36,13 +42,19 @@
 - No bare-number tables without significance testing
 - No "we believe" / "we feel" — show, don't assert
 - No more than 3 acronyms before they all blur
+- No bulleted Related Work, Discussion, or Limitations — paragraphs;
+  bullets only in the §F slots of `prose_hygiene.md` (intro contributions,
+  enumerated assumptions, pseudocode)
 
-## Compute reporting (required since NeurIPS 2024)
+## Compute reporting
 
 State explicitly: GPU type + count, wall-clock per experiment, total
-compute for the paper.
+compute for the paper (the paper checklist asks for it; norm, unverified
+as a standalone requirement).
 
-## AI disclosure (required)
+## LLM / AI use (2026 policy)
 
-Single sentence stating any LLM use (writing assistance, code generation,
-review). Do not hide.
+If LLMs/agents are an important, original, or non-standard component of
+the **method**, describe that in the experimental setup. Routine writing,
+editing, and basic code assistance need no statement. LLMs cannot be
+authors. Do not hide material use.

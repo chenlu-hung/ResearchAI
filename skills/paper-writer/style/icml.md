@@ -4,11 +4,17 @@ Largely parallel to NeurIPS; key differences:
 
 ## Section template
 
-- 8 pp main + unlimited references + appendix
+- 8 pp main at submission (+1 camera-ready); references, impact statement,
+  and appendix unlimited
 - Same skeleton as NeurIPS (Intro / Related / Setup / Method / Theory /
   Experiments / Discussion)
-- Broader Impact / Limitations recommended but not always mandatory by
-  template — include anyway
+- **Impact Statement required** (2026 CFP): potential broader impact incl.
+  ethical aspects and societal consequences; placed with Acknowledgements
+  before References; not counted toward the limit. Concrete, not
+  boilerplate.
+- Limitations discussion: not mandated by the CFP but expected by
+  reviewers (norm) — include it.
+- Citations: author-year via the ICML style file (norm, unverified).
 
 ## Tone
 

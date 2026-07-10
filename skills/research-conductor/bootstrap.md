@@ -16,8 +16,10 @@ a starting stage, then hand back to the conductor loop. Follow
 
 Ask `venue_target` once, via `AskUserQuestion` (recommended option first, per
 `shared/prompts/grill_protocol.md`). Options from `shared/venue_profiles.md`
-(NeurIPS / ICML / JMLR / AISTATS / Annals of Statistics). "Decide later" is
-available via Other → set `venue_target: TBD`.
+(NeurIPS / ICML / JMLR / AISTATS / Annals of Statistics). Via Other the user
+can answer "decide later" → set `venue_target: TBD`, or name an unprofiled
+venue → set it verbatim and note in one line that `outline` will require
+`/write venue-calibration <venue>` first (`shared/prompts/venue_calibration.md`).
 
 Do **not** ask anything else here. In particular do not ask the
 empirical-vs-theoretical question — `ideate`'s grill (`interview_ideate`) captures

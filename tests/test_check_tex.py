@@ -78,3 +78,29 @@ def test_unknown_must_include_token_blocks(tmp_path, run_script):
     r = run_script(SCRIPT, str(main), "--bib", str(bib), "--must-include", "no_such_token")
     assert r.returncode == 1
     assert "no_such_token" in r.stdout
+
+
+def test_pattern_flag_supplies_new_token(tmp_path, run_script):
+    body = "\\cite{good2020} \\label{a} \\ref{a}\nData and code are available.\n"
+    main, bib = _paper(tmp_path, body)
+    # without --pattern the custom token is unknown → blocking
+    r = run_script(SCRIPT, str(main), "--bib", str(bib),
+                   "--must-include", "data_availability")
+    assert r.returncode == 1
+    # with --pattern it resolves and is found in the source
+    r = run_script(
+        SCRIPT, str(main), "--bib", str(bib),
+        "--must-include", "data_availability",
+        "--pattern", r"data_availability=data\s+and\s+code\s+are\s+available",
+        "--json",
+    )
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert "data_availability" in json.loads(r.stdout)["must_include_found"]
+
+
+def test_pattern_flag_rejects_bad_spec(tmp_path, run_script):
+    main, bib = _paper(tmp_path, "\\cite{good2020} \\label{a} \\ref{a}\n")
+    r = run_script(SCRIPT, str(main), "--bib", str(bib), "--pattern", "no-equals-sign")
+    assert r.returncode == 2
+    r = run_script(SCRIPT, str(main), "--bib", str(bib), "--pattern", "tok=([bad")
+    assert r.returncode == 2

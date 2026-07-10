@@ -32,13 +32,18 @@ available opt-in via `--council` (see "Council panel" below).
      not delimited. Each tied to a section.
    - **Minor comments**: clarity, notation, figure/table issues.
    - **AI-tell scan**: read as a reviewer alert to machine-written prose.
-     Flag any structural tells from `shared/prompts/prose_hygiene.md` §B
-     (binary contrasts, false agency like "the data reveals", vague
-     declaratives, dramatic fragmentation) and §A filler, tied to a
-     section/line. "Reads as LLM-generated" is a credibility hit reviewers
-     act on — surface it so `revision` can fix it. Respect the academic
-     exceptions (§E): do not flag conventional passive voice, technical
-     adverbs, or three-item lists.
+     Gather the mechanical evidence first — run `uv run python
+     skills/paper-writer/scripts/check_prose.py paper/main.tex` and fold
+     its findings in (rule 4 of `execution_discipline.md`; paste the result
+     line). Then flag any structural tells from
+     `shared/prompts/prose_hygiene.md` §B (binary contrasts, false agency
+     like "the data reveals", vague declaratives, dramatic fragmentation),
+     §A filler, and §F format tells (bullet-shaped sections, pseudo-list
+     `\paragraph` runs, outline residue), tied to a section/line. "Reads as
+     LLM-generated" is a credibility hit reviewers act on — surface it so
+     `revision` can fix it. Respect the academic exceptions (§E) and the §F
+     allowed slots: do not flag conventional passive voice, technical
+     adverbs, three-item lists, or Intro contribution bullets.
    - **Red-flag check**: go down the venue's `Common reviewer red flags` list
      and mark each present / absent / N/A.
 
@@ -86,6 +91,7 @@ Verify each item before emitting; fix violations first
 - [ ] ≥3 concrete weaknesses, each tied to a section/line; none invented.
 - [ ] Every venue red flag marked present / absent / N-A — the list was
       walked to the end.
-- [ ] AI-tell scan respects the §E academic exceptions.
+- [ ] AI-tell scan ran `check_prose.py` (result line pasted, findings folded
+      in) and respects the §E academic exceptions and §F allowed slots.
 - [ ] Written to `.research-state/<slug>-selfreview-<date>.md`;
       no stage change.

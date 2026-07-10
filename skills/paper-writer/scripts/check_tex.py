@@ -101,8 +101,26 @@ def main() -> int:
     ap.add_argument("--bib", help=".bib file with the verified bibliography")
     ap.add_argument("--must-include", nargs="*", default=[],
                     help="venue must_include tokens (see venue_profiles.md)")
+    ap.add_argument("--pattern", action="append", default=[], metavar="TOKEN=REGEX",
+                    help="extra must_include token pattern (from the venue's "
+                         "must_include_patterns block); repeatable")
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
+
+    patterns = dict(MUST_INCLUDE_PATTERNS)
+    for spec in args.pattern:
+        token, sep, regex = spec.partition("=")
+        if not sep or not token or not regex:
+            print(f"error: --pattern expects TOKEN=REGEX, got {spec!r}",
+                  file=sys.stderr)
+            return 2
+        try:
+            re.compile(regex)
+        except re.error as exc:
+            print(f"error: --pattern {token}: invalid regex ({exc})",
+                  file=sys.stderr)
+            return 2
+        patterns[token] = regex
 
     main_path = Path(args.main_tex)
     if not main_path.exists():
@@ -138,7 +156,7 @@ def main() -> int:
     low = all_text.lower()
     must_missing, must_found, must_unknown = [], [], []
     for token in args.must_include:
-        pat = MUST_INCLUDE_PATTERNS.get(token)
+        pat = patterns.get(token)
         if pat is None:
             must_unknown.append(token)
         elif re.search(pat, low, re.IGNORECASE):

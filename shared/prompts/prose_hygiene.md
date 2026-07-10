@@ -98,6 +98,34 @@ survive a vocabulary pass, so check them explicitly.
   stop-slop's "two beats three."
 - **Em-dashes**: ≤ 2 per page, not a total ban.
 
+## F. Format-level tells (list budget)
+
+Chat-tuned models argue in bullets; papers argue in paragraphs. A vocabulary
+pass never catches this — check the format itself. The mechanical subset
+(list density, pseudo-list runs, §A phrases, em-dash rate) is scripted:
+run `skills/paper-writer/scripts/check_prose.py` on the section file and
+paste its result line instead of eyeballing.
+
+- **Lists only in conventional slots**: contribution bullets in the Intro,
+  enumerated assumptions (A1–A3) in Setup, algorithm steps inside pseudocode
+  environments, point-by-point reviewer responses. Everywhere else — Related
+  Work, Method prose, Theory discussion, Experiments analysis, Discussion,
+  Limitations — write paragraphs. Budget: ≤ 1 list environment per section,
+  0 in the sections just named. A list outside the slots gets **rewritten as
+  prose**, not trimmed.
+- **Bold-label pseudo-lists**: ≥ 3 consecutive `\paragraph{...}` heads (or
+  `**Label.** sentence` blocks) of under ~90 words each is a list in
+  disguise — merge into paragraphs, keeping at most the strongest head.
+- **Heading fragmentation**: more than ~3 subsection-level headings per page
+  reads as an expanded outline. Merge; let transitions do the structuring.
+- **Outline residue**: paragraphs that map 1:1 onto the outline's bullets
+  (same order, similar length, no transitions) are scaffolding left
+  standing. Reflow into an argument — merge, reorder, connect.
+- **Uniform openers / wrap-up closers**: ≥ 3 consecutive paragraphs opening
+  on the same word ("We…"), or sections closing with "In summary…" /
+  "Overall,…" / "Taken together…". Vary the entry point; end on the last
+  claim, not a recap.
+
 ## Per-section checklist (fast pass)
 
 1. Any phrase from §A? Cut or replace.
@@ -105,6 +133,9 @@ survive a vocabulary pass, so check them explicitly.
 3. Any superlative or improvement claim without scope/numbers? Add them or soften.
 4. Do three paragraphs in a row have the same length or punchy ending? Break the pattern (§C).
 5. Active voice for our claims (§D); passive only where conventional (§E).
+6. Format pass (§F): lists only in the allowed slots, no pseudo-list runs,
+   no outline residue — `check_prose.py` ran, result line pasted, blocking
+   findings fixed or waived (name the slot).
 
 ## Precedence
 

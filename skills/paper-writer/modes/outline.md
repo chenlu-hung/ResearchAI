@@ -12,7 +12,9 @@ populated with the algorithm-card contents.
 ## Procedure
 
 1. **Load venue profile**. Section template + page budget determines the
-   skeleton.
+   skeleton. If `venue_target` has no profile in `shared/venue_profiles.md`,
+   stop and offer `venue-calibration` first; proceed unprofiled only if the
+   user explicitly declines (then say every venue field is unverified).
 
 2. **Map algorithm card → sections**. Each part of the card should land in
    a specific section:

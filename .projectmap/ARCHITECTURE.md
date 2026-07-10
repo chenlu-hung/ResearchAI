@@ -31,6 +31,8 @@ drives the other three. The runnable Python/shell scripts the skills invoke:
 - `skills/literature-explorer/scripts/dedupe_rank.py` — deterministic merge/dedup/rank of retrieval JSONL (stdlib-only)
 - `skills/paper-writer/scripts/verify_citations.py` — citation auditor CLI
 - `skills/paper-writer/scripts/check_tex.py` — static TeX cross-checks: `\cite`↔`.bib`, `\ref`↔`\label`, figures, venue `must_include` (stdlib-only)
+- `skills/paper-writer/scripts/check_prose.py` — prose-format lint: `prose_hygiene.md` §F list budget, pseudo-list runs, §A banned phrases, em-dash rate, rhythm warnings (stdlib-only)
+- `skills/paper-writer/scripts/check_venues.py` — venue-knowledge consistency: Defaults ↔ prose profiles ↔ `style/` ↔ `check_tex.py` tokens, provenance + staleness (stdlib-only)
 - `skills/paper-writer/scripts/build_paper.sh` — LaTeX compile gate + DOCX export (not in `tags`)
 - `skills/paper-writer/scripts/figs.py` — figure-style library; also a standalone smoketest
 - `skills/peer-reviewer/scripts/scan_injection.py` — injection-pattern scan + two-extractor divergence check (stdlib-only)
@@ -67,7 +69,7 @@ drives the other three. The runnable Python/shell scripts the skills invoke:
 |---|---|---|---|
 | `shared` | 1 | [doc](modules/shared.md) | Stdlib-only multi-model council dispatcher (`--council`) + shared prompts/profiles. |
 | `skills/literature-explorer` | 4 | [doc](modules/skills__literature-explorer.md) | Retrieval CLIs (arXiv/OpenAlex/S2) + deterministic `dedupe_rank.py` merge/rank. |
-| `skills/paper-writer` | 3 | [doc](modules/skills__paper-writer.md) | Citation auditor (S2→OpenAlex→Crossref) + `check_tex.py` static gate + figure styles. |
+| `skills/paper-writer` | 5 | [doc](modules/skills__paper-writer.md) | Citation auditor (S2→OpenAlex→Crossref) + `check_tex.py`/`check_prose.py`/`check_venues.py` static gates + figure styles. |
 | `skills/peer-reviewer` | 1 | [doc](modules/skills__peer-reviewer.md) | `scan_injection.py`: hidden-prompt scan + two-extractor divergence check. |
-| `tests` | 4 | [doc](modules/tests.md) | Subprocess pytest suite for the three deterministic helper scripts (no network). |
+| `tests` | 6 | [doc](modules/tests.md) | Subprocess pytest suite for the five deterministic helper scripts (no network). |
 <!-- projectmap:modules:end -->

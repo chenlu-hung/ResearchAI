@@ -146,7 +146,9 @@ only) convenes the multi-reviewer panel.
    reviewer's mind (a missing experiment, an unstated assumption, a needed
    proof). No generic gatekeeping.
 5. **Persona = venue** — adopt the venue's dominant reviewer persona from
-   `shared/venue_profiles.md` (`generic` → a balanced Stats/ML referee).
+   `shared/venue_profiles.md` (`generic` → a balanced Stats/ML referee; if
+   the user referees for the same unprofiled venue repeatedly, suggest
+   `/write venue-calibration <venue>` once to profile it properly).
 6. **AI-tell scan is an observation, not a cudgel** — flag machine-written prose
    per `prose_hygiene.md` §B, but frame it for the author's benefit (and respect
    the §E academic exceptions); never use it to dismiss a paper's substance.

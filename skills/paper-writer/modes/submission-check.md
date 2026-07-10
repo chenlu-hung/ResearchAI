@@ -19,11 +19,22 @@ venue's `must_include` tokens straight through:
 
 ```bash
 uv run python skills/paper-writer/scripts/check_tex.py paper/main.tex \
-  --bib refs/<slug>.bib --must-include <tokens from venue profile> --json
+  --bib refs/<slug>.bib --must-include <tokens from venue profile> \
+  <one --pattern token=regex per entry in the venue's must_include_patterns> \
+  --json
+uv run python skills/paper-writer/scripts/check_prose.py paper/main.tex
+uv run python skills/paper-writer/scripts/check_venues.py
 ```
 
-Use its output as the evidence for items 2, 7 (static part), and 8 below —
-do not re-derive those by reading (rule 4 of `execution_discipline.md`).
+Use their output as the evidence for items 2, 7 (static part), 8, and 9
+below — do not re-derive those by reading (rule 4 of
+`execution_discipline.md`). `check_venues.py` guards the *profile itself*:
+surface any staleness warning (as_of > 1 year) to the user.
+
+**Unverified fields**: any checklist item whose backing field is listed in
+the venue's `unverified:` (see `shared/prompts/venue_calibration.md`) may
+not FAIL the gate — report it as **WARN** with "field unverified — re-run
+venue-calibration". Verified fields gate as usual.
 
 Produce a checklist; each item is **PASS / FAIL / N/A** with a one-line
 reason. Items:
@@ -46,6 +57,10 @@ reason. Items:
    `citation-audit` first.
 8. **Figures**: every figure is referenced in text, captioned, and vector
    (PDF). Run `build_paper.sh compile` — the draft must build.
+9. **Prose format**: `check_prose.py` reports no blocking findings on any
+   section, except those explicitly waived as §F slots (Intro contribution
+   bullets, enumerated assumptions). A bullet-shaped section reads as
+   machine-written and is a desk-risk.
 
 ## Output
 
@@ -68,6 +83,10 @@ Verify each item before emitting; fix violations first
 
 - [ ] `check_tex.py` ran with the venue's `must_include` tokens; output
       pasted and used as evidence, not paraphrased from memory.
+- [ ] `check_prose.py` ran on the full draft; output pasted; item 9 judged
+      from it (blocking findings fixed or waived as §F slots).
+- [ ] `check_venues.py` ran; venue's `must_include_patterns` passed through
+      as `--pattern`; unverified-field items reported WARN, never FAIL.
 - [ ] `build_paper.sh compile` ran; the draft builds.
 - [ ] Every checklist item is PASS / FAIL / N-A with a one-line reason —
       no blanks.

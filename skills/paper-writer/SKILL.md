@@ -35,6 +35,7 @@ blocking findings.
 | `citation-audit` | Verify each citation exists and supports the claim | `modes/citation-audit.md` |
 | `self-review` | One-pass venue-reviewer critique of the draft | `modes/self-review.md` |
 | `submission-check` | Submission-readiness gate before `final` | `modes/submission-check.md` |
+| `venue-calibration` | Add or re-verify a venue profile from official sources | `modes/venue-calibration.md` |
 
 ## Hard discipline
 
@@ -52,6 +53,9 @@ blocking findings.
 
 2. **Venue conformance**: read `shared/venue_profiles.md`. The profile
    dictates page limit, bib style, theory depth, required sections.
+   No profile for `venue_target` → offer `venue-calibration` before
+   drafting (`shared/prompts/venue_calibration.md`); fields listed in a
+   profile's `unverified:` never hard-FAIL a gate (WARN + re-calibrate).
 
 3. **No fabricated citations**: every `\cite{key}` must be in the
    `refs/<slug>.bib` file produced by `literature-explorer`. If a
@@ -71,7 +75,10 @@ blocking findings.
    a paper — passive voice, technical adverbs, three-item lists). The
    overlay is self-contained, so the pass still works when `stop-slop` is
    absent. This catches the structural "AI smell" (binary contrasts, false
-   agency, vague declaratives), not just filler words.
+   agency, vague declaratives) and the format-level smell (§F list budget:
+   bullets only in conventional slots, no pseudo-list `\paragraph` runs),
+   not just filler words. The mechanical subset is verified by
+   `scripts/check_prose.py`, not by eye — paste its result line per section.
 
 7. **Submission gate**: never advance `stage` to `final` until
    `submission-check` passes and the latest `citation-audit` is clean.
@@ -107,16 +114,27 @@ Flag mismatches.
   `\cite` resolves in the `.bib`, every `\ref` has a `\label`, figure files
   exist, venue `must_include` tokens present. Stage 0 of `citation-audit`;
   evidence source for `submission-check`; run after every draft/revision.
+- `scripts/check_prose.py` — deterministic prose-format lint (the
+  mechanical subset of `prose_hygiene.md`): §F list budget and density,
+  pseudo-list `\paragraph`/bold-label runs, §A banned phrases, em-dash
+  rate, rhythm-uniformity warnings. Evidence for the per-section hygiene
+  pass, `self-review`'s AI-tell scan, and `submission-check` item 9; run
+  alongside `check_tex.py` after every draft/revision.
 - `scripts/figs.py` — one colorblind-safe, vector-PDF figure style for
   experiment/ablation plots; import and adapt to real results, never invent
   numbers. `uv run --extra figures python ...` (needs the `figures` extra).
 - `scripts/build_paper.sh` — `compile` (build gate; non-zero if it won't
   build) and `docx` (lossy LaTeX→DOCX export for co-authors via pandoc).
+- `scripts/check_venues.py` — consistency check for the venue-knowledge
+  triple (`venue_profiles.md` Defaults ↔ prose sections ↔ `style/` files ↔
+  `check_tex.py` tokens) + provenance (`as_of`/`sources`) and staleness.
+  Run after every `venue-calibration`; evidence for `submission-check`.
 
 ## Drafting aids
 
-- **Style calibration** (optional): `shared/prompts/style_calibration.md` —
-  `full-draft` can match your voice from 1–3 prior papers (soft guidance,
+- **Style calibration** (recommended): `shared/prompts/style_calibration.md` —
+  `full-draft` matches your voice and rhythm anchors from 1–3 prior papers;
+  the strongest positive lever against AI-flavored prose (soft guidance,
   never overrides venue style or anti-hallucination).
 - **Prose hygiene**: `shared/prompts/prose_hygiene.md` — AI-tell checklist
   applied per section (see hard discipline #6).
