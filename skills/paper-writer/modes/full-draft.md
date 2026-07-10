@@ -47,8 +47,9 @@ skip the interview and proceed.
    experiment-dominant → empirical-results; roughly equal → hybrid.
 4. **Proactive weaknesses** — free-form. Recommended phrasing: list the
    top 1–3 `red_team_findings:` with `severity: high` (or
-   `severity: medium` if no high-severity findings exist) as the default
-   answer. User can replace.
+   `severity: medium` if no high-severity findings exist), plus any
+   `reviewer_intel:` objection that applies to this paper, as the
+   default answer. User can replace.
 
 On `Proceed`, append an `interview_drafting:` block to research-state
 frontmatter per the protocol's persistence rules. Use the answers as

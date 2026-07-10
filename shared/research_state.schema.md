@@ -35,6 +35,8 @@ literature: docs/survey-conformal-covariate-shift.md
 citations:  refs/conformal-covariate-shift.bib
 algorithm_card: docs/algo-card-v3.md      # rolling, may be overwritten
 draft: paper/main.tex                      # once paper-writer is engaged
+reviewer_intel: .research-state/conformal-covariate-shift-reviewer-intel.md
+  # optional; topic-scoped review dossier (shared/prompts/reviewer_intel.md)
 
 # --- formalization (filled by algo-brainstorm `formalize` mode) ---
 formalization:

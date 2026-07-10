@@ -1,9 +1,9 @@
 {
-  "generated": "2026-07-10T07:22:30+00:00",
+  "generated": "2026-07-10T12:02:08+00:00",
   "mode": "update",
   "depth": 2,
   "source": "git",
-  "files": 17,
+  "files": 18,
   "modules": {
     "shared": {
       "hash": "e78ed6bea037d842d66cc177bcd1cc08cd84079a575bd6032c5d9c540311ce81",
@@ -11,12 +11,12 @@
       "doc": "modules/shared.md"
     },
     "skills/literature-explorer": {
-      "hash": "84609edd0861fb14f42449ec0c5832f7bf6729a52541ab368b7fcf691532b343",
-      "files": 4,
+      "hash": "893a2ccbbe634127e027cc2b25f7946f4dd58c6222c7c87b816059679a83158f",
+      "files": 5,
       "doc": "modules/skills__literature-explorer.md"
     },
     "skills/paper-writer": {
-      "hash": "6a6c8703cca653eed1b9b9e119bde6569718374c067af8e9b3c749f8295446d0",
+      "hash": "3050f18fb88a50961352389c3a2aab9c4aea6b82cc949c108b0e3dd9934de959",
       "files": 5,
       "doc": "modules/skills__paper-writer.md"
     },
@@ -26,7 +26,7 @@
       "doc": "modules/skills__peer-reviewer.md"
     },
     "tests": {
-      "hash": "52885e9cf735babdf14709018ed58182ed61067790ed29669a0fae474fd8dcc9",
+      "hash": "d303b1dfc329821919364861124a666eedd8c5edccc69a6f41b9ad0ffe63f1ca",
       "files": 6,
       "doc": "modules/tests.md"
     }

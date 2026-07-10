@@ -72,6 +72,15 @@ and `venue_target` (+ `shared/venue_profiles.md`).
   Statistics) **and** no empirical `key_claims`. `red-team` still runs before
   `outline` in this branch (theory → red-team → outline).
 
+## Write-phase entry hook: reviewer intel
+
+On transitioning **into `red-team`** (either branch), check research state:
+`venue_target` has public reviews (OpenReview venue) and `reviewer_intel:`
+absent → run `shared/prompts/reviewer_intel.md` first. The dossier is a
+project artifact — gather without asking; only the venue-profile upgrade
+it may offer needs user confirmation. No public reviews (JMLR, AoS) →
+skip with one line. Consumers: `red-team`, `self-review`, `full-draft`.
+
 ## Write-phase sub-steps (`stage: drafting` / `revision`)
 
 The `stage` enum does not split the write phase, so detect sub-progress from

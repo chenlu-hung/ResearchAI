@@ -1,7 +1,7 @@
 # Module: `tests`
 
 ## Summary
-Pytest suite for the five deterministic helper scripts (`dedupe_rank.py`, `scan_injection.py`, `check_tex.py`, `check_prose.py`, `check_venues.py`). Each test drives the script as a subprocess via the `run_script` fixture in `conftest.py` — real CLI, tmp-dir fixtures, no network — asserting merge/rank behaviour, injection-pattern and extractor-divergence detection, TeX/bib cross-check findings, prose-hygiene blocking/warning findings, and venue-knowledge drift detection, plus exit codes. `test_check_venues.py::test_repo_venue_knowledge_is_consistent` is the exception to the fixture pattern — it runs `check_venues.py` against this repo's real `venue_profiles.md`/`style/` as a live integration guard, not a synthetic tmp-dir case. Run with `uv run pytest tests/ -q`; these scripts carry integrity-gate duties, so keep them covered when extending.
+Pytest suite for the five deterministic helper scripts (`dedupe_rank.py`, `scan_injection.py`, `check_tex.py`, `check_prose.py`, `check_venues.py`). Each test drives the script as a subprocess via the `run_script` fixture in `conftest.py` — real CLI, tmp-dir fixtures, no network — asserting merge/rank behaviour, injection-pattern and extractor-divergence detection, TeX/bib cross-check findings, prose-hygiene blocking/warning findings, and venue-knowledge drift + exemplar-provenance validation (`observed_fields`/`observed_sample`), plus exit codes. `test_check_venues.py::test_repo_venue_knowledge_is_consistent` is the exception to the fixture pattern — it runs `check_venues.py` against this repo's real `venue_profiles.md`/`style/` as a live integration guard, not a synthetic tmp-dir case. Run with `uv run pytest tests/ -q`; these scripts carry integrity-gate duties, so keep them covered when extending.
 
 <!-- projectmap:auto:start (generated — do not edit by hand) -->
 ## Files (6)
@@ -12,7 +12,7 @@ Pytest suite for the five deterministic helper scripts (`dedupe_rank.py`, `scan_
 - `tests/test_dedupe_rank.py`
 - `tests/test_scan_injection.py`
 
-## Public symbols (32)
+## Public symbols (36)
 - `function run_script` — tests/conftest.py:11
 - `function _run` — tests/conftest.py:14
 - `function test_listy_ai_section_blocks` — tests/test_check_prose.py:82
@@ -30,13 +30,17 @@ Pytest suite for the five deterministic helper scripts (`dedupe_rank.py`, `scan_
 - `function test_pattern_flag_rejects_bad_spec` — tests/test_check_tex.py:101
 - `namespace dt` — tests/test_check_venues.py:1
 - `function _setup` — tests/test_check_venues.py:35
-- `function _run` — tests/test_check_venues.py:55
-- `function test_consistent_profile_passes` — tests/test_check_venues.py:60
-- `function test_unknown_token_without_pattern_blocks` — tests/test_check_venues.py:69
-- `function test_venue_pattern_resolves_custom_token` — tests/test_check_venues.py:77
-- `function test_missing_style_file_blocks` — tests/test_check_venues.py:85
-- `function test_missing_as_of_blocks_and_stale_warns` — tests/test_check_venues.py:92
-- `function test_repo_venue_knowledge_is_consistent` — tests/test_check_venues.py:104
+- `function _run` — tests/test_check_venues.py:62
+- `function test_consistent_profile_passes` — tests/test_check_venues.py:67
+- `function test_unknown_token_without_pattern_blocks` — tests/test_check_venues.py:76
+- `function test_venue_pattern_resolves_custom_token` — tests/test_check_venues.py:84
+- `function test_missing_style_file_blocks` — tests/test_check_venues.py:92
+- `function test_missing_as_of_blocks_and_stale_warns` — tests/test_check_venues.py:99
+- `function test_observed_valid_pair_passes` — tests/test_check_venues.py:111
+- `function test_observed_field_must_stay_unverified` — tests/test_check_venues.py:119
+- `function test_observed_policy_field_blocks` — tests/test_check_venues.py:130
+- `function test_observed_fields_without_sample_blocks` — tests/test_check_venues.py:141
+- `function test_repo_venue_knowledge_is_consistent` — tests/test_check_venues.py:150
 - `function _write_jsonl` — tests/test_dedupe_rank.py:6
 - `function test_merges_across_sources_and_ranks` — tests/test_dedupe_rank.py:10
 - `function test_same_title_far_apart_years_not_merged` — tests/test_dedupe_rank.py:74

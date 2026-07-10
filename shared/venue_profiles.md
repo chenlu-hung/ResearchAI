@@ -7,7 +7,10 @@ uses these to predict reviewer concerns.
 **Maintenance**: edited only via `/write venue-calibration`
 (`shared/prompts/venue_calibration.md`). Policy fields carry `sources` +
 `as_of`; anything resting on recall or community norms is listed in that
-venue's `unverified:` and never hard-FAILs a gate. `check_venues.py` verifies
+venue's `unverified:` and never hard-FAILs a gate. User-supplied exemplar
+papers can upgrade a norm field's provenance to observed-in-sample
+(`observed_fields`/`observed_sample`) — still `unverified:`, but the WARN
+cites the sample instead of bare recall. `check_venues.py` verifies
 the profile ↔ style-file ↔ token consistency and flags stale `as_of`.
 
 ---

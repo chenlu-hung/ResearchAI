@@ -35,7 +35,7 @@ blocking findings.
 | `citation-audit` | Verify each citation exists and supports the claim | `modes/citation-audit.md` |
 | `self-review` | One-pass venue-reviewer critique of the draft | `modes/self-review.md` |
 | `submission-check` | Submission-readiness gate before `final` | `modes/submission-check.md` |
-| `venue-calibration` | Add or re-verify a venue profile from official sources | `modes/venue-calibration.md` |
+| `venue-calibration` | Add or re-verify a venue profile from official sources + optional exemplar papers | `modes/venue-calibration.md` |
 
 ## Hard discipline
 

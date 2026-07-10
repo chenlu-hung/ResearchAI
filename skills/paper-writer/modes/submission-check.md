@@ -34,7 +34,9 @@ surface any staleness warning (as_of > 1 year) to the user.
 **Unverified fields**: any checklist item whose backing field is listed in
 the venue's `unverified:` (see `shared/prompts/venue_calibration.md`) may
 not FAIL the gate — report it as **WARN** with "field unverified — re-run
-venue-calibration". Verified fields gate as usual.
+venue-calibration". If the field is also in the venue's `observed_fields`,
+cite the evidence instead: "unverified — observed in sample (n=k)".
+Verified fields gate as usual.
 
 Produce a checklist; each item is **PASS / FAIL / N/A** with a one-line
 reason. Items:

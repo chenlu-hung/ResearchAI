@@ -20,6 +20,9 @@ available opt-in via `--council` (see "Council panel" below).
 
 1. Read the full draft and the venue's profile in `shared/venue_profiles.md`
    (reviewer profile + red-flag list) plus the matching `style/<venue>.md`.
+   If research state has `reviewer_intel:`
+   (`shared/prompts/reviewer_intel.md`), read the dossier too — its
+   observed objections sharpen the persona and the red-flag walk.
 2. Adopt the venue's **dominant** reviewer persona (e.g. NeurIPS → empirical
    reviewer; AoS → pure statistician).
 3. Produce a review with these parts:
@@ -85,7 +88,8 @@ Verify each item before emitting; fix violations first
 (`shared/prompts/execution_discipline.md` rule 2):
 
 - [ ] Full draft, venue profile, and `style/<venue>.md` read *this session*
-      — not recalled from earlier context.
+      — not recalled from earlier context; `reviewer_intel:` dossier read
+      if present.
 - [ ] All report parts present: summary, recommendation + one-line reason,
       major comments, minor comments, AI-tell scan, red-flag check.
 - [ ] ≥3 concrete weaknesses, each tied to a section/line; none invented.

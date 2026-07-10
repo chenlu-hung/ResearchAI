@@ -15,8 +15,12 @@ Run all six attacks. Do not skip.
 
 ### Attack 1: Reviewer red-flags (venue-specific)
 
-Load the venue profile from `shared/venue_profiles.md`. List the venue's
-"common reviewer red flags". For each, check your work and rate:
+Load the venue profile from `shared/venue_profiles.md`. If research state
+has `reviewer_intel:` (`shared/prompts/reviewer_intel.md`), read the
+dossier too and rate against its observed objections where they apply —
+evidence beats persona. (The conductor gathers it on entry when the venue
+has public reviews; standalone runs may proceed without.) List the
+venue's "common reviewer red flags". For each, check your work and rate:
 
 - ✅ addressed
 - ⚠️ partially addressed — what's missing
@@ -96,8 +100,10 @@ or sharpen the contribution.
 ### Attack 6: Pre-mortem
 
 Imagine the paper is rejected. Write the 2–3 most likely reasons in the
-reviewer's voice. Then for each, check whether the current research state
-addresses it. If not, plan the fix.
+reviewer's voice — when `reviewer_intel:` exists, ground them in its
+observed objections (cite the quote a reason echoes). Then for each,
+check whether the current research state addresses it. If not, plan the
+fix.
 
 ## Council panel (opt-in)
 
@@ -178,7 +184,9 @@ Verify each item before emitting; fix violations first
 
 - [ ] All six attacks have content or an explicit `N/A — <reason>`;
       none skipped silently.
-- [ ] Venue red-flag table rates **every** flag ✅/⚠️/❌ with a note.
+- [ ] Venue red-flag table rates **every** flag ✅/⚠️/❌ with a note;
+      `reviewer_intel:` dossier read and cited where it applies
+      (if present).
 - [ ] Every finding carries severity + mitigation + `blocking:` bool
       in state.
 - [ ] Sycophancy check answered honestly in ≥1 full sentence; if the verdict

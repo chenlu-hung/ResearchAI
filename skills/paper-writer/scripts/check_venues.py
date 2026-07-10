@@ -13,6 +13,9 @@ verifies, per venue in the `Defaults by venue` block:
   * every `must_include_patterns` regex compiles          (invalid = blocking)
   * provenance present: `as_of` (ISO date) + `sources`    (missing = blocking)
   * `unverified` entries name real fields of that venue   (unknown = blocking)
+  * `observed_fields` entries are real, exemplar-eligible (OBSERVABLE_FIELDS),
+    still listed in `unverified`, and paired with
+    non-empty `observed_sample` ids                       (violation = blocking)
   * `as_of` older than --max-age-days                     (stale = warning)
   * prose section with no Defaults entry (except Generic) (orphan = warning)
   * pattern shadowing a builtin token                     (shadow = warning)
@@ -46,6 +49,10 @@ DEFAULTS_HEADING_RE = re.compile(
     r"^## Defaults by venue.*?```yaml\n(.*?)```", re.DOTALL | re.MULTILINE)
 SECTION_RE = re.compile(r"^## (.+)$", re.MULTILINE)
 PERSONA_ONLY_SECTIONS = {"generic"}  # peer-reviewer fallback: no Defaults by design
+# Fields exemplar papers may evidence (venue_calibration.md "Exemplar input");
+# every other policy field requires an official source.
+OBSERVABLE_FIELDS = {"bib_style", "theory_depth", "ablation_required",
+                     "seed_count_min"}
 
 
 def slug(heading: str) -> str:
@@ -210,6 +217,31 @@ def main() -> int:
         for field in unverified:
             if field not in fields:
                 blocking.append(prefix + f"unverified names unknown field {field!r}")
+
+        observed_fields = fields.get("observed_fields", [])
+        observed_sample = fields.get("observed_sample", [])
+        if not isinstance(observed_fields, list):
+            blocking.append(prefix + "observed_fields must be a list of field names")
+            observed_fields = []
+        if not isinstance(observed_sample, list):
+            blocking.append(prefix + "observed_sample must be a list of exemplar ids")
+            observed_sample = []
+        if observed_fields and not observed_sample:
+            blocking.append(prefix + "observed_fields without observed_sample — "
+                            "list the exemplar ids backing the observation")
+        if observed_sample and not observed_fields:
+            warnings.append(prefix + "observed_sample listed but no observed_fields")
+        for field in observed_fields:
+            if field not in fields:
+                blocking.append(prefix + f"observed_fields names unknown field {field!r}")
+                continue
+            if field not in OBSERVABLE_FIELDS:
+                blocking.append(prefix + f"{field!r} cannot rest on exemplars — "
+                                "policy fields need an official source (only "
+                                + ", ".join(sorted(OBSERVABLE_FIELDS)) + " may)")
+            if field not in unverified:
+                blocking.append(prefix + f"observed field {field!r} missing from "
+                                "unverified (sample evidence never verifies a field)")
 
     for section in prose_sections - set(venues) - PERSONA_ONLY_SECTIONS:
         warnings.append(f"prose section '{section}' has no Defaults entry "

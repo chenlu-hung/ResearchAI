@@ -68,7 +68,7 @@ drives the other three. The runnable Python/shell scripts the skills invoke:
 | Module | Files | Doc | One-liner |
 |---|---|---|---|
 | `shared` | 1 | [doc](modules/shared.md) | Stdlib-only multi-model council dispatcher (`--council`) + shared prompts/profiles. |
-| `skills/literature-explorer` | 4 | [doc](modules/skills__literature-explorer.md) | Retrieval CLIs (arXiv/OpenAlex/S2) + deterministic `dedupe_rank.py` merge/rank. |
+| `skills/literature-explorer` | 5 | [doc](modules/skills__literature-explorer.md) | Retrieval CLIs (arXiv/OpenAlex/S2/OpenReview reviews) + deterministic `dedupe_rank.py` merge/rank. |
 | `skills/paper-writer` | 5 | [doc](modules/skills__paper-writer.md) | Citation auditor (S2→OpenAlex→Crossref) + `check_tex.py`/`check_prose.py`/`check_venues.py` static gates + figure styles. |
 | `skills/peer-reviewer` | 1 | [doc](modules/skills__peer-reviewer.md) | `scan_injection.py`: hidden-prompt scan + two-extractor divergence check. |
 | `tests` | 6 | [doc](modules/tests.md) | Subprocess pytest suite for the five deterministic helper scripts (no network). |

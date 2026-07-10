@@ -81,6 +81,21 @@ _get	skills/literature-explorer/scripts/search_openalex.py	17;"	function	typeref
 _reconstruct_abstract	skills/literature-explorer/scripts/search_openalex.py	23;"	function	typeref:typename:str
 search	skills/literature-explorer/scripts/search_openalex.py	34;"	function	typeref:typename:list[dict]
 main	skills/literature-explorer/scripts/search_openalex.py	68;"	function	typeref:typename:int
+API	skills/literature-explorer/scripts/search_openreview.py	37;"	variable
+PAGE	skills/literature-explorer/scripts/search_openreview.py	38;"	variable
+SLEEP	skills/literature-explorer/scripts/search_openreview.py	39;"	variable
+SKIP_FIELDS	skills/literature-explorer/scripts/search_openreview.py	40;"	variable
+ChallengeError	skills/literature-explorer/scripts/search_openreview.py	45;"	class
+_value	skills/literature-explorer/scripts/search_openreview.py	49;"	function
+_get	skills/literature-explorer/scripts/search_openreview.py	54;"	function	typeref:typename:dict
+login	skills/literature-explorer/scripts/search_openreview.py	66;"	function	typeref:typename:str|None
+fetch_accepted	skills/literature-explorer/scripts/search_openreview.py	77;"	function	typeref:typename:list[dict]
+normalize	skills/literature-explorer/scripts/search_openreview.py	93;"	function	typeref:typename:dict
+score	skills/literature-explorer/scripts/search_openreview.py	106;"	function	typeref:typename:int
+_note_type	skills/literature-explorer/scripts/search_openreview.py	117;"	function	typeref:typename:str
+review_content	skills/literature-explorer/scripts/search_openreview.py	126;"	function	typeref:typename:dict
+fetch_reviews	skills/literature-explorer/scripts/search_openreview.py	137;"	function	typeref:typename:dict
+main	skills/literature-explorer/scripts/search_openreview.py	152;"	function	typeref:typename:int
 S2_API	skills/literature-explorer/scripts/search_semantic_scholar.py	13;"	variable
 FIELDS	skills/literature-explorer/scripts/search_semantic_scholar.py	14;"	variable
 _get	skills/literature-explorer/scripts/search_semantic_scholar.py	18;"	function	typeref:typename:dict
@@ -137,18 +152,19 @@ strip_comments	skills/paper-writer/scripts/check_tex.py	56;"	function	typeref:ty
 gather_sources	skills/paper-writer/scripts/check_tex.py	60;"	function	typeref:typename:tuple[dict[str,str],list[str]]
 find_graphic	skills/paper-writer/scripts/check_tex.py	90;"	function	typeref:typename:bool
 main	skills/paper-writer/scripts/check_tex.py	98;"	function	typeref:typename:int
-dt	skills/paper-writer/scripts/check_venues.py	32;"	namespace	nameref:module:datetime
-SCRIPT_DIR	skills/paper-writer/scripts/check_venues.py	41;"	variable
-DEFAULT_PROFILES	skills/paper-writer/scripts/check_venues.py	42;"	variable
-DEFAULT_STYLE_DIR	skills/paper-writer/scripts/check_venues.py	43;"	variable
-DEFAULTS_HEADING_RE	skills/paper-writer/scripts/check_venues.py	45;"	variable
-SECTION_RE	skills/paper-writer/scripts/check_venues.py	47;"	variable
-PERSONA_ONLY_SECTIONS	skills/paper-writer/scripts/check_venues.py	48;"	variable
-slug	skills/paper-writer/scripts/check_venues.py	51;"	function	typeref:typename:str
-strip_quotes	skills/paper-writer/scripts/check_venues.py	56;"	function	typeref:typename:str
-parse_value	skills/paper-writer/scripts/check_venues.py	62;"	function
-parse_defaults	skills/paper-writer/scripts/check_venues.py	71;"	function	typeref:typename:tuple[dict,list[str]]
-main	skills/paper-writer/scripts/check_venues.py	124;"	function	typeref:typename:int
+dt	skills/paper-writer/scripts/check_venues.py	35;"	namespace	nameref:module:datetime
+SCRIPT_DIR	skills/paper-writer/scripts/check_venues.py	44;"	variable
+DEFAULT_PROFILES	skills/paper-writer/scripts/check_venues.py	45;"	variable
+DEFAULT_STYLE_DIR	skills/paper-writer/scripts/check_venues.py	46;"	variable
+DEFAULTS_HEADING_RE	skills/paper-writer/scripts/check_venues.py	48;"	variable
+SECTION_RE	skills/paper-writer/scripts/check_venues.py	50;"	variable
+PERSONA_ONLY_SECTIONS	skills/paper-writer/scripts/check_venues.py	51;"	variable
+OBSERVABLE_FIELDS	skills/paper-writer/scripts/check_venues.py	54;"	variable
+slug	skills/paper-writer/scripts/check_venues.py	58;"	function	typeref:typename:str
+strip_quotes	skills/paper-writer/scripts/check_venues.py	63;"	function	typeref:typename:str
+parse_value	skills/paper-writer/scripts/check_venues.py	69;"	function
+parse_defaults	skills/paper-writer/scripts/check_venues.py	78;"	function	typeref:typename:tuple[dict,list[str]]
+main	skills/paper-writer/scripts/check_venues.py	131;"	function	typeref:typename:int
 PALETTE	skills/paper-writer/scripts/figs.py	24;"	variable
 apply_style	skills/paper-writer/scripts/figs.py	28;"	function	typeref:typename:None
 mpl	skills/paper-writer/scripts/figs.py	29;"	namespace	function:apply_style	file:	nameref:module:matplotlib
@@ -225,13 +241,17 @@ SCRIPT	tests/test_check_venues.py	4;"	variable
 TODAY	tests/test_check_venues.py	6;"	variable
 PROFILES_TMPL	tests/test_check_venues.py	8;"	variable
 _setup	tests/test_check_venues.py	35;"	function
-_run	tests/test_check_venues.py	55;"	function
-test_consistent_profile_passes	tests/test_check_venues.py	60;"	function
-test_unknown_token_without_pattern_blocks	tests/test_check_venues.py	69;"	function
-test_venue_pattern_resolves_custom_token	tests/test_check_venues.py	77;"	function
-test_missing_style_file_blocks	tests/test_check_venues.py	85;"	function
-test_missing_as_of_blocks_and_stale_warns	tests/test_check_venues.py	92;"	function
-test_repo_venue_knowledge_is_consistent	tests/test_check_venues.py	104;"	function
+_run	tests/test_check_venues.py	62;"	function
+test_consistent_profile_passes	tests/test_check_venues.py	67;"	function
+test_unknown_token_without_pattern_blocks	tests/test_check_venues.py	76;"	function
+test_venue_pattern_resolves_custom_token	tests/test_check_venues.py	84;"	function
+test_missing_style_file_blocks	tests/test_check_venues.py	92;"	function
+test_missing_as_of_blocks_and_stale_warns	tests/test_check_venues.py	99;"	function
+test_observed_valid_pair_passes	tests/test_check_venues.py	111;"	function
+test_observed_field_must_stay_unverified	tests/test_check_venues.py	119;"	function
+test_observed_policy_field_blocks	tests/test_check_venues.py	130;"	function
+test_observed_fields_without_sample_blocks	tests/test_check_venues.py	141;"	function
+test_repo_venue_knowledge_is_consistent	tests/test_check_venues.py	150;"	function
 SCRIPT	tests/test_dedupe_rank.py	3;"	variable
 _write_jsonl	tests/test_dedupe_rank.py	6;"	function
 test_merges_across_sources_and_ranks	tests/test_dedupe_rank.py	10;"	function

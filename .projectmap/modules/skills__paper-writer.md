@@ -1,7 +1,7 @@
 # Module: `skills/paper-writer`
 
 ## Summary
-The Python helpers behind the `paper-writer` skill (`/write`) — one networked auditor plus four stdlib-only static gates. `verify_citations.py` matches each BibTeX entry against Semantic Scholar → OpenAlex → Crossref (DOI plus fuzzy title/author/year matching via `difflib`) to flag fabricated or mismatched references. `check_tex.py` is the static TeX gate — Stage 0 of `citation-audit` and the evidence source for `submission-check`: undefined `\cite`/`\ref`, missing figure files, venue `must_include` tokens. `check_prose.py` lints paper prose against `shared/prompts/prose_hygiene.md` (list budget, pseudo-list runs, heading fragmentation, banned phrases, em-dash rate as blocking findings; rhythm/structural patterns as warnings for the LLM hygiene pass). `check_venues.py` cross-checks the venue-knowledge triple — `venue_profiles.md` Defaults ↔ `style/<venue>.md` ↔ `check_tex.py`'s `MUST_INCLUDE_PATTERNS` — for drift and stale provenance; meant to run after every venue-calibration. `figs.py` is a small matplotlib/numpy styling library runnable standalone as a smoketest; not indexed here: `build_paper.sh` (compile gate + DOCX export) and the skill's mode/style Markdown.
+The Python helpers behind the `paper-writer` skill (`/write`) — one networked auditor plus four stdlib-only static gates. `verify_citations.py` matches each BibTeX entry against Semantic Scholar → OpenAlex → Crossref (DOI plus fuzzy title/author/year matching via `difflib`) to flag fabricated or mismatched references. `check_tex.py` is the static TeX gate — Stage 0 of `citation-audit` and the evidence source for `submission-check`: undefined `\cite`/`\ref`, missing figure files, venue `must_include` tokens. `check_prose.py` lints paper prose against `shared/prompts/prose_hygiene.md` (list budget, pseudo-list runs, heading fragmentation, banned phrases, em-dash rate as blocking findings; rhythm/structural patterns as warnings for the LLM hygiene pass). `check_venues.py` cross-checks the venue-knowledge triple — `venue_profiles.md` Defaults ↔ `style/<venue>.md` ↔ `check_tex.py`'s `MUST_INCLUDE_PATTERNS` — for drift, stale provenance, and exemplar-provenance rules (`observed_fields` ⊆ `unverified`, `OBSERVABLE_FIELDS`-eligible, paired with `observed_sample` ids); meant to run after every venue-calibration. `figs.py` is a small matplotlib/numpy styling library runnable standalone as a smoketest; not indexed here: `build_paper.sh` (compile gate + DOCX export) and the skill's mode/style Markdown.
 
 <!-- projectmap:auto:start (generated — do not edit by hand) -->
 ## Files (5)
@@ -38,12 +38,12 @@ The Python helpers behind the `paper-writer` skill (`/write`) — one networked 
 - `function gather_sources` — skills/paper-writer/scripts/check_tex.py:60
 - `function find_graphic` — skills/paper-writer/scripts/check_tex.py:90
 - `function main` — skills/paper-writer/scripts/check_tex.py:98
-- `namespace dt` — skills/paper-writer/scripts/check_venues.py:32
-- `function slug` — skills/paper-writer/scripts/check_venues.py:51
-- `function strip_quotes` — skills/paper-writer/scripts/check_venues.py:56
-- `function parse_value` — skills/paper-writer/scripts/check_venues.py:62
-- `function parse_defaults` — skills/paper-writer/scripts/check_venues.py:71
-- `function main` — skills/paper-writer/scripts/check_venues.py:124
+- `namespace dt` — skills/paper-writer/scripts/check_venues.py:35
+- `function slug` — skills/paper-writer/scripts/check_venues.py:58
+- `function strip_quotes` — skills/paper-writer/scripts/check_venues.py:63
+- `function parse_value` — skills/paper-writer/scripts/check_venues.py:69
+- `function parse_defaults` — skills/paper-writer/scripts/check_venues.py:78
+- `function main` — skills/paper-writer/scripts/check_venues.py:131
 - `function apply_style` — skills/paper-writer/scripts/figs.py:28
 - `namespace mpl` — skills/paper-writer/scripts/figs.py:29
 - `function save` — skills/paper-writer/scripts/figs.py:51

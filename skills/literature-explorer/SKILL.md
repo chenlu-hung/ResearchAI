@@ -91,6 +91,10 @@ implemented as prompt orchestration (no STORM dependency required).
 - `expert-dialogue.md` — two-persona dialogue protocol.
 - `scripts/search_arxiv.py`, `scripts/search_semantic_scholar.py`,
   `scripts/search_openalex.py` — retrieval helpers.
+- `scripts/search_openreview.py` — venue-scoped accepted-papers + public-
+  reviews fetcher for `shared/prompts/reviewer_intel.md` and
+  venue-calibration exemplars; **not** part of the survey retrieval trio
+  in step 3.
 
 ## Anti-hallucination
 

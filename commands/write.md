@@ -16,8 +16,9 @@ Modes (see `skills/paper-writer/SKILL.md`):
   from `algo-brainstorm`'s method-level `red-team`)
 - `submission-check` — submission-readiness gate before `stage: final`
 - `venue-calibration` — add or re-verify a venue profile from official
-  sources (CFP / author guidelines), with provenance; the only mode that
-  edits `shared/venue_profiles.md` and `style/`
+  sources (CFP / author guidelines), optionally grounded in exemplar
+  papers, with provenance; the only mode that edits
+  `shared/venue_profiles.md` and `style/`
 
 Pre-flight: refuse to emit `full-draft` if `red-team` mode has any
 `blocking: true` finding unresolved, or if `algorithm_card` / `refs/<slug>.bib`

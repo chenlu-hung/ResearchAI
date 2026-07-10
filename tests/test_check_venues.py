@@ -27,22 +27,29 @@ testconf:
   page_limit: 8
   bib_style: numeric
   must_include: [limitations, {extra_token}]
-{patterns_block}  unverified: [page_limit]
+{patterns_block}{observed_block}  unverified: {unverified}
 ```
 """
 
 
 def _setup(tmp_path, as_of=TODAY, extra_token="reproducibility",
-           patterns=None, style=True):
+           patterns=None, style=True, observed=None,
+           unverified="[page_limit]"):
     tmp_path.mkdir(exist_ok=True)
     patterns_block = ""
     if patterns:
         entries = "".join(f"    {k}: '{v}'\n" for k, v in patterns.items())
         patterns_block = "  must_include_patterns:\n" + entries
+    observed_block = ""
+    for key in ("fields", "sample"):
+        if observed and key in observed:
+            observed_block += f"  observed_{key}: [{', '.join(observed[key])}]\n"
     profiles = tmp_path / "venue_profiles.md"
     profiles.write_text(
         PROFILES_TMPL.format(as_of=as_of, extra_token=extra_token,
-                             patterns_block=patterns_block),
+                             patterns_block=patterns_block,
+                             observed_block=observed_block,
+                             unverified=unverified),
         encoding="utf-8",
     )
     style_dir = tmp_path / "style"
@@ -99,6 +106,45 @@ def test_missing_as_of_blocks_and_stale_warns(tmp_path, run_script):
     assert r.returncode == 0
     data = json.loads(r.stdout)
     assert any("re-verify" in w for w in data["warnings"])
+
+
+def test_observed_valid_pair_passes(tmp_path, run_script):
+    profiles, style_dir = _setup(
+        tmp_path, unverified="[page_limit, bib_style]",
+        observed={"fields": ["bib_style"], "sample": ["arxiv:2501.01234"]})
+    r = _run(run_script, profiles, style_dir)
+    assert r.returncode == 0, r.stdout + r.stderr
+
+
+def test_observed_field_must_stay_unverified(tmp_path, run_script):
+    # sample evidence never verifies a field — bib_style not in unverified
+    profiles, style_dir = _setup(
+        tmp_path,
+        observed={"fields": ["bib_style"], "sample": ["arxiv:2501.01234"]})
+    r = _run(run_script, profiles, style_dir)
+    assert r.returncode == 1
+    assert any("missing from unverified" in b
+               for b in json.loads(r.stdout)["blocking"])
+
+
+def test_observed_policy_field_blocks(tmp_path, run_script):
+    # camera-ready page count is not evidence for the submission limit
+    profiles, style_dir = _setup(
+        tmp_path,
+        observed={"fields": ["page_limit"], "sample": ["arxiv:2501.01234"]})
+    r = _run(run_script, profiles, style_dir)
+    assert r.returncode == 1
+    assert any("cannot rest on exemplars" in b
+               for b in json.loads(r.stdout)["blocking"])
+
+
+def test_observed_fields_without_sample_blocks(tmp_path, run_script):
+    profiles, style_dir = _setup(
+        tmp_path, unverified="[page_limit, bib_style]",
+        observed={"fields": ["bib_style"]})
+    r = _run(run_script, profiles, style_dir)
+    assert r.returncode == 1
+    assert any("observed_sample" in b for b in json.loads(r.stdout)["blocking"])
 
 
 def test_repo_venue_knowledge_is_consistent(run_script):

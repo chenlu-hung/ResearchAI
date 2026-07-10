@@ -9,6 +9,12 @@ work — the only mode allowed to edit `shared/venue_profiles.md` and
 
 - Venue name (required); target year/cycle (optional); official URLs
   (optional — skips the search step)
+- Exemplars (optional): 3–5 recent accepted papers from the venue (paths
+  or arXiv ids), optionally OpenReview review threads — upgrade norm
+  fields and `bib_style` from recall to observed-in-sample (protocol's
+  *Exemplar input* rules; they never substitute for official sources).
+  Auto-gatherable for OpenReview venues via
+  `skills/literature-explorer/scripts/search_openreview.py`.
 - Web access (WebFetch/WebSearch). Without it the run still works but
   every policy field lands in `unverified:`.
 
@@ -17,8 +23,9 @@ work — the only mode allowed to edit `shared/venue_profiles.md` and
 Follow `shared/prompts/venue_calibration.md` end-to-end: resolve key →
 gather official sources → extract policy fields with quotes+URLs → map to
 `must_include` tokens (new ones get `must_include_patterns` regexes) →
-one-question grill for insider knowledge → draft the four artifacts →
-user confirms → persist → `check_venues.py` clean → wire-up sweep.
+exemplar scan (if given) → one-question grill for insider knowledge →
+draft the four artifacts → user confirms → persist → `check_venues.py`
+clean → wire-up sweep.
 
 ## Output
 
