@@ -56,6 +56,11 @@ drives the other three. The runnable Python/shell scripts the skills invoke:
 - **Anti-sycophancy / anti-hallucination** are baked into the prompts: brainstorm responses
   must surface weaknesses first, and `--council` output is ideation-only — its citations are
   `[VERIFY]`-flagged and must pass the citation audit before entering research-state.
+- **Economy delegation:** `/research --economy` lets the conductor run the token-heavy,
+  judgment-light stages (explore, full-draft, revision, citation-audit — marked `✓` in
+  `skills/research-conductor/routing.md`) in a cheaper implementer subagent, with a
+  DONE/CONSULT protocol and a non-skippable acceptance gate in
+  `shared/prompts/model_dispatch.md`. Grills, verdicts, and review never delegate.
 - **Model-robustness:** every mode file ends with an `## Exit checklist` and all skills obey
   `shared/prompts/execution_discipline.md` (two-pass emission, declared skips, scripts-over-
   recall) so quality holds on smaller Claude models. Keep new mechanical steps in

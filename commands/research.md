@@ -1,6 +1,6 @@
 ---
 description: Autopilot from a research idea to a submission-ready paper. Sequences explore → algo → write automatically via the research-conductor skill.
-argument-hint: [idea] [--step | --gates]
+argument-hint: [idea] [--step | --gates] [--economy [model]]
 ---
 
 Invoke the `research-conductor` skill on: $ARGUMENTS
@@ -23,6 +23,10 @@ Autonomy (default **full auto until blocked**):
 - `--gates` — also pause for a go/no-go at high-leverage gates (candidate pick,
   novelty verdict, red-team triage, before full-draft, before submission).
 - `--step` — pause before every mode.
+- `--economy [model]` — run the token-heavy, judgment-light stages (explore,
+  full-draft, revision, citation-audit) in a cheaper implementer subagent
+  (default `sonnet`) per `shared/prompts/model_dispatch.md`; grills, verdicts,
+  and acceptance stay in the main session. Composes with `--gates`/`--step`.
 
 The conductor never bypasses a gate, never duplicates a mode's grill, and writes
 research-state only during bootstrap. `--council` is not applied automatically;

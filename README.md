@@ -19,6 +19,15 @@ red-team blocking finding, fabricated citations, or a failed submission check. A
 before every mode. It never bypasses a gate; it only sequences the three skills,
 which all remain independently usable below.
 
+Add `--economy [model]` to cut usage via an architect/implementer split: the
+token-heavy, judgment-light stages (`explore`, `full-draft`, `revision`,
+`citation-audit`) run in a cheaper implementer subagent (default `sonnet`)
+under a DONE/CONSULT protocol, while routing, grills, verdicts, and a
+non-skippable acceptance gate (re-running the machine checks on the
+implementer's output) stay in the main session. Protocol and delegation rules:
+`shared/prompts/model_dispatch.md`. Composes with `--gates`/`--step`; without
+the flag, everything runs inline exactly as before.
+
 ## The three skills (each independently usable)
 
 | Skill | Purpose | Trigger |

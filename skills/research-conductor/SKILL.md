@@ -37,6 +37,10 @@ reads the `stage` that modes already write and delegates execution back to them.
 5. Load and execute that mode file (skills/<skill>/modes/<mode>.md or the
    literature-explorer pipeline). The mode owns its own grill, gating, and
    state-writes — let it run exactly as if invoked directly.
+   *Economy branch (`--economy` only):* if routing.md marks the stage `✓`
+   and the preconditions in `shared/prompts/model_dispatch.md` hold, run the
+   mode in an implementer subagent per that file instead of inline, then
+   apply its Acceptance section before step 6. Otherwise inline as above.
 6. When the mode finishes, re-read research-state.
      - hard stop hit?  → halt, hand control to the user (see "Hard stops").
      - else            → go to 2.
@@ -71,6 +75,14 @@ below (or the user) pause the run. Two opt-down flags from `/research`:
   pick (after `ideate`), novelty verdict, red-team triage, before `full-draft`,
   before `submission-check`.
 - `--step` — pause before every mode.
+
+A third flag changes *where* modes run, not when they pause:
+
+- `--economy [model]` — delegate the token-heavy, judgment-light stages
+  (marked `✓` in routing.md) to a cheaper implementer subagent per
+  `shared/prompts/model_dispatch.md`; default implementer `sonnet`. Routing,
+  grills, verdicts, and acceptance stay in this session. Composes freely
+  with `--gates`/`--step`.
 
 Full auto is **not silent**: announce every hop (step 4) so the user can interject.
 

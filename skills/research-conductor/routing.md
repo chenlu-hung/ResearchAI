@@ -6,21 +6,27 @@ The `stage → next mode` state machine the conductor follows. Backbone = the
 
 ## Stage → mode file
 
-| `stage` | Skill / mode file |
-|---|---|
-| explore | `literature-explorer` pipeline (its `SKILL.md`; entry `/explore`) |
-| gap | `skills/algo-brainstorm/modes/gap-analysis.md` |
-| formalize | `skills/algo-brainstorm/modes/formalize.md` |
-| ideate | `skills/algo-brainstorm/modes/ideate.md` |
-| novelty | `skills/algo-brainstorm/modes/novelty-check.md` |
-| theory | `skills/algo-brainstorm/modes/theory-scoping.md` |
-| toy | `skills/algo-brainstorm/modes/toy-design.md` |
-| ablation | `skills/algo-brainstorm/modes/ablation-plan.md` |
-| red-team | `skills/algo-brainstorm/modes/red-team.md` |
-| outline | `skills/paper-writer/modes/outline.md` |
-| drafting | `skills/paper-writer/modes/{full-draft,self-review,citation-audit}.md` (sub-steps, see below) |
-| revision | `skills/paper-writer/modes/revision.md` |
-| final | — (done; summarize artifacts) |
+The `--economy` column marks stages the conductor may delegate to a cheaper
+implementer subagent — **only** when `/research --economy` was passed, per
+`shared/prompts/model_dispatch.md` (preconditions, brief, acceptance).
+Unmarked stages always run inline: they are grill-, verdict-, or
+review-bearing, or too small to repay a subagent's overhead.
+
+| `stage` | Skill / mode file | `--economy` |
+|---|---|---|
+| explore | `literature-explorer` pipeline (its `SKILL.md`; entry `/explore`) | ✓ |
+| gap | `skills/algo-brainstorm/modes/gap-analysis.md` | |
+| formalize | `skills/algo-brainstorm/modes/formalize.md` | |
+| ideate | `skills/algo-brainstorm/modes/ideate.md` | |
+| novelty | `skills/algo-brainstorm/modes/novelty-check.md` | |
+| theory | `skills/algo-brainstorm/modes/theory-scoping.md` | |
+| toy | `skills/algo-brainstorm/modes/toy-design.md` | |
+| ablation | `skills/algo-brainstorm/modes/ablation-plan.md` | |
+| red-team | `skills/algo-brainstorm/modes/red-team.md` | |
+| outline | `skills/paper-writer/modes/outline.md` | |
+| drafting | `skills/paper-writer/modes/{full-draft,self-review,citation-audit}.md` (sub-steps, see below) | full-draft ✓, citation-audit ✓; self-review inline |
+| revision | `skills/paper-writer/modes/revision.md` | ✓ |
+| final | — (done; summarize artifacts) | |
 
 ## Routing table
 
