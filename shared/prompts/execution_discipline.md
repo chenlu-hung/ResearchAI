@@ -5,7 +5,8 @@ model follows a long mode file reliably; a smaller one drops steps, softens
 adversarial passes, and trusts its memory of files it read long ago. The rules
 below make step-following **mechanical**, so output quality is set by the mode
 files, checklists, and scripts — not by the running model's attention. Every
-rule is mandatory on every model; a stronger model simply clears them faster.
+rule binds on every model; on a top-tier model exactly two of them run in a
+relaxed *form* (see **Strong-model tier** below) — the obligation never drops.
 
 ## Rules
 
@@ -47,3 +48,31 @@ rule is mandatory on every model; a stronger model simply clears them faster.
    real ones. If, after attacking every listed axis, you genuinely cannot
    reach the floor, say so explicitly — padding with invented findings is a
    worse failure than an honest shortfall.
+
+## Strong-model tier
+
+Two of the rules above are *process scaffolding* — they compensate for a
+smaller model's drift over long procedures. On a top-tier model their form
+relaxes; every other rule, and every deterministic script gate, is identical
+on every tier.
+
+**Tier check.** Decide once per skill invocation from the model named in
+your system prompt: Mythos-class (Fable, Mythos) or a newer top tier →
+**strong**; Opus-tier and below, or any doubt → **standard**. Declare it in
+the first mode output of the session (`Discipline tier: strong` or
+`standard`); an undeclared tier is standard.
+
+**Relaxed on strong (form changes, obligation doesn't):**
+
+- Rule 2 — the separate draft-then-re-read pass may collapse to one pass:
+  verify each Exit-checklist item while writing. The closing
+  `Exit checklist: N/N` line stays mandatory, with misses declared the
+  same way.
+- Rule 5 — the ≤3-line re-anchor may stay silent instead of being emitted —
+  except immediately after a compaction or resume, where it is emitted on
+  every tier (staleness does not shrink with capability).
+
+**Never relaxed, on any tier:** rules 1, 3, 4, 6, 7, 8. Scripts over recall
+(4) and fresh reads on resume (6) guard against hallucination and staleness,
+which are behavioural, not capability, failures. Implementer subagents under
+`model_dispatch.md` always run standard, whatever their model.

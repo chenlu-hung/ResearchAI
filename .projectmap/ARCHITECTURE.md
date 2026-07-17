@@ -65,7 +65,10 @@ drives the other three. The runnable Python/shell scripts the skills invoke:
   `shared/prompts/execution_discipline.md` (two-pass emission, declared skips, scripts-over-
   recall) so quality holds on smaller Claude models. Keep new mechanical steps in
   deterministic scripts (`dedupe_rank.py`, `check_tex.py`, `scan_injection.py` pattern), and
-  give any new mode an Exit checklist.
+  give any new mode an Exit checklist. The discipline's **Strong-model tier** (Mythos-class)
+  relaxes only the two scaffolding rules (two-pass emission, emitted re-anchor); script gates,
+  Exit checklists, and honesty rules never relax, and `--economy` implementers always run
+  standard tier.
 
 <!-- projectmap:modules:start (generated — do not edit by hand) -->
 ## Modules (5) — grouping depth 2

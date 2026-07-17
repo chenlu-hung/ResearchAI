@@ -62,7 +62,9 @@ Rules:
    mode-mandated approach or script fails after one honest attempt.
 4. Scripts over recall: run the real script, paste its real output.
    A simulated result is a defect, not a shortcut.
-5. End the run with exactly one of these blocks and nothing after it:
+5. Your discipline tier is standard, whatever model you run on — never
+   apply the strong-model relaxations in execution_discipline.md.
+6. End the run with exactly one of these blocks and nothing after it:
 
    DONE
    stage written: <the stage value you set in research-state>
