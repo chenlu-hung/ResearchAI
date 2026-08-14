@@ -52,8 +52,26 @@ the relevant rows into the paper's Method section.
 
 ## Cost
 
-- Time: $O(...)$
-- Memory: $O(...)$
+Per phase — a single `O(...)` for "the method" hides which stage actually breaks:
+
+| Phase | Time | Memory | Notes |
+|---|---|---|---|
+| Preprocessing / decomposition | $O(...)$ | $O(...)$ | one-off or per-sample? |
+| Training | $O(...)$ | $O(...)$ | |
+| Calibration / adaptation | $O(...)$ | $O(...)$ | per target resolution? |
+| Inference | $O(...)$ | $O(...)$ | per query |
+
+**Scaling regime beyond the tested one** (required): name one regime the paper
+claims or implies but did not run — e.g. 3D, transient/time-dependent, $10\times$
+resolution — and state the memory and wall-clock implication there.
+
+> e.g. "3D at $256^3$: decomposition memory grows as $O(N^2)$ in grid points →
+> ~180 GB, infeasible on one node without a streaming variant."
+
+`red-team` Attack 4 attacks this table, and its acceptance criterion is
+feasibility relative to the regimes the spine claims target.
+`paper-writer submission-check` blocks if the analysis shows the method
+infeasible in a regime a spine claim advertises.
 
 ## Empirical plan (from `toy-design` + `ablation-plan`)
 

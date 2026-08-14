@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Compile gate + optional DOCX export for paper-writer drafts.
 #
-#   build_paper.sh compile [paper/main.tex]            # gate: must produce a PDF
-#   build_paper.sh docx    [paper/main.tex] [out.docx] # LaTeX -> DOCX (co-authors)
+#   "$PLUGIN_ROOT/skills/paper-writer/scripts/build_paper.sh" compile [paper/main.tex]
+#   "$PLUGIN_ROOT/skills/paper-writer/scripts/build_paper.sh" docx [paper/main.tex] [out.docx]
 #
 # `compile` exits non-zero if the draft does not build — use it as the gate
 # before declaring a draft done. `docx` is lossy (math/figures); for review only.

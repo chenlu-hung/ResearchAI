@@ -1,0 +1,181 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-ai.local/schemas/evidence-records.schema.json",
+  "title": "Research evidence record",
+  "oneOf": [
+    {"$ref": "#/$defs/topic"},
+    {"$ref": "#/$defs/work"},
+    {"$ref": "#/$defs/source_version"},
+    {"$ref": "#/$defs/claim"},
+    {"$ref": "#/$defs/evidence_link"},
+    {"$ref": "#/$defs/candidate"},
+    {"$ref": "#/$defs/dataset"},
+    {"$ref": "#/$defs/evidence_packet"},
+    {"$ref": "#/$defs/query_run"},
+    {"$ref": "#/$defs/reading"},
+    {"$ref": "#/$defs/passage"},
+    {"$ref": "#/$defs/method"},
+    {"$ref": "#/$defs/audit_verdict"}
+  ],
+  "$defs": {
+    "common": {
+      "type": "object",
+      "required": ["record_type", "id", "schema_version", "created_at", "updated_at"],
+      "properties": {
+        "record_type": {"type": "string"},
+        "id": {"type": "string", "minLength": 1},
+        "schema_version": {"const": 1},
+        "created_at": {"type": "string"},
+        "updated_at": {"type": "string"}
+      }
+    },
+    "topic": {
+      "allOf": [
+        {"$ref": "#/$defs/common"},
+        {
+          "properties": {"record_type": {"const": "topic"}, "title": {"type": "string"}, "slug": {"type": "string"}, "status": {"type": "string"}},
+          "required": ["title", "slug", "status"]
+        }
+      ]
+    },
+    "work": {
+      "allOf": [
+        {"$ref": "#/$defs/common"},
+        {
+          "properties": {"record_type": {"const": "work"}, "title": {"type": "string"}, "authors": {"type": "array", "items": {"type": "string"}}, "topic_ids": {"$ref": "#/$defs/id_list"}},
+          "required": ["title", "authors", "topic_ids"]
+        }
+      ]
+    },
+    "source_version": {
+      "allOf": [
+        {"$ref": "#/$defs/common"},
+        {
+          "properties": {"record_type": {"const": "source_version"}, "work_id": {"type": "string"}, "source_kind": {"type": "string"}, "source_scope": {"$ref": "#/$defs/scope"}, "source_path": {"type": "string"}, "source_url": {"type": "string"}, "content_hash": {"$ref": "#/$defs/hash"}, "hash_kind": {"enum": ["discovery_fingerprint", "content_sha256"]}, "managed_copy": {"type": "boolean"}},
+          "required": ["work_id", "source_kind", "source_scope", "content_hash", "hash_kind", "managed_copy"]
+        }
+      ]
+    },
+    "claim": {
+      "allOf": [
+        {"$ref": "#/$defs/common"},
+        {
+          "properties": {"record_type": {"const": "claim"}, "text": {"type": "string"}, "topic_ids": {"$ref": "#/$defs/id_list"}, "status": {"type": "string"}},
+          "required": ["text", "topic_ids", "status"]
+        }
+      ]
+    },
+    "evidence_link": {
+      "allOf": [
+        {"$ref": "#/$defs/common"},
+        {
+          "properties": {
+            "record_type": {"const": "evidence_link"},
+            "claim_id": {"type": "string"},
+            "source_version_id": {"type": "string"},
+            "passage_id": {"type": "string"},
+            "locator": {"type": "string"},
+            "excerpt_hash": {"$ref": "#/$defs/optional_hash"},
+            "relation": {"enum": ["supports", "contradicts", "background", "mentions", "compares", "extends", "subsumes", "same_primitive_as", "relevant_to", "uses", "evaluates_on", "belongs_to"]},
+            "verdict": {"enum": ["verified", "provisional", "cannot_determine", "disputed"]},
+            "evidence_scope": {"$ref": "#/$defs/scope"},
+            "verified_at": {"type": "string"},
+            "verifier": {"type": "string"}
+          },
+          "required": ["claim_id", "source_version_id", "passage_id", "locator", "excerpt_hash", "relation", "verdict", "evidence_scope", "verified_at", "verifier"]
+        }
+      ]
+    },
+    "candidate": {
+      "allOf": [
+        {"$ref": "#/$defs/common"},
+        {
+          "properties": {"record_type": {"const": "candidate"}, "topic_id": {"type": "string"}, "title": {"type": "string"}, "claim_ids": {"$ref": "#/$defs/id_list"}, "primitives": {"type": "array", "items": {"type": "string"}, "minItems": 1}, "objective": {"type": "string", "minLength": 1}, "data_regime": {"type": "string", "minLength": 1}, "assumptions": {"type": "array", "items": {"type": "string"}}, "component_hash": {"$ref": "#/$defs/hash"}, "objective_hash": {"$ref": "#/$defs/hash"}, "data_regime_hash": {"$ref": "#/$defs/hash"}, "status": {"type": "string"}},
+          "required": ["topic_id", "title", "claim_ids", "primitives", "objective", "data_regime", "assumptions", "component_hash", "objective_hash", "data_regime_hash", "status"]
+        }
+      ]
+    },
+    "dataset": {
+      "allOf": [
+        {"$ref": "#/$defs/common"},
+        {
+          "properties": {"record_type": {"const": "dataset"}, "title": {"type": "string"}, "topic_ids": {"$ref": "#/$defs/id_list"}, "uri": {"type": "string"}, "content_hash": {"type": "string", "pattern": "^$|^[a-f0-9]{64}$"}, "hash_status": {"enum": ["unknown", "verified"]}},
+          "required": ["title", "topic_ids", "uri", "content_hash", "hash_status"]
+        }
+      ]
+    },
+    "evidence_packet": {
+      "allOf": [
+        {"$ref": "#/$defs/common"},
+        {
+          "properties": {"record_type": {"const": "evidence_packet"}, "topic_id": {"type": "string"}, "candidate_id": {"type": "string"}, "claim_ids": {"$ref": "#/$defs/id_list"}, "evidence_link_ids": {"$ref": "#/$defs/id_list"}, "source_version_ids": {"$ref": "#/$defs/id_list"}, "passage_ids": {"$ref": "#/$defs/id_list"}, "query_run_ids": {"$ref": "#/$defs/id_list"}, "work_ids": {"$ref": "#/$defs/id_list"}, "dataset_ids": {"$ref": "#/$defs/id_list"}, "dependency_hashes": {"type": "object", "additionalProperties": {"$ref": "#/$defs/hash"}}, "snapshot_hash": {"$ref": "#/$defs/hash"}, "frozen_at": {"type": "string"}, "status": {"enum": ["frozen", "invalidated"]}, "invalidated_by": {"$ref": "#/$defs/id_list"}, "invalidation_reasons": {"type": "array", "items": {"type": "string"}}},
+          "required": ["topic_id", "claim_ids", "evidence_link_ids", "source_version_ids", "passage_ids", "query_run_ids", "work_ids", "dataset_ids", "dependency_hashes", "snapshot_hash", "frozen_at", "status", "invalidated_by", "invalidation_reasons"]
+        }
+      ]
+    },
+    "query_run": {
+      "allOf": [
+        {"$ref": "#/$defs/common"},
+        {
+          "properties": {"record_type": {"const": "query_run"}, "topic_id": {"type": "string"}, "query": {"type": "string"}, "provider": {"type": "string"}, "executed_at": {"type": "string"}, "result_work_ids": {"$ref": "#/$defs/id_list"}, "raw_response_hash": {"type": "string", "pattern": "^$|^[a-f0-9]{64}$"}, "observations": {"type": "array", "items": {"type": "object"}}},
+          "required": ["topic_id", "query", "provider", "executed_at", "result_work_ids", "raw_response_hash", "observations"]
+        }
+      ]
+    },
+    "reading": {
+      "allOf": [
+        {"$ref": "#/$defs/common"},
+        {
+          "properties": {"record_type": {"const": "reading"}, "work_id": {"type": "string"}, "topic_ids": {"$ref": "#/$defs/id_list"}, "source_version_ids": {"$ref": "#/$defs/id_list"}, "summary": {"type": "string"}, "status": {"type": "string"}},
+          "required": ["work_id", "topic_ids", "source_version_ids", "summary", "status"]
+        }
+      ]
+    },
+    "passage": {
+      "allOf": [
+        {"$ref": "#/$defs/common"},
+        {
+          "properties": {"record_type": {"const": "passage"}, "work_id": {"type": "string"}, "source_version_id": {"type": "string"}, "topic_ids": {"$ref": "#/$defs/id_list"}, "claim_ids": {"$ref": "#/$defs/id_list"}, "locator": {"type": "string"}, "excerpt_hash": {"$ref": "#/$defs/optional_hash"}, "paraphrase": {"type": "string"}},
+          "required": ["work_id", "source_version_id", "topic_ids", "claim_ids", "locator", "excerpt_hash", "paraphrase"]
+        }
+      ]
+    },
+    "method": {
+      "allOf": [
+        {"$ref": "#/$defs/common"},
+        {
+          "properties": {
+            "record_type": {"const": "method"},
+            "name": {"type": "string"},
+            "description": {"type": "string"},
+            "topic_ids": {"$ref": "#/$defs/id_list"},
+            "work_ids": {"$ref": "#/$defs/id_list"},
+            "relations": {"type": "array", "items": {"$ref": "#/$defs/relation"}}
+          },
+          "required": ["name", "description", "topic_ids", "work_ids", "relations"]
+        }
+      ]
+    },
+    "audit_verdict": {
+      "allOf": [
+        {"$ref": "#/$defs/common"},
+        {
+          "properties": {"record_type": {"const": "audit_verdict"}, "topic_id": {"type": "string"}, "candidate_id": {"type": "string"}, "evidence_packet_id": {"type": "string"}, "verdict": {"enum": ["pass", "conditional", "fail", "cannot_determine"]}, "rationale": {"type": "string"}, "audited_at": {"type": "string"}, "auditor": {"type": "string"}, "subject_type": {"type": "string"}, "subject_id": {"type": "string"}, "subject_hash": {"$ref": "#/$defs/optional_hash"}, "artifact_hashes": {"type": "object", "additionalProperties": {"$ref": "#/$defs/hash"}}, "protocol_hash": {"$ref": "#/$defs/optional_hash"}},
+          "required": ["topic_id", "candidate_id", "evidence_packet_id", "verdict", "rationale", "audited_at", "auditor"]
+        }
+      ]
+    },
+    "id_list": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "relation": {
+      "type": "object",
+      "required": ["relation", "target_id"],
+      "properties": {
+        "relation": {"enum": ["supports", "contradicts", "background", "mentions", "compares", "extends", "subsumes", "same_primitive_as", "relevant_to", "uses", "evaluates_on", "belongs_to"]},
+        "target_id": {"type": "string"}
+      }
+    },
+    "hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "optional_hash": {"type": "string", "pattern": "^$|^[a-f0-9]{64}$"},
+    "scope": {"enum": ["metadata", "abstract", "full_text", "supplement", "dataset"]}
+  }
+}

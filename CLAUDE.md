@@ -16,3 +16,11 @@ Re-run `/project-map update` after substantial changes.
 - Provenance: venue and NSTC ground truth (page caps, review weights,
   policies) carries `as_of`/sources and is re-verified per cycle, never
   asserted from model memory.
+- Versioning: bump the version yourself when plugin behaviour changes —
+  this is standing authorization, do not ask first. Patch = docs, wording,
+  or bug fixes; minor = a new skill/mode/gate or a changed contract; major =
+  a breaking `.research-state` or evidence-vault schema change. The same base
+  version must appear in `.claude-plugin/plugin.json`,
+  `.claude-plugin/marketplace.json`, `.codex-plugin/plugin.json`, and
+  `pyproject.toml`; run `python3 scripts/check_host_parity.py` and bump in the
+  same commit as the change it describes.

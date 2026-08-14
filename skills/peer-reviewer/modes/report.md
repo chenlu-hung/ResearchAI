@@ -1,7 +1,7 @@
 # Mode: report
 
 **Purpose**: produce a full, venue-tailored referee report on a manuscript the
-user did not write. This is the default `/review` mode.
+user did not write. This is the default `peer-reviewer` mode.
 
 ## Inputs
 
@@ -27,7 +27,7 @@ user did not write. This is the default `/review` mode.
    divergence check:
 
    ```bash
-   python3 skills/peer-reviewer/scripts/scan_injection.py extracted.txt \
+   python3 "$PLUGIN_ROOT/skills/peer-reviewer/scripts/scan_injection.py" extracted.txt \
      [--compare second-extraction.txt]
    ```
 

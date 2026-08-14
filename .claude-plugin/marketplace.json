@@ -5,14 +5,14 @@
     "email": "luhung@email.nchu.edu.tw"
   },
   "metadata": {
-    "description": "Local marketplace for the research-assistant plugin — literature exploration, algorithm brainstorming, and paper writing for Stats/ML researchers."
+    "description": "Local marketplace for the evidence-grounded ResearchAI workflow on Claude Code."
   },
   "plugins": [
     {
       "name": "research-assistant",
       "source": "./",
-      "description": "A /research autopilot conductor plus three pipeline skills (literature-explorer, algo-brainstorm, paper-writer) and a standalone /review peer-reviewer for refereeing other people's papers.",
-      "version": "0.4.0",
+      "description": "A /research conductor with reusable evidence storage, literature exploration, algorithm design, experiment gates, paper writing, and peer review.",
+      "version": "0.6.0",
       "author": {
         "name": "Lu-Hung Chen",
         "email": "luhung@email.nchu.edu.tw"

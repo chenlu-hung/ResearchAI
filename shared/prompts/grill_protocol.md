@@ -42,7 +42,9 @@ interview level.
 
 ### Discrete answer (2–4 options)
 
-Use `AskUserQuestion`. Constraints:
+Use the host's interactive user-question mechanism (`AskUserQuestion` where
+available; otherwise an equivalent one-question chat turn). Persist the answer
+in the same schema regardless of host. Constraints:
 
 - **Recommended option first**, labeled with `(Recommended)` suffix.
 - Header ≤ 12 characters.
@@ -95,7 +97,7 @@ After all essentials are answered (or short-circuited):
 1. Print a summary, **one line per essential**, in the order asked. Use
    the exact answer text the user supplied (or the recommended phrasing
    if they accepted it).
-2. Ask via `AskUserQuestion`:
+2. Ask via the host's interactive user-question mechanism:
    - Header: "Confirm"
    - Options (≤ 4 per call): `Proceed` *(Recommended)* /
      `Edit answer 1` / `Edit answer 2` / `Edit answer 3`.

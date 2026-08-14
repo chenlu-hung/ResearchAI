@@ -7,7 +7,8 @@ outline. This is the heaviest mode; expect to iterate.
 
 - Outline (required — run `outline` first if missing)
 - Algorithm card
-- `refs/<slug>.bib` (citations must be in here)
+- Validated current evidence packet(s) for the selected candidate/key claims
+- `refs/<slug>.bib` (generated view of packet canonical works)
 - Notation file `docs/notation-<slug>.md` (will create if absent)
 
 ## Pre-flight
@@ -16,7 +17,14 @@ Refuse if:
 
 - `red-team` has `blocking: true` findings unresolved
 - Outline does not exist
-- `refs/<slug>.bib` does not exist
+- Evidence packet is missing/stale/invalid or mismatches the current candidate
+- Any lifecycle gate through evidence audit/results-aware red team is
+  missing/stale/failing or has a mismatched artifact hash
+- Generated `refs/<slug>.bib` does not exist or is out of sync with canonical works
+
+Before the grill, run the deterministic `export bibtex` command in
+`paper-writer/SKILL.md` via the absolute `$EVIDENCECTL`, recompute
+`citations_view_hash`, and invalidate prior citation/static audits if it changed.
 
 ## Pre-flight grill
 
@@ -31,15 +39,17 @@ skip the interview and proceed.
 **Essentials** (ask in this order, one at a time):
 
 1. **One-sentence contribution claim** — free-form. Recommended
-   phrasing: synthesize a single sentence from `key_claims:`. Prefer the
-   first claim with `audit_status: verified`; otherwise the first claim
-   in the list. If `key_claims:` is empty, recommendation = "No basis in
-   state; user pick is authoritative."
-2. **Intended reader** — `AskUserQuestion`, header "Reader". Options:
+   phrasing: synthesize a single sentence from `key_claims:` whose claim ID and
+   passage links occur in the current packet. Prefer an already-audited claim
+   when available. If no grounded key claim exists, recommendation = "No
+   grounded basis in state; retrieve evidence before drafting."
+2. **Intended reader** — use the host's interactive question mechanism,
+   header "Reader". Options:
    theorists / applied ML practitioners / domain statisticians / mixed.
    Recommended = inferred from `venue_target:` — NeurIPS/ICML → applied
    ML practitioners; JMLR/AoS → theorists; AISTATS → mixed.
-3. **Tone / framing** — `AskUserQuestion`, header "Tone". Options:
+3. **Tone / framing** — use the host's interactive question mechanism,
+   header "Tone". Options:
    formal-proof-heavy / empirical-results-forward / framework-paper /
    hybrid. Recommended = inferred from the ratio of `theory_targets:`
    (with `must_have: true`) to the number of distinct experiments in
@@ -72,12 +82,21 @@ drafting context throughout Procedure:
 ## Procedure
 
 1. **One section at a time**. Emit, checkpoint with the user, then next.
-   Do not emit all sections in one pass — Claude's coherence degrades and
-   you will end up rewriting.
+   Do not emit all sections in one pass; bounded checkpoints protect
+   cross-section consistency and make evidence changes visible.
 
 2. **Per-section protocol**:
    - Restate the outline bullets for this section.
-   - Identify which bibkeys are needed; verify each is in the `.bib`.
+   - Decompose proposed substantive sentences into atomic claim IDs. Resolve
+     each to evidence-link/source-version IDs in the current packet, then map
+     canonical works to display bibkeys in the generated `.bib`.
+   - For experimental/numeric claims, resolve each to the audited result
+     manifest's run/artifact hashes, metric, split/population, estimate and
+     uncertainty, and frozen decision rule. Expected curves are never prose
+     evidence.
+   - If a needed claim/link is missing or a new near-neighbor appears, stop the
+     section: persist a query, run vault-first then external retrieval, inspect
+     passages, and freeze a replacement packet. Never fill the gap from memory.
    - Draft the section **as connected prose**. The outline's bullets are a
      content checklist, not a paragraph plan: merge, reorder, and connect
      them so transitions carry the argument. Do not expand one bullet into
@@ -86,9 +105,13 @@ drafting context throughout Procedure:
      (Intro contributions, enumerated assumptions, pseudocode).
    - Run a self-check:
      - Every `\cite{key}` resolves in `.bib` — verify with the script, not
-       by eye: `uv run python skills/paper-writer/scripts/check_tex.py
+       by eye: `python3 "$PLUGIN_ROOT/skills/paper-writer/scripts/check_tex.py"
        paper/main.tex --bib refs/<slug>.bib` (rule 4 of
        `execution_discipline.md`; paste its result line)
+     - Every substantive citing sentence maps to an atomic claim and stable
+       passage link in the refreshed packet; abstract-only is not `supports`
+     - Every empirical claim maps to the current manifest/evidence-audit entry;
+       no selective omission of failed/excluded runs or protocol deviations
      - Every named theorem either proved here or cited
      - Notation consistent with `docs/notation-<slug>.md` (add new symbols
        to the notation file as introduced)
@@ -98,7 +121,7 @@ drafting context throughout Procedure:
        reveals", vague declaratives) and the §F format tells (lists outside
        the allowed slots, pseudo-list `\paragraph` runs, outline residue),
        not just filler words. Mechanical subset via script, not by eye:
-       `uv run python skills/paper-writer/scripts/check_prose.py
+       `python3 "$PLUGIN_ROOT/skills/paper-writer/scripts/check_prose.py"
        paper/sections/<n>-<name>.tex` — paste its result line; fix blocking
        findings or state the waiver (e.g. "Intro contribution bullets, §F
        slot") before saving.
@@ -106,11 +129,16 @@ drafting context throughout Procedure:
 
 3. **Section ordering** (for efficiency):
    1. **Notation + Setup** (Section 2) — most constrained, foundational
-   2. **Method** (Section 3) — directly from algorithm card
+   2. **Method** (Section 3) — directly from algorithm card. For ML venues
+      (NeurIPS/ICML/AISTATS) a **method/architecture figure** is required: draw
+      it, reference it in the text, and place it before the pseudocode.
+      Reviewers read the figure before the prose; its absence costs clarity
+      scores. Flag to the user if the outline did not plan one.
    3. **Theory** (Section 4) — from `theory-scoping`
    4. **Experiments** (Section 5) — from `toy-design` + `ablation-plan`;
-      generate plots with `scripts/figs.py` (consistent vector-PDF style;
-      plot only real results, never invented numbers)
+      generate plots with `uv run --project "$PLUGIN_ROOT" --extra figures
+      python "$PLUGIN_ROOT/skills/paper-writer/scripts/figs.py"` (consistent
+      vector-PDF style; plot only real results, never invented numbers)
    5. **Related Work** — after Method so positioning is clear
    6. **Introduction** — after the body; hooks land cleaner
    7. **Abstract** — last
@@ -135,6 +163,9 @@ drafting context throughout Procedure:
      `red-team`), not generic "future work" filler
    - Related work must articulate Δ, not just enumerate citations
    - No "novel" or "first" without specific scope
+   - Weaknesses do not replace grounded closest-prior comparisons
+   - Application-only deltas are described as application contributions, never
+     method novelty
 
 ## Output
 
@@ -156,22 +187,41 @@ Glue:
 
 ## After full draft
 
-Before declaring "draft done", in order:
+Before declaring the write phase complete, in order:
 
-1. `citation-audit` — must be clean (no `fabricated` / `contradicts`);
-   its Stage 0 static check (`check_tex.py`) must also be clean.
-2. `scripts/build_paper.sh compile paper/main.tex` — the draft must build.
-3. `self-review` — one venue-reviewer pass; feed findings into `revision`.
-4. `submission-check` — the gate to `final`.
+1. Run `python3 "$PLUGIN_ROOT/skills/paper-writer/scripts/check_tex.py"
+   paper/main.tex --bib refs/<slug>.bib` and
+   `"$PLUGIN_ROOT/skills/paper-writer/scripts/build_paper.sh" compile
+   paper/main.tex`; fix
+   static/rendering failures before scientific review.
+2. Run `self-review` against the current draft/upstream hashes. It creates the
+   scientific-review artifact as `conditional` (or `fail`) and routes blocking
+   findings through `revision`.
+3. Run `citation-audit` against that current self-review artifact and draft. It
+   completes the composite scientific-review gate only when metadata and every
+   invoked substantive claim's passage support are clean.
+4. Run `submission-check` only after the composite scientific-review gate is
+   `pass`; this is the gate to `final`.
 
 ## State update
 
 ```yaml
 stage: drafting
+research_phase: drafting
 draft: paper/main.tex
+evidence_packet_id: packet-...
+evidence_packet_hash: "<64-char-lowercase-sha256-hex>"
+evidence_packet_status: current
+lifecycle_gates:
+  draft:
+    status: pass
+    artifact: paper/main.tex
+    artifact_hash: "<64-char-lowercase-sha256-hex>"
+  scientific_review:
+    status: stale
 ```
 
-When all sections checkpointed and `citation-audit` clean:
+When all sections are checkpointed and the draft/static checks pass:
 ```yaml
 stage: revision
 ```
@@ -182,10 +232,18 @@ Verify each item before declaring the draft done; fix violations first
 (`shared/prompts/execution_discipline.md` rule 2):
 
 - [ ] Grill ran or the skip notice shown; style calibration offered once.
+- [ ] Current packet matches the candidate primitives, objective/estimand,
+      data regime, and claims; generated BibTeX view is synchronized.
+- [ ] Lifecycle method/protocol/result/audit/red-team gates revalidated against
+      their artifact hashes; real results or valid theory-only proof audit exist.
 - [ ] Every section drafted via the Step 2 per-section protocol,
       checkpointed with the user, and saved under `paper/sections/`.
 - [ ] `check_tex.py` ran on the full draft with real output pasted — no
       undefined cites/refs, no missing figures.
+- [ ] ML venue: method/architecture figure drawn, placed in Method, and
+      referenced in the text — or its absence flagged to the user.
+- [ ] Per-phase complexity from the card's Cost section landed in the section
+      the outline assigned it; no aggregate-only bound.
 - [ ] Notation file carries every symbol introduced; no symbol was
       reintroduced with a different meaning.
 - [ ] Prose-hygiene pass ran per section (stop-slop if available, then
@@ -196,6 +254,12 @@ Verify each item before declaring the draft done; fix violations first
       dissolved into connected paragraphs; lists appear only in §F slots.
 - [ ] Limitations names concrete failure cases from `red-team`; Related
       Work articulates Δ per work; no unscoped "novel"/"first".
+- [ ] Every substantive literature-backed sentence has atomic claim,
+      source-version, locator, and evidence-link provenance; new claims or
+      near-neighbors triggered retrieval and a replacement packet.
+- [ ] Every empirical/numeric sentence traces to audited result artifact hashes,
+      metric/split/uncertainty and protocol rule; expected outcomes were not drafted as results.
 - [ ] The After-full-draft sequence (audit → compile → self-review →
       submission-check) was scheduled with the user.
 - [ ] State updated: `stage: drafting`, `draft: paper/main.tex`.
+- [ ] Draft hash recorded; scientific-review/submission gates marked stale until rerun.

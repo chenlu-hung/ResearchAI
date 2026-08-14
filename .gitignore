@@ -28,3 +28,6 @@ venv/
 
 # Peer-review outputs — confidential manuscripts under review; never commit
 reviews/
+
+# Internal design specs and post-mortems (reference unpublished work); never commit
+private/

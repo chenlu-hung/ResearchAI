@@ -1,9 +1,15 @@
 # Model dispatch — economy delegation
 
+Inherit the absolute `PLUGIN_ROOT` resolved from the conductor's loaded
+`SKILL.md`. Interpolate that absolute value into every implementer brief before
+spawning; a child may not inherit a shell variable or the caller's plugin
+context. Never derive plugin paths from the user's project cwd.
+
 Architect/implementer split for the conductor. The main session (the
 strongest model) keeps routing, grills, verdicts, and acceptance; token-heavy
 but judgment-light modes run in a subagent on a cheaper model. Active **only**
-when the user passed `--economy` to `/research` — never delegate by default.
+when the user passed `--economy` to the conductor request — never delegate by
+default.
 
 Two things this buys: the delegated mode's tokens bill at the cheaper model's
 rate, and its bulk reading / long output never enters the main session's
@@ -25,16 +31,19 @@ For `explore`, the "mode file" below is the whole
    interview the user; a pending grill is a hard stop for the conductor
    first, delegation after.
 2. No hard stop currently firing.
-3. The Agent tool is available and the spawn succeeds.
+3. The host provides a subagent/worker facility and the spawn succeeds.
 
 ## Spawning
 
-`Agent` with `subagent_type: "general-purpose"` and `model:` the economy
-model — default `sonnet`; the user may name another (`--economy haiku`).
+Use the host's subagent/worker facility with the requested economy model. If no
+model is named, use the host-configured economy default (legacy Claude Code
+configurations may resolve this to `sonnet`). The protocol must not require an
+`Agent`, `SendMessage`, Codex, or Claude-only API.
 **One implementer per mode, never parallel**: research-state is a shared
-file and concurrent writers corrupt it.
+control file and the evidence vault is a shared data plane; concurrent writers
+can corrupt either.
 
-Announce the hop with the model: `▶ <stage> → <mode> (economy: sonnet)`.
+Announce the hop with the resolved model: `▶ <stage> → <mode> (economy: <model>)`.
 
 ## Implementer brief (template — fill every <blank>; all paths absolute)
 
@@ -43,9 +52,13 @@ You are the implementer for one research-pipeline mode: <mode name>,
 project <topic slug>, working directory <absolute project root>.
 
 Read these in full, in order, before doing anything:
-1. <path to shared/prompts/execution_discipline.md> — binding rules.
-2. <path to the mode file> — the procedure you execute.
-3. <path to .research-state/<slug>.md> — project state.
+1. <absolute $PLUGIN_ROOT/shared/prompts/execution_discipline.md> — binding rules.
+2. <absolute $PLUGIN_ROOT/shared/prompts/evidence_grounding.md> — binding evidence rules.
+3. <absolute $PLUGIN_ROOT/shared/prompts/research_lifecycle.md> — binding lifecycle gates.
+4. <absolute $PLUGIN_ROOT/skills/evidence-store/SKILL.md> — host-neutral vault operations.
+5. <absolute $PLUGIN_ROOT path to the mode file> — the procedure you execute.
+6. <path to .research-state/<slug>.md> — project state/control plane.
+7. <absolute evidence vault path> and current packet ID/hash/status.
 Plus every file the mode file itself tells you to load (venue profiles,
 prose_hygiene.md, checklists).
 
@@ -58,7 +71,8 @@ Rules:
 3. CONSULT when: research-state is ambiguous or contradicts the mode's
    preconditions; a verdict-level judgment appears (novelty call,
    blocking-severity finding, dropping or changing a key claim); a citation
-   cannot be verified against any real source (never invent one); or a
+   cannot be verified against a canonical source passage (never invent one);
+   the packet or required lifecycle artifact/hash is missing/stale/invalid; or a
    mode-mandated approach or script fails after one honest attempt.
 4. Scripts over recall: run the real script, paste its real output.
    A simulated result is a defect, not a shortcut.
@@ -83,10 +97,10 @@ Rules:
 ## Consult loop
 
 On CONSULT, rule decisively — decision, why, what it forecloses. Answer the
-design question; don't do the mode's work for it. Reply with **SendMessage**
-to the same agent so its context survives; never spawn a fresh agent to
-continue a delegated mode. Relay each consult and ruling to the user in 1–2
-lines. Ruling format:
+design question; don't do the mode's work for it. Use the host's same-worker
+follow-up mechanism so context survives; never spawn a fresh worker to continue
+a delegated mode. Relay each consult and ruling to the user in 1–2 lines.
+Ruling format:
 
 ```text
 RULING: <decision in one sentence>
@@ -105,14 +119,25 @@ inline yourself.
    stage and body entry (routing.md completeness rule).
 2. Confirm every artifact the DONE block names exists and is non-empty.
 3. Re-run the stage's machine gates yourself and paste the result lines:
-   `full-draft` / `revision` → `check_prose.py` + `check_tex.py`;
-   `citation-audit` → read the audit JSON (any `fabricated`/`mismatched` is
-   the usual hard stop); `explore` → literature + bib artifacts exist,
-   `[VERIFY]` flags preserved on unaudited claims.
+   `full-draft` / `revision` →
+   `python3 "$PLUGIN_ROOT/skills/paper-writer/scripts/check_prose.py" ...` +
+   `python3 "$PLUGIN_ROOT/skills/paper-writer/scripts/check_tex.py" ...`;
+   `citation-audit` → read the audit JSON and passage report (any
+   `fabricated`/`mismatched` or unsupported claim is a hard stop); `explore` →
+   validate canonical records and packet, then confirm survey + generated BibTeX
+   views exist. `[VERIFY]` items must remain persisted unresolved queries.
 4. `Exit checklist: N/N` line present in the DONE block; a shortfall names
-   its item and reason, or the run goes back via SendMessage.
-5. Judgment spot-check: skim for silently dropped claims, softened findings,
+   its item and reason, or the run goes back through the host's same-worker
+   follow-up mechanism.
+5. Resolve the absolute evidence entrypoint per `evidence_grounding.md`, then
+   run `python3 "$EVIDENCECTL" validate --vault <absolute vault>` and
+   verify packet dependency hashes/status against the candidate and claim set.
+   A stale/invalidated packet rejects DONE.
+6. Recompute every lifecycle artifact hash the mode claims, validate the
+   phase→gate mapping, and reject DONE if an upstream gate is absent/stale or if
+   expected/plan values were presented as observed results.
+7. Judgment spot-check: skim for silently dropped claims, softened findings,
    or invented citations — architecture-level deviations go back to the
    implementer citing the mode file; small mechanical slips you fix inline.
 
-Only after 1–5 does the conductor advance to the next hop.
+Only after 1–7 does the conductor advance to the next hop.

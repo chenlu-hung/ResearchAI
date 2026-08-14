@@ -1,109 +1,159 @@
 # Mode: novelty-check
 
-**Purpose**: for each active candidate from `ideate`, compare against the
-most-relevant prior art and write a contribution statement that articulates
-exactly what is new (Δ).
+**Purpose**: compare each active candidate against passage-grounded prior art
+and articulate its exact methodological delta.
 
-## Inputs
+## Hard input gate
 
-- `candidates:` from research state (at least one with `status: active`)
-- Retrieved literature from `literature-explorer` — required for honest
-  comparison. If unavailable, refuse with: "novelty cannot be claimed
-  without retrieval; run `/explore <topic>` first."
+For every candidate require:
+
+- a canonical candidate ID;
+- explicit primitives/components, objective/estimand, data regime/assumptions,
+  and atomic claim IDs; and
+- a validated `current` candidate-specific evidence packet whose fingerprint
+  matches those fields.
+
+Legacy `literature:`/`citations:` paths or a `.bib` alone do not satisfy this
+gate. Migrate/import them, ground claims, and freeze a packet first. If a packet
+is missing/stale, do the retrieval loop or refuse to issue a novelty verdict.
+Follow `shared/prompts/evidence_grounding.md`.
 
 ## Procedure
 
-For **each active candidate**:
+For each active candidate:
 
-1. **Identify the 3–5 most-similar prior works** via:
-   - Direct similarity in the retrieved set (same primitive, same problem)
-   - Forward/backward citation chase from those (use Semantic Scholar
-     citation graph)
-   - Recent preprints (arXiv ≤6 months) — these are easy to miss and ICML
-     reviewers will catch you on them
+1. **Validate identity and freshness.** Recompute/compare the primitives,
+   objective, data-regime, and claim basis. Any material change invalidates the
+   packet; persist the reason and refresh before continuing.
 
-2. **Same/Different/Δ table** per related paper:
+2. **Find nearest prior art.** Query the vault first for the same problem,
+   primitive, objective, assumptions, and claimed delta. Persist each query-run.
+   Retrieve externally only for uncovered axes, including recent preprints.
+   When cited-by/reference traversal is available, persist those graph searches
+   as query-runs too; do not assume a particular search script implements them.
+
+3. **Structural-isomorphism search (mandatory).** Write the candidate as a
+   **domain-free mathematical skeleton**: strip every application noun, dataset
+   name, and field-specific term, leaving only objects, operators, objective,
+   and regime — e.g. "a ridge-learned linear map aligning PCA latent spaces of
+   two related representations". Query the vault and then external providers on
+   that skeleton **across fields** (at minimum: computer vision, signal
+   processing, reduced-order modeling, multivariate statistics, plus any field
+   the skeleton's primitives came from) **and across decades, explicitly
+   including pre-2015 classic literature**. Reuse and extend the
+   math-skeleton axis of `docs/corpus-manifest-<slug>.md`
+   (`skills/literature-explorer/corpus-prefetch.md`); persist every run as a
+   query-run. Record in the prior-art audit and method-freeze artifacts: the
+   skeleton text verbatim, the queried fields, the year coverage per field, and
+   every structural query left unresolved. A skeleton match is prior art even
+   when no vocabulary overlaps.
+
+4. **Ground comparison claims.** Inspect primary passages and create atomic
+   evidence links for what each work actually computes, assumes, and proves.
+   Search metadata/abstracts may prioritize reading but cannot support a
+   Same/Different/Δ row. Corpus-manifest hits are alarm evidence only
+   (`shared/prompts/evidence_grounding.md`, two-fidelity rule): they justify a
+   query, never a row or a verdict.
+
+5. **Loop on discoveries.** Every new near-neighbor or competing formulation
+   becomes a query. Add its source version and links, invalidate the old packet,
+   then freeze/validate a replacement before continuing.
+
+6. **Write a Same/Different/Δ table** from the refreshed packet:
 
    ```markdown
-   #### Candidate 1: <name>
-   
-   | Related work | What's the same | What's different | The Δ |
-   |--------------|-----------------|------------------|-------|
-   | Tibshirani 2019 | Weighted quantile reweighting | They assume $w$ known | We estimate $w$ via DML with cross-fitting and obtain $n^{-1/4}$ remainder |
-   | Barber 2023 | Jackknife+ for non-exchangeable | Different shift model | Their result is conditional; ours marginal under shift |
-   | ...
+   | Related work | What's the same | What's different | The Δ | Evidence links |
+   |--------------|-----------------|------------------|-------|----------------|
+   | work-... | ... | ... | ... | claim-... → evidence-... |
    ```
 
-3. **Contribution statement** (one paragraph, paper-intro ready):
+7. **Classify the delta.** Compare algorithmic primitives, objective/estimand,
+   data regime, assumptions, guarantee, and computation. Moving an existing
+   method to a new application/domain/dataset is **application novelty only**
+   and can never by itself receive a `novel` method verdict.
 
-   > Compared to [Tibshirani 2019], who assumes $w$ is known, we propose a
-   > cross-fitted DML estimator for $w$ and prove that the resulting
-   > prediction set retains marginal coverage with an $O(n^{-1/4})$
-   > remainder. Compared to [Barber 2023], who provide conditional
-   > validity under non-exchangeability, our result is marginal but
-   > applies under a broader class of shift models.
+8. **Compositional-novelty test (mandatory).** When the candidate is a
+   composition of standard components, decompose it into its parts and answer,
+   per part, "does this already exist?" with grounded evidence; then answer for
+   the composition itself: "is the composition non-obvious **and** necessary —
+   would the naive combination fail, and why?" Record both answers. A
+   composition whose parts all exist and whose glue is routine **cannot receive
+   `novel`**; at best it is `incremental`. Naming the composition is not an
+   argument for it.
 
-4. **Novelty verdict** per candidate:
+9. **Issue a verdict only after the gate:**
+   - `novel` — a material method delta remains after grounded comparison;
+   - `incremental` — a real but small method delta remains; or
+   - `subsumed` — prior work already implements or proves the claim in essence.
 
-   - `novel` — clearly distinct delta, articulated above
-   - `incremental` — delta exists but is small; flag for user to decide
-     if worth pursuing
-   - `subsumed` — at least one prior work already does this, in essence;
-     candidate should be dropped or substantially modified
+   A `novel` verdict requires at least three grounded closest works and a delta
+   against each, a completed structural-isomorphism search (step 3), and a
+   passed compositional-novelty test (step 8). “Nothing found” is a retrieval
+   failure, not evidence of novelty. If coverage is insufficient, report
+   unresolved queries and **issue no verdict** — absence of a verdict is itself
+   a blocking state downstream, not a neutral one.
 
-5. **For subsumed candidates**: do not silently delete. Move to
-   `dropped:` in research state with `drop_reason` citing the subsuming
-   work.
+10. **Persist disposition.** Keep subsumed candidates in `dropped:` with a
+    passage-grounded `drop_reason`; never delete them. Freeze the final packet and
+    write its ID/hash/status into state.
 
-## Citation graph chase
+11. **Prior-art audit + method freeze.** Persist a canonical `audit_verdict` for
+    the final packet and update `lifecycle_gates.prior_art_audit`. A `conditional`
+    verdict needs explicit user acceptance. Require exactly one chosen candidate
+    before freezing the method; if several survive, hard-stop for the choice.
 
-Use this minimum protocol:
+    **Minimum verdict for freeze**, checked before anything is written:
 
-- Take each "most similar" paper
-- Pull its 5 most-cited references and 5 most-recent citing papers
-- Scan for anything that would invalidate the Δ
-- If you find something, update the table
+    - `novel` — may freeze;
+    - `incremental` — may freeze **only** with a persisted
+      `incremental_accepted: true` plus a one-line user rationale
+      (`incremental_acceptance_rationale:`) in state, obtained from the user in
+      this session or already recorded; without both fields, hard-stop;
+    - `subsumed` — can **never** freeze; the candidate goes to `dropped:`;
+    - no verdict issued (insufficient coverage) — can never freeze; hard-stop
+      with the unresolved queries.
 
-Tools: `skills/literature-explorer/scripts/search_semantic_scholar.py`
-can fetch by paperId via the `/paper/{id}/citations` and `/paper/{id}/references`
-endpoints (add as needed — keep this in mind for ablation-plan stage).
+    **Freeze the contribution spine.** Before writing the artifact, choose from
+    `docs/claim-map-<slug>.md` **exactly one primary claim** and **at most three
+    supporting claims**, each named by claim ID — never by prose restatement. The
+    spine is what the paper is about; everything downstream binds to it:
+    experiments map to spine claims (`toy-design.md`), outline bullets tag the
+    spine claim they advance (`paper-writer/modes/outline.md`), and `self-review`
+    audits whether the written paper's apparent contribution still matches the
+    primary claim. A candidate that cannot name one primary claim is not ready to
+    freeze — say so and hard-stop rather than freezing a diffuse spine. More than
+    three supporting claims means the paper is two papers; make the user choose.
+
+    Then write/hash `docs/method-freeze-<slug>.md` with the candidate/method IDs,
+    primitives/components, objective/estimand, regime/assumptions, claim IDs and
+    dependency hashes, the domain-free skeleton text with its queried fields and
+    year coverage, the compositional-novelty decomposition and verdict, the
+    contribution spine (primary + supporting claim IDs), the recorded novelty
+    verdict (plus acceptance rationale when `incremental`), and
+    final packet/audit IDs, then set
+    `lifecycle_gates.method_freeze.status: frozen`. Follow
+    `shared/prompts/research_lifecycle.md`.
 
 ## Anti-sycophancy
 
-Hard rule: you may not declare a candidate `novel` without listing ≥3
-related works and articulating Δ against each. Bare "I couldn't find
-anything similar" is not acceptable — that's a retrieval failure, not
-a novelty result.
+Always state substantive weaknesses **and** run grounded prior-art pressure
+before endorsing a contribution. Weaknesses cannot substitute for prior art.
+The intro-ready contribution statement must be traceable sentence-by-sentence
+to the final packet.
 
 ## Council panel (opt-in)
 
-When invoked with `--council`, convene a panel to **attack the Δ** before you commit a
-verdict. Heterogeneous models surface prior art and subsumption angles a single model
-misses. Follow `shared/prompts/council_panel.md` — novelty-check is a **critique** *and*
-**adversarial** mode, so cross-review and the conditional cross-examination both apply.
+With `--council`, give members the bounded candidate plus current packet and ask
+them to attack the delta. Always include this fixed question verbatim, in
+addition to the mode's own attack prompts:
 
-- **Panel prompt**: each active candidate's contribution statement + Same/Different/Δ table,
-  asking each member: "Where is this *not* novel? Name the closest prior work and say what
-  Δ it kills." Frame it as adversarial — you want the strongest subsumption case, not praise.
-- **Cross-examination (conditional)**: when members disagree on a verdict
-  (`novel`/`incremental`/`subsumed`), run **one** rebuttal round — send the contested
-  candidate back with the strongest "this is subsumed by X" objection and ask the author to
-  defend the Δ or concede.
-- **Evidence gate — NON-NEGOTIABLE**: a member's "subsumed by X" is a **hypothesis, not a
-  result**. You may **not** flip a verdict to `incremental`/`subsumed` on a member's say-so.
-  For each proposed prior work, **verify against the retrieved set** (and a citation-graph
-  chase via `skills/literature-explorer/scripts/search_semantic_scholar.py`):
-  - If X exists and genuinely subsumes the Δ → flip the verdict, cite X from the verified
-    bibliography, and record it in `closest_prior`.
-  - If X is unretrievable or doesn't actually subsume → **discard the attack**, note why in
-    one line. Bare "a model said it's not novel" is a retrieval/verification task, **never**
-    a novelty result — the same hard rule as the Anti-sycophancy section above.
+> In what other field has this exact mathematical structure already been done?
 
-  Members reasoning about novelty from parametric memory only converge on shared priors;
-  the retrieval gate is exactly what stops a confident hallucinated citation from sinking a
-  good candidate. Panel-proposed works enter state only after verification, `[VERIFY]`-clean.
-
-Without `--council`, run novelty-check single-model exactly as above.
+Give members the domain-free skeleton from step 3 alongside the candidate so the
+question is answerable. Every named work or objection is a hypothesis: persist
+it as a query, run vault-first/external retrieval, inspect the passage, refresh
+the packet, and only then let it change a verdict. Follow
+`shared/prompts/council_panel.md`; no verdict flips on model agreement or say-so.
 
 ## State update
 
@@ -111,47 +161,81 @@ Without `--council`, run novelty-check single-model exactly as above.
 stage: novelty
 candidates:
   - id: cand-1
-    novelty: novel
+    evidence_candidate_id: candidate-cand-1
+    evidence_packet_id: "<packet-id-returned-by-evidencectl>"
+    evidence_packet_hash: "<64-char-lowercase-sha256-hex>"
+    evidence_packet_status: current
+    novelty: novel          # novel | incremental | subsumed
+                            # when no verdict was issued, leave `ideate`'s
+                            # `pending` placeholder in place — never invent one
+    # required only when novelty: incremental and the candidate is to be frozen
+    incremental_accepted: true
+    incremental_acceptance_rationale: "<one line, user's own words>"
+    structural_skeleton: "<domain-free mathematical skeleton, one sentence>"
+    skeleton_fields_queried: ["computer vision", "signal processing", "..."]
+    skeleton_year_coverage: "1970–2026"
+    compositional_test: non_obvious   # non_obvious | routine_composition
     contribution_statement: "..."
+spine:
+  primary: claim-novelty-1          # exactly one
+  supporting: [claim-limit-1, claim-theory-2]   # 0–3, all from the claim map
+  frozen_with: docs/method-freeze-<slug>.md
     closest_prior:
-      - ref: tibshirani2019
-        delta: "..."
-      - ref: barber2023
+      - work_id: work-...
+        claim_ids: [claim-...]
+        evidence_link_ids: [evidence-...]
         delta: "..."
 key_claims:
-  - claim: "<the contribution statement, distilled>"
-    supporting_refs: [tibshirani2019, barber2023, ...]
+  - claim_id: claim-novelty-1
+    claim: "..."
+    evidence_link_ids: [evidence-...]
+    supporting_refs: [generated-bibkey]
     audit_status: pending
+lifecycle_gates:
+  prior_art_audit:
+    status: pass
+    candidate_id: candidate-cand-1
+    evidence_packet_id: "<packet-id-returned-by-evidencectl>"
+    evidence_packet_hash: "<64-char-lowercase-sha256-hex>"
+    audit_id: "<audit-id-returned-by-evidencectl>"
+  method_freeze:
+    status: frozen
+    artifact: docs/method-freeze-<slug>.md
+    artifact_hash: "<64-char-lowercase-sha256-hex>"
+    candidate_id: candidate-cand-1
+    novelty_verdict: novel        # novel | incremental (with acceptance); never subsumed
+research_phase: method_frozen
 ```
 
-The `audit_status: pending` will be flipped to `verified` once
-`paper-writer citation-audit` confirms the citations exist and support
-the comparisons made.
-
-## Failure modes
-
-- If no candidates pass novelty: tell the user honestly, offer to return
-  to `ideate` with explicit constraints (e.g., "ideate candidates that
-  attack a different gap").
-- If multiple candidates are equally novel: do not pick a winner. Present
-  trade-offs and let the user choose.
+`paper-writer citation-audit` later checks rendering metadata and whether each
+invoked sentence is supported by these passages; it does not manufacture the
+evidence here.
 
 ## Exit checklist
 
-Verify each item before emitting; fix violations first
-(`shared/prompts/execution_discipline.md` rule 2):
-
-- [ ] Retrieval present (`literature:` + `citations:` non-empty) — or you
-      refused with the exact message in Inputs.
-- [ ] Every active candidate has ≥3 related works, each with a filled
-      Same / Different / Δ row.
-- [ ] Citation-graph chase ran per most-similar paper (5 refs + 5 citers),
-      or `Skipped step: <reason>` appears in the output.
-- [ ] Verdict per candidate ∈ {novel, incremental, subsumed}; `novel` only
-      with the ≥3-works rule met — never from "couldn't find anything".
-- [ ] Subsumed candidates moved to `dropped:` with `drop_reason` citing the
-      subsuming work; nothing silently deleted.
-- [ ] `key_claims` written with `supporting_refs` from the verified set and
-      `audit_status: pending`.
-- [ ] (`--council`) every panel attack was verified against retrieval or
-      discarded with a one-line reason; no verdict flipped on say-so.
+- [ ] Exact candidate has a validated current packet; legacy `.bib` alone was rejected.
+- [ ] Vault-first retrieval covered primitive, objective, regime, claim, and recent work.
+- [ ] Domain-free mathematical skeleton written verbatim into the prior-art
+      audit and method-freeze artifacts.
+- [ ] Cross-field and pre-2015 coverage recorded per queried field; unresolved
+      structural queries listed, not silently dropped.
+- [ ] Compositional-novelty test run: per-component existence answered and the
+      composition judged non-obvious **and** necessary, or `novel` refused.
+- [ ] Every comparison row has primary-passage evidence links; no row rests on a
+      corpus-manifest hit alone.
+- [ ] New near-neighbors triggered query/link/re-freeze before the verdict.
+- [ ] `novel` has ≥3 grounded closest works and explicit deltas.
+- [ ] Application-only change was not labeled method novelty.
+- [ ] Subsumed candidates were moved, not deleted, with grounded reasons.
+- [ ] Panel items changed results only after evidence verification; the fixed
+      cross-field structure question was asked when `--council` ran.
+- [ ] Final packet ID/hash/status and claim/link IDs were written to state.
+- [ ] Canonical prior-art audit persisted; conditional status explicitly accepted.
+- [ ] Contribution spine frozen: exactly one primary claim ID and ≤3 supporting
+      claim IDs, all drawn from the claim map, written to `spine:` and into the
+      method-freeze artifact.
+- [ ] Method freeze cleared the minimum-verdict rule: `novel`, or `incremental`
+      with persisted `incremental_accepted: true` + rationale. `subsumed` or
+      no-verdict hard-stopped instead of freezing.
+- [ ] Exactly one chosen candidate has a hashed method-freeze artifact, or the
+      mode hard-stopped for selection.

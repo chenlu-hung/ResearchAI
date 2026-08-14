@@ -11,7 +11,8 @@ where k = number of distinct perspectives (input labels) that retrieved the
 paper. Unknown year counts as age 3.
 
 Usage:
-    python3 dedupe_rank.py theorist.jsonl critic.jsonl --out ranked.jsonl --md ranked.md
+    python3 "$PLUGIN_ROOT/skills/literature-explorer/scripts/dedupe_rank.py" \
+        theorist.jsonl critic.jsonl --out ranked.jsonl --md ranked.md
 
 Each input file's label (= perspective) defaults to its filename stem; a
 `perspective` field on a JSON line overrides it. Stdlib only.

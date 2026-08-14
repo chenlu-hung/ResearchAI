@@ -11,12 +11,18 @@ submission-check would otherwise eyeball:
   * unused .bib entries (informational)
   * optional --must-include tokens (venue_profiles.md `must_include`) found
     in the source (missing = blocking)
+  * optional --abstract-word-limit (venue_profiles.md `abstract_word_limit`):
+    words inside \\begin{abstract}..\\end{abstract} (over limit = blocking;
+    no abstract found = warning). submission-check downgrades this to WARN
+    when the venue lists `abstract_word_limit` in its `unverified:` block.
 
 Follows \\input/\\include recursively from the main file. Comments stripped.
 
 Usage:
-    python3 check_tex.py paper/main.tex --bib refs/<slug>.bib \\
-        [--must-include limitations broader_impact ...] [--json]
+    python3 "$PLUGIN_ROOT/skills/paper-writer/scripts/check_tex.py" \\
+        paper/main.tex --bib refs/<slug>.bib \\
+        [--must-include limitations broader_impact ...] \\
+        [--abstract-word-limit 250] [--json]
 
 Exit codes: 0 = clean, 1 = blocking findings, 2 = usage error. Stdlib only.
 """
@@ -52,9 +58,37 @@ MUST_INCLUDE_PATTERNS: dict[str, str] = {
 
 GRAPHIC_EXTS = ["", ".pdf", ".png", ".jpg", ".jpeg", ".eps"]
 
+ABSTRACT_RE = re.compile(r"\\begin\{abstract\}(.*?)\\end\{abstract\}",
+                         re.DOTALL | re.IGNORECASE)
+# Inline/display math counts as one word each; a formula is not prose but it is
+# not free either.
+MATH_RE = re.compile(r"\$\$.*?\$\$|\$[^$]*\$|\\\[.*?\\\]|\\\(.*?\\\)", re.DOTALL)
+TEX_CMD_RE = re.compile(r"\\[a-zA-Z@]+\*?")
+WORD_TOKEN_RE = re.compile(r"[A-Za-z0-9]")
+
 
 def strip_comments(tex: str) -> str:
     return "\n".join(COMMENT_RE.sub("", line) for line in tex.splitlines())
+
+
+def count_abstract_words(text: str) -> int | None:
+    """Word count inside \\begin{abstract}..\\end{abstract}, or None if absent.
+
+    Deterministic and conservative: each math group counts as one word, TeX
+    control sequences and brace/format characters are dropped, and a token
+    counts only if it contains an alphanumeric character. Concatenates multiple
+    abstract environments (rare, but a template may define one per language).
+    """
+    blocks = ABSTRACT_RE.findall(text)
+    if not blocks:
+        return None
+    total = 0
+    for body in blocks:
+        body = MATH_RE.sub(" MATH ", body)
+        body = TEX_CMD_RE.sub(" ", body)
+        body = re.sub(r"[{}~\\&%#_^]", " ", body)
+        total += sum(1 for tok in body.split() if WORD_TOKEN_RE.search(tok))
+    return total
 
 
 def gather_sources(main: Path) -> tuple[dict[str, str], list[str]]:
@@ -104,8 +138,17 @@ def main() -> int:
     ap.add_argument("--pattern", action="append", default=[], metavar="TOKEN=REGEX",
                     help="extra must_include token pattern (from the venue's "
                          "must_include_patterns block); repeatable")
+    ap.add_argument("--abstract-word-limit", type=int, default=None,
+                    metavar="N",
+                    help="venue abstract_word_limit (venue_profiles.md); "
+                         "over the limit is blocking, no abstract is a warning")
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
+
+    if args.abstract_word_limit is not None and args.abstract_word_limit <= 0:
+        print("error: --abstract-word-limit expects a positive integer",
+              file=sys.stderr)
+        return 2
 
     patterns = dict(MUST_INCLUDE_PATTERNS)
     for spec in args.pattern:
@@ -164,6 +207,16 @@ def main() -> int:
         else:
             must_missing.append(token)
 
+    abstract_words = None
+    abstract_over_limit = False
+    if args.abstract_word_limit is not None:
+        abstract_words = count_abstract_words(all_text)
+        if abstract_words is None:
+            warnings.append(
+                "--abstract-word-limit given but no \\begin{abstract} found")
+        elif abstract_words > args.abstract_word_limit:
+            abstract_over_limit = True
+
     report = {
         "files_scanned": sorted(sources),
         "cite_keys": len(cites),
@@ -175,10 +228,13 @@ def main() -> int:
         "must_include_found": must_found,
         "must_include_missing": must_missing,
         "must_include_unknown_tokens": must_unknown,
+        "abstract_word_limit": args.abstract_word_limit,
+        "abstract_words": abstract_words,
+        "abstract_over_limit": abstract_over_limit,
         "warnings": warnings,
     }
     blocking = bool(undefined_cites or undefined_refs or missing_graphics
-                    or must_missing or must_unknown)
+                    or must_missing or must_unknown or abstract_over_limit)
 
     if args.json:
         print(json.dumps(report, ensure_ascii=False, indent=2))
@@ -196,6 +252,10 @@ def main() -> int:
             print(f"unused_bib_entries (info, {len(unused_bib)}): {', '.join(unused_bib)}")
         if must_found:
             print(f"must_include_found: {', '.join(must_found)}")
+        if abstract_words is not None:
+            verdict = "OVER LIMIT" if abstract_over_limit else "ok"
+            print(f"abstract_words: {abstract_words} / "
+                  f"{args.abstract_word_limit} ({verdict})")
         print("RESULT: " + ("BLOCKING FINDINGS" if blocking else "clean"))
     return 1 if blocking else 0
 

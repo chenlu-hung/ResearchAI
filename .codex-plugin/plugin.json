@@ -1,0 +1,25 @@
+{
+  "name": "research-ai",
+  "version": "0.6.0",
+  "description": "An evidence-grounded Stats/ML workflow for literature discovery, algorithm design, experiments, paper drafting, and peer review.",
+  "author": {
+    "name": "ResearchAI"
+  },
+  "license": "MIT",
+  "keywords": ["statistics", "machine-learning", "research", "academic-writing", "peer-review"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "ResearchAI",
+    "shortDescription": "Evidence-grounded Stats/ML workflow",
+    "longDescription": "Develop Stats/ML research through reusable literature evidence, algorithm ideation, experiment gates, venue-aware drafting, and peer review.",
+    "developerName": "ResearchAI",
+    "category": "Productivity",
+    "capabilities": ["Research", "Evidence", "Write", "Review"],
+    "defaultPrompt": [
+      "Help me survey a Stats/ML research topic.",
+      "Turn my algorithm idea into a research plan.",
+      "Review this manuscript for a target venue."
+    ],
+    "brandColor": "#2563EB"
+  }
+}

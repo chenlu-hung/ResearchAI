@@ -24,8 +24,10 @@ Run after every venue-calibration and in CI; it would have caught the
 `proofs` vs `proofs_in_main` drift that shipped with the initial profiles.
 
 Usage:
-    python3 check_venues.py [--profiles shared/venue_profiles.md]
-        [--style-dir skills/paper-writer/style] [--max-age-days 365] [--json]
+    python3 "$PLUGIN_ROOT/skills/paper-writer/scripts/check_venues.py" \\
+        [--profiles "$PLUGIN_ROOT/shared/venue_profiles.md"] \\
+        [--style-dir "$PLUGIN_ROOT/skills/paper-writer/style"] \\
+        [--max-age-days 365] [--json]
 
 Exit codes: 0 = clean, 1 = blocking findings, 2 = usage error. Stdlib only.
 """

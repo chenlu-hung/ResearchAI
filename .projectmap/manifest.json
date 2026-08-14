@@ -1,33 +1,48 @@
 {
-  "generated": "2026-07-17T03:04:56+00:00",
+  "generated": "2026-08-14T05:20:22+00:00",
   "mode": "update",
   "depth": 2,
   "source": "git",
-  "files": 18,
+  "files": 29,
   "modules": {
-    "shared": {
-      "hash": "e78ed6bea037d842d66cc177bcd1cc08cd84079a575bd6032c5d9c540311ce81",
+    "scripts": {
+      "hash": "cc9f9a4fba5716ea9a2e31f55dbe3509ad0194134d603fcf395f63c4bc837597",
       "files": 1,
+      "doc": "modules/scripts.md"
+    },
+    "shared": {
+      "hash": "87aa8c32116c26c287b29b232e4f05e2d3bfedeab69325a20d1df3e0d6bc13eb",
+      "files": 2,
       "doc": "modules/shared.md"
     },
+    "shared/evidence_core": {
+      "hash": "0ec53728a7937ca582933c6dfbe07a916e3aef43ca75fb803878bf3d07408c2b",
+      "files": 4,
+      "doc": "modules/shared__evidence_core.md"
+    },
+    "skills/evidence-store": {
+      "hash": "6c018edad5dbfde92c25d8cddfbadaa086aab4668d650a659fb3309557c00909",
+      "files": 1,
+      "doc": "modules/skills__evidence-store.md"
+    },
     "skills/literature-explorer": {
-      "hash": "893a2ccbbe634127e027cc2b25f7946f4dd58c6222c7c87b816059679a83158f",
+      "hash": "729a4c7e44bc7f58ae7ae997d620bc2205bc04711a7d5c2bbeae90041f39e2aa",
       "files": 5,
       "doc": "modules/skills__literature-explorer.md"
     },
     "skills/paper-writer": {
-      "hash": "fb64fd28ee83b86bcf4f2cad64ddf66afd741b2114fcb675a62a3b4970a03526",
+      "hash": "9665bed1f6085abac5f327a2635b5f7304f46c04a52d2e428d5854e8304a7691",
       "files": 5,
       "doc": "modules/skills__paper-writer.md"
     },
     "skills/peer-reviewer": {
-      "hash": "5d12265046a6d153d41330b8e068104de82617e6b688e069c149e4d377c5a3a8",
+      "hash": "4f9e28eef9dbdb2e476ea613ac4a39e71eb8f1f0ef6be7e0533cf26d6acb3bc2",
       "files": 1,
       "doc": "modules/skills__peer-reviewer.md"
     },
     "tests": {
-      "hash": "d303b1dfc329821919364861124a666eedd8c5edccc69a6f41b9ad0ffe63f1ca",
-      "files": 6,
+      "hash": "2def4f95ee3862b1732617d9fa39d472a0a27bfbafe25570afc6b3e18a750e02",
+      "files": 10,
       "doc": "modules/tests.md"
     }
   }

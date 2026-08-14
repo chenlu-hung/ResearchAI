@@ -47,7 +47,7 @@ confirm the current policy for their venue/year**:
 - Some venues permit LLM *assistance* (e.g. polishing the reviewer's own text)
   but not LLM-*authored* reviews.
 
-**Operating rule regardless of venue**: the output of `/review` is a **draft to
+**Operating rule regardless of venue**: the output of `peer-reviewer` is a **draft to
 inform the human reviewer's own reading and judgment**. The human reviewer reads
 the paper themselves, verifies every claim the draft makes, and owns and signs
 the final review. Never present the draft as a review to paste in verbatim.

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Evidence Store"
+  short_description: "Ground research claims in reusable source evidence"
+  default_prompt: "Use $evidence-store to capture, validate, and freeze evidence for this research topic."

@@ -25,7 +25,8 @@ This script cannot judge §F slot legitimacy (e.g. Intro contribution bullets)
 or §E exceptions — the caller waives findings explicitly, naming the slot.
 
 Usage:
-    python3 check_prose.py paper/sections/03-method.tex [more files ...]
+    python3 "$PLUGIN_ROOT/skills/paper-writer/scripts/check_prose.py" \
+        paper/sections/03-method.tex [more files ...]
         [--max-lists 1] [--max-list-ratio 0.20] [--max-heading-density 5.0]
         [--max-emdash-rate 4.0] [--json]
 

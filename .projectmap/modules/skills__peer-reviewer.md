@@ -8,10 +8,10 @@ Deterministic helper behind the `peer-reviewer` skill's mandatory injection scan
 - `skills/peer-reviewer/scripts/scan_injection.py`
 
 ## Public symbols (4)
-- `function scan_text` — skills/peer-reviewer/scripts/scan_injection.py:43
-- `function _substantive_lines` — skills/peer-reviewer/scripts/scan_injection.py:63
-- `function compare_extractions` — skills/peer-reviewer/scripts/scan_injection.py:72
-- `function main` — skills/peer-reviewer/scripts/scan_injection.py:82
+- `function scan_text` — skills/peer-reviewer/scripts/scan_injection.py:44
+- `function _substantive_lines` — skills/peer-reviewer/scripts/scan_injection.py:64
+- `function compare_extractions` — skills/peer-reviewer/scripts/scan_injection.py:73
+- `function main` — skills/peer-reviewer/scripts/scan_injection.py:83
 
 ## Dependencies (imports)
 - `__future__`

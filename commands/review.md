@@ -3,12 +3,20 @@ description: Peer-review someone else's paper as a venue reviewer. Plug-and-play
 argument-hint: <paper-path|arxiv-id|url> [--venue neurips|icml|jmlr|aistats|aos|generic] [--depth quick|standard|deep] [--council]
 ---
 
+Resolve `PLUGIN_ROOT` from this loaded command file before loading anything:
+it is the absolute parent of the file's `commands/` directory. Never derive it
+from the user's working directory. Resolve every `skills/...`, `shared/...`, or
+other plugin resource below as `$PLUGIN_ROOT/<path>`. Dependency-bearing Python
+scripts use `uv run --project "$PLUGIN_ROOT" python "$PLUGIN_ROOT/<path>"`;
+stdlib-only scripts use `python3 "$PLUGIN_ROOT/<path>"`.
+
 Invoke the `peer-reviewer` skill: $ARGUMENTS
 
 This is the **plug-and-play** entry for reviewing *other people's* manuscripts.
-Unlike `/write self-review` (which critiques *your own* draft and assumes
-`.research-state`), `/review` takes an external artifact and needs **no project
-state** — just a file and, ideally, a target venue.
+Unlike `/research-assistant:write self-review` (which critiques *your own* draft
+and assumes `.research-state`), `/research-assistant:review` takes an external
+artifact and needs **no project state** — just a file and, ideally, a target
+venue.
 
 Modes (see `skills/peer-reviewer/SKILL.md`):
 

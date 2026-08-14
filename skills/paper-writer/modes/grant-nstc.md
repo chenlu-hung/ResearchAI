@@ -111,7 +111,9 @@ unaddressed difficulty outweighs polished prose elsewhere.
   eye in Chinese drafts): 「近年來，隨著…的快速/蓬勃發展」開場、
   「值得注意的是」「綜上所述」「不僅…更…」堆疊、每段等長、
   full-width em-dash 濫用、條列取代論證。
-- English drafts: run `check_prose.py` per section as usual.
+- English drafts: run
+  `python3 "$PLUGIN_ROOT/skills/paper-writer/scripts/check_prose.py"` per
+  section as usual.
 
 ## AI-use disclosure
 

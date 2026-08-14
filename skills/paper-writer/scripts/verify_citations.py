@@ -9,7 +9,8 @@ at the first match. Multi-source fallback avoids false `fabricated` verdicts on
 very recent preprints that one index has not yet ingested.
 
 Usage:
-    uv run python skills/paper-writer/scripts/verify_citations.py \
+    uv run --project "$PLUGIN_ROOT" python \
+        "$PLUGIN_ROOT/skills/paper-writer/scripts/verify_citations.py" \
         --bib refs/<slug>.bib --out audit.json
 
 Env: SEMANTIC_SCHOLAR_API_KEY (optional), OPENALEX_MAILTO (polite pool).

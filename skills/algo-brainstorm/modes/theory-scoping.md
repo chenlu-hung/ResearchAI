@@ -7,6 +7,7 @@ must-haves vs. nice-to-haves given the venue.
 ## Inputs
 
 - A chosen candidate from `novelty-check` (must have `status: chosen`)
+- A validated frozen method artifact from the lifecycle gate
 - `venue_target` from research state (loads `shared/venue_profiles.md`)
 
 ## Procedure
@@ -95,6 +96,14 @@ If proof sketches are produced, save them to `docs/proof-sketch-<kind>.md`
 (separate file per theorem so they can be edited in isolation later by
 paper-writer).
 
+If—and only if—the work is explicitly pure theory, the venue fit supports that
+choice, no empirical key claim remains, and the user confirms, record hashed
+proof artifact paths and a concrete rationale while marking
+`experiment_contract`, `protocol_freeze`, and `results_ingested`
+`not_applicable` per `shared/prompts/research_lifecycle.md`. This skips runs, not
+evidence: `red-team` must still perform a proof/claim evidence audit before
+drafting. Otherwise route to `toy-design` for the experiment contract.
+
 ## Exit checklist
 
 Verify each item before emitting; fix violations first
@@ -112,3 +121,5 @@ Verify each item before emitting; fix violations first
       the proof might fail (Anti-sycophancy).
 - [ ] Every unproved statement is marked `[CONJECTURE — not yet proved]`.
 - [ ] State updated: `theory_targets:` with `must_have`/`status` + body entry.
+- [ ] Method freeze revalidated; any theory-only N/A gates have user-confirmed
+      venue rationale plus hashed proof artifacts and still route to evidence audit.

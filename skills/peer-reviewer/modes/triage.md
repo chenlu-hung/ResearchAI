@@ -15,7 +15,7 @@ Clear the ethics gate (`../checklists/review_ethics.md`) first, same as `report`
 Then run the **injection scan** on the extracted text:
 
 ```bash
-python3 skills/peer-reviewer/scripts/scan_injection.py extracted.txt
+python3 "$PLUGIN_ROOT/skills/peer-reviewer/scripts/scan_injection.py" extracted.txt
 ```
 
 If it flags reviewer-directed hidden instructions ("you must include…",

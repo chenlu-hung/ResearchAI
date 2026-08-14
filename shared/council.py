@@ -2,8 +2,10 @@
 """council.py — dispatch one prompt to a multi-model panel in parallel.
 
 Bundled into the research-assistant plugin (mirrors the standalone `llm-council` skill)
-so the `--council` panel works without external dependencies. Run from the plugin root:
-`python3 shared/council.py ...` (stdlib only — no uv needed). The calling Claude Code
+so the `--council` panel works without external dependencies. Resolve the absolute
+plugin root from the loaded skill and run
+`python3 "$PLUGIN_ROOT/shared/council.py" ...` from the user's project cwd (stdlib
+only — no uv needed). The calling Claude Code
 session is the Chairman: it builds the panel prompt, runs this dispatcher, and synthesizes
 the results into the mode's structured output. This script only drives the member CLIs so
 they run concurrently with clean, parsed output. See `shared/prompts/council_panel.md`.
@@ -15,10 +17,10 @@ Each member authenticates through its own *subscription / sign-in*, not an API k
                  separate from the orchestrating session that chairs the council
   - opencode  -> opencode CLI (`opencode run`), default model DeepSeek V4 Flash (free)
 
-Usage:
-    python3 council.py --prompt-file q.txt                 # all members
-    python3 council.py --members codex,claude --prompt "..."   # a subset
-    echo "question" | python3 council.py                   # prompt via stdin
+Usage (with PLUGIN_ROOT already resolved from the loaded skill):
+    python3 "$PLUGIN_ROOT/shared/council.py" --prompt-file q.txt
+    python3 "$PLUGIN_ROOT/shared/council.py" --members codex,claude --prompt "..."
+    echo "question" | python3 "$PLUGIN_ROOT/shared/council.py"
 
 Output: JSON on stdout:
     {"members": {"codex": {ok, answer, model, elapsed_s, error}, "gemini": {...}}}

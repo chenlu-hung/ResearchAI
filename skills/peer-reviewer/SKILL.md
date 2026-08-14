@@ -5,6 +5,19 @@ description: Plug-and-play peer review of *other people's* Stats/ML manuscripts.
 
 # peer-reviewer
 
+## Plugin-root contract
+
+Resolve the absolute path of this already loaded `SKILL.md`, then set
+`PLUGIN_ROOT` to the directory two levels above its containing skill directory
+(`.../skills/peer-reviewer/../..`). Never infer the plugin location from the
+user's working directory and do not `cd` into the plugin. Resolve `shared/...`
+and `skills/...` resources against `$PLUGIN_ROOT`; resolve bare `modes/...`,
+`checklists/...`, and `scripts/...` paths against this skill directory. Project
+artifacts such as `reviews/` remain relative to the user's project.
+Dependency-bearing Python scripts use
+`uv run --project "$PLUGIN_ROOT" python "$PLUGIN_ROOT/<path>"`; stdlib-only
+scripts use `python3 "$PLUGIN_ROOT/<path>"`.
+
 Reviews a manuscript you did **not** write, as a referee for a target venue.
 
 This is the third critique surface in the plugin, and the only **external** one:
@@ -13,9 +26,10 @@ This is the third critique surface in the plugin, and the only **external** one:
 - `paper-writer` `self-review` — attacks whether *your own* draft persuades a venue.
 - `peer-reviewer` (this) — referees *someone else's* manuscript, **stateless**.
 
-It reuses the same machinery — `shared/venue_profiles.md` (reviewer persona +
-red flags), `shared/prompts/prose_hygiene.md` (AI-tell scan), and
-`shared/prompts/council_panel.md` + `shared/council.py` (panel) — but takes its
+It reuses the same machinery — `$PLUGIN_ROOT/shared/venue_profiles.md`
+(reviewer persona + red flags), `$PLUGIN_ROOT/shared/prompts/prose_hygiene.md`
+(AI-tell scan), and `$PLUGIN_ROOT/shared/prompts/council_panel.md` +
+`$PLUGIN_ROOT/shared/council.py` (panel) — but takes its
 input from a file, not from `.research-state`, and writes its output outside the
 state tree.
 
@@ -23,13 +37,15 @@ state tree.
 
 - "Review this paper for NeurIPS" / "I'm refereeing this, help me read it critically"
 - "Is this submission above the bar?" / "Triage this for our workshop"
-- `/review <paper>` slash command
+- Claude Code: `/research-assistant:review <paper>`
+- Codex: invoke `$research-ai:peer-reviewer` with the manuscript
 
 ## When NOT to invoke
 
-- It's *your own* draft → `/write self-review`.
-- You want to attack *your own* method → `/algo red-team`.
-- The task is "find related work / build a bib" → `/explore`.
+- It's *your own* draft → use `paper-writer` in `self-review` mode.
+- You want to attack *your own* method → use `algo-brainstorm` in `red-team`
+  mode.
+- The task is "find related work / build a bib" → use `literature-explorer`.
 
 ## Ethics gate — run FIRST, before reading the paper
 
@@ -148,7 +164,7 @@ only) convenes the multi-reviewer panel.
 5. **Persona = venue** — adopt the venue's dominant reviewer persona from
    `shared/venue_profiles.md` (`generic` → a balanced Stats/ML referee; if
    the user referees for the same unprofiled venue repeatedly, suggest
-   `/write venue-calibration <venue>` once to profile it properly).
+   `paper-writer` `venue-calibration` once to profile it properly).
 6. **AI-tell scan is an observation, not a cudgel** — flag machine-written prose
    per `prose_hygiene.md` §B, but frame it for the author's benefit (and respect
    the §E academic exceptions); never use it to dismiss a paper's substance.
@@ -166,7 +182,8 @@ With `--council`, each model plays an independent venue referee, then this
 session chairs a meta-review — merging overlapping comments, noting agreement
 ("3/4 reviewers flag the missing baseline" → a major weakness) and keeping
 genuine disagreement explicit. Follow `shared/prompts/council_panel.md` (engine
-`python3 shared/council.py`). Requires `codex` / `agy` / `claude` / `opencode` on
+`python3 "$PLUGIN_ROOT/shared/council.py"`). Requires `codex` / `agy` /
+`claude` / `opencode` on
 PATH and signed in; missing members drop out.
 
 **`--council` is unavailable for confidential submissions — downgrade to

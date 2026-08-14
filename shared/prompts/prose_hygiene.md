@@ -113,7 +113,7 @@ survive a vocabulary pass, so check them explicitly.
 Chat-tuned models argue in bullets; papers argue in paragraphs. A vocabulary
 pass never catches this — check the format itself. The mechanical subset
 (list density, pseudo-list runs, §A phrases, em-dash rate) is scripted:
-run `skills/paper-writer/scripts/check_prose.py` on the section file and
+run `python3 "$PLUGIN_ROOT/skills/paper-writer/scripts/check_prose.py"` on the section file and
 paste its result line instead of eyeballing.
 
 - **Lists only in conventional slots**: contribution bullets in the Intro,

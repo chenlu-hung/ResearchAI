@@ -12,7 +12,8 @@ still applies the attribution rules in SKILL.md (author payload vs platform
 canary) to every hit. A clean scan does not prove absence — still skim.
 
 Usage:
-    python3 scan_injection.py extracted.txt [--compare other_extraction.txt] [--json]
+    python3 "$PLUGIN_ROOT/skills/peer-reviewer/scripts/scan_injection.py" \
+        extracted.txt [--compare other_extraction.txt] [--json]
 
 Exit codes: 0 = nothing flagged, 1 = findings to review, 2 = usage error.
 Stdlib only.

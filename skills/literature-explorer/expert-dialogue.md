@@ -19,10 +19,10 @@ For each section, pick two personae whose views are likely to conflict:
 
 ```
 Turn 1 — Persona A opens: "What does this section conclude, and why?"
-  (1–2 sentences, must cite at least one paper from the retrieved set)
+  (1–2 sentences, must cite at least one claim/passage link from the packet)
 
 Turn 2 — Persona B objects: list the strongest counter-argument or missing
-  context. Must cite a different paper.
+  context. Must cite a different claim/passage link.
 
 Turn 3 — Persona A concedes one point, doubles down on another.
 
@@ -37,10 +37,14 @@ Turn 6 — Both flag what remains *open*: questions for future work or for
 
 ## Hard rules
 
-- Every turn must reference a paper from the retrieved set by bibkey.
+- Every factual turn must reference atomic claim/passage links from the current
+  evidence packet. A rendered bibkey alone is insufficient.
 - No persona is allowed to "win". Synthesis must integrate both views.
 - Turn 6's open questions feed into `algo-brainstorm`'s `gap-analysis` —
-  preserve them in the section frontmatter as `open_questions: [...]`.
+  preserve them in the section frontmatter as `open_questions: [...]`, persist
+  them as queries, and run vault-first retrieval before any is called a gap.
+- Persona/model additions are hypotheses only. A newly named near-neighbor must
+  complete the retrieval/link/freeze loop before changing the synthesis.
 
 ## Dialogue health check (per ARS-inspired design)
 
@@ -48,7 +52,7 @@ Before emitting the synthesis, verify:
 
 - [ ] At least 2 substantive disagreements were raised
 - [ ] No turn consisted of "great point, I agree" with no new content
-- [ ] At least 4 distinct papers were cited across the 6 turns
+- [ ] At least 4 distinct passage links were cited across the 6 turns
 - [ ] Synthesis takes a *position* — not "it depends" without specifics
 
 If any check fails, regenerate that section's dialogue with stricter prompt.
@@ -58,7 +62,7 @@ If any check fails, regenerate that section's dialogue with stricter prompt.
 ```markdown
 ### <Section title>
 
-<3–5 sentence synthesis with inline citations>
+<3–5 sentence synthesis with inline citations generated from packet-grounded claims>
 
 **Open questions** (carried forward to algo-brainstorm):
 - ...

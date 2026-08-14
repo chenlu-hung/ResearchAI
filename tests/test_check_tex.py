@@ -104,3 +104,73 @@ def test_pattern_flag_rejects_bad_spec(tmp_path, run_script):
     assert r.returncode == 2
     r = run_script(SCRIPT, str(main), "--bib", str(bib), "--pattern", "tok=([bad")
     assert r.returncode == 2
+
+
+def _abstract_paper(tmp_path, abstract_body):
+    body = (
+        "\\begin{abstract}\n" + abstract_body + "\n\\end{abstract}\n"
+        "\\label{a}\\ref{a}\\cite{good2020}\n"
+    )
+    return _paper(tmp_path, body)
+
+
+def test_abstract_within_limit_is_clean(tmp_path, run_script):
+    main, bib = _abstract_paper(tmp_path, "One two three four five six.")
+    r = run_script(SCRIPT, str(main), "--bib", str(bib),
+                   "--abstract-word-limit", "10", "--json")
+    assert r.returncode == 0, r.stdout + r.stderr
+    data = json.loads(r.stdout)
+    assert data["abstract_words"] == 6
+    assert data["abstract_over_limit"] is False
+    assert data["abstract_word_limit"] == 10
+
+
+def test_abstract_over_limit_blocks(tmp_path, run_script):
+    main, bib = _abstract_paper(tmp_path, " ".join(f"word{i}" for i in range(30)))
+    r = run_script(SCRIPT, str(main), "--bib", str(bib),
+                   "--abstract-word-limit", "10", "--json")
+    assert r.returncode == 1, r.stdout + r.stderr
+    data = json.loads(r.stdout)
+    assert data["abstract_words"] == 30
+    assert data["abstract_over_limit"] is True
+
+
+def test_abstract_word_count_ignores_tex_commands_and_counts_math_once(
+    tmp_path, run_script
+):
+    main, bib = _abstract_paper(
+        tmp_path,
+        "\\textbf{Bold} prose with $x + y + z$ inline math and \\emph{emphasis}.",
+    )
+    r = run_script(SCRIPT, str(main), "--bib", str(bib),
+                   "--abstract-word-limit", "100", "--json")
+    assert r.returncode == 0, r.stdout + r.stderr
+    # Bold prose with MATH inline math and emphasis = 8 words;
+    # \textbf, \emph and the braces contribute nothing.
+    assert json.loads(r.stdout)["abstract_words"] == 8
+
+
+def test_missing_abstract_warns_but_does_not_block(tmp_path, run_script):
+    main, bib = _paper(tmp_path, "\\cite{good2020} \\label{a} \\ref{a}\n")
+    r = run_script(SCRIPT, str(main), "--bib", str(bib),
+                   "--abstract-word-limit", "250", "--json")
+    assert r.returncode == 0, r.stdout + r.stderr
+    data = json.loads(r.stdout)
+    assert data["abstract_words"] is None
+    assert data["abstract_over_limit"] is False
+    assert any("no \\begin{abstract}" in w for w in data["warnings"])
+
+
+def test_abstract_limit_absent_skips_the_check(tmp_path, run_script):
+    main, bib = _abstract_paper(tmp_path, " ".join(f"word{i}" for i in range(500)))
+    r = run_script(SCRIPT, str(main), "--bib", str(bib), "--json")
+    assert r.returncode == 0, r.stdout + r.stderr
+    data = json.loads(r.stdout)
+    assert data["abstract_word_limit"] is None
+    assert data["abstract_words"] is None
+
+
+def test_abstract_limit_rejects_nonpositive(tmp_path, run_script):
+    main, bib = _abstract_paper(tmp_path, "Short.")
+    r = run_script(SCRIPT, str(main), "--bib", str(bib), "--abstract-word-limit", "0")
+    assert r.returncode == 2

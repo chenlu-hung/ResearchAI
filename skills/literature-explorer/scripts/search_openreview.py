@@ -20,8 +20,10 @@ API facts (probed live 2026-07):
   Unsure → probe /groups?id=... (not challenge-gated).
 
 Usage:
-    search_openreview.py "conformal prediction shift" \
-        --venue NeurIPS.cc/2022/Conference --max 8 --include-reviews
+    uv run --project "$PLUGIN_ROOT" python \
+      "$PLUGIN_ROOT/skills/literature-explorer/scripts/search_openreview.py" \
+      "conformal prediction shift" --venue NeurIPS.cc/2022/Conference \
+      --max 8 --include-reviews
 """
 from __future__ import annotations
 

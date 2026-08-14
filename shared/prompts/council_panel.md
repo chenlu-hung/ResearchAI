@@ -1,5 +1,10 @@
 # Council Panel Protocol
 
+Inherit the absolute `PLUGIN_ROOT` resolved from the invoking skill. If this
+prompt is loaded directly, derive it from this file's absolute location
+(`.../shared/prompts/../..`). Never derive it from the user's working directory;
+project artifacts remain relative to that working directory.
+
 Applied by modes that benefit from **multiple independent models** before they
 commit to divergent output (`gap-analysis`, `ideate`) or critique (`outline`,
 `self-review`, `red-team`, `novelty-check`). Modes reference this file rather than
@@ -17,7 +22,7 @@ Two shapes of panel:
 
 A single model has blind spots: gaps it never lists, candidate families it never
 proposes, reviewer objections it never raises. A panel of independent models, merged
-by a chair, widens coverage cheaply. The chair (this session) stays in control — the
+by a chair, widens coverage cheaply. The invoking host session stays in control — the
 panel **suggests**, it never writes to research-state directly.
 
 ## Members and chair
@@ -29,16 +34,18 @@ panel **suggests**, it never writes to research-state directly.
 | Claude | `claude -p` | Claude subscription (independent of the chair) |
 | DeepSeek | `opencode run` | opencode (free DeepSeek V4 Flash) |
 
-**This Claude Code session is the Chair.** It builds the panel prompt, runs the
-dispatcher, and synthesizes the results into the calling mode's normal structured
-output. It does not merely concatenate member answers.
+**The invoking host session is the Chair.** Whether hosted by Codex, Claude
+Code, or another compatible runner, it builds the same persisted panel prompt,
+runs the dispatcher, and synthesizes the results into the calling mode's normal
+structured output. No host-specific API is part of the evidence contract.
 
 ## When to run
 
 **Opt-in only.** Run the panel when **either**:
 
-- the user invoked the mode with the `--council` flag (e.g. `/algo ideate --council`,
-  `/write self-review --council`), or
+- the user invoked the mode with the `--council` flag (for example, Claude Code
+  `/research-assistant:algo ideate --council` or
+  `/research-assistant:write self-review --council`), or
 - the mode offered a panel and the user accepted.
 
 Run it **after** the calling mode has:
@@ -47,15 +54,18 @@ Run it **after** the calling mode has:
 2. Passed its refuse-if-blank gating (e.g. `ideate` requires a `formalize` block;
    `outline` requires `algorithm_card`; `self-review` requires a draft).
 3. Run any pre-flight grill the mode specifies.
+4. For evidence-dependent critique, load the **current candidate-specific
+   evidence packet**. Give members that bounded packet, not unrestricted model
+   memory or an unversioned bibliography.
 
-Without `--council`, the mode runs exactly as before — **single-model, unchanged.**
+Without `--council`, the mode remains single-model; all evidence gates still apply.
 
 ## Dispatch
 
 1. Write the panel prompt (mode-specific; see each mode file) to a temp file.
 2. Fan out to all members in parallel:
    ```sh
-   python3 shared/council.py --prompt-file <panel.txt>
+   python3 "$PLUGIN_ROOT/shared/council.py" --prompt-file <panel.txt>
    ```
    Subset with `--members codex,gemini,claude,opencode` (default: all four).
 3. Parse the JSON (`members.<name>.answer`). For any member with `ok: false`, note the
@@ -63,7 +73,8 @@ Without `--council`, the mode runs exactly as before — **single-model, unchang
    smaller panel is still valid.
 4. **Cross-review (critique modes only — `outline`, `self-review`, `red-team`,
    `novelty-check`):** anonymize the member outputs as `Response A / B / …` (keep the
-   label→member map private), then run a second `council.py` pass asking each member to
+   label→member map private), then run a second
+   `python3 "$PLUGIN_ROOT/shared/council.py"` pass asking each member to
    evaluate and rank the anonymized set. Skip this for pure-divergence modes
    (`gap-analysis`, `ideate`) where you want union, not ranking.
 5. **Cross-examination (adversarial modes only — `red-team`, `novelty-check`):** when the
@@ -85,20 +96,20 @@ it is **one round, only on real disagreement** — never a loop, never forced co
    "I'd phrase it differently" split does **not** qualify — skip the round and say so.
 2. **One round.** Send each contested position back to *its own author* with the strongest
    opposing objection (anonymized — the author never learns who objected). Dispatch one
-   `council.py --members <author>` call per contested author so each prompt is
+   `python3 "$PLUGIN_ROOT/shared/council.py" --members <author>` call per
+   contested author so each prompt is
    self-contained: it carries the author's position, the objection verbatim, and the
    instruction to **defend with concrete, checkable evidence or concede the specific
    point**. Do not feed rebuttals back for a second round.
 3. **Evidence gate — the chair owns verification.** A panel member is **not** a source of
    truth; its attack is a *hypothesis*, not a finding. Before any attack changes the mode's
    output:
-   - **`novelty-check`:** a member's "this is subsumed by / anticipated in <work>" only
-     counts after **you verify it against the retrieved set** (and a citation-graph chase
-     if needed). If the work exists and genuinely subsumes, flip the verdict and cite it
-     from the verified bibliography. If it is unretrievable or doesn't actually subsume,
-     **discard the attack** and note why in one line — never flip a verdict on a member's
-     unverified say-so. Members debating novelty from parametric memory only agree on
-     shared priors; that is exactly what the retrieval gate exists to stop.
+   - **`novelty-check`:** a member's "this is subsumed by / anticipated in <work>" becomes
+     a persisted query. Query the vault first, retrieve externally only for the remaining
+     gap, inspect the passage, add the atomic claim link, and freeze a replacement packet.
+     Only then may it change the verdict. If it is unretrievable or does not actually
+     subsume, retain the no-result/contrary evidence and discard the attack—never flip a
+     verdict on a member's say-so. Agreement from parametric memory is still not evidence.
    - **`red-team`:** an attack (edge case, statistical pitfall, missing baseline) counts
      only if it is concretely checkable against the work or the venue red-flag list. A
      defended-with-specifics position stands; a conceded one becomes an action item.
@@ -108,21 +119,22 @@ it is **one round, only on real disagreement** — never a loop, never forced co
 
 ## Anti-hallucination guardrails — NON-NEGOTIABLE
 
-The panel members do **not** share this plugin's verified bibliography, retrieval
+The panel members do **not** share this plugin's canonical evidence packet, retrieval
 tools, or `shared/prompts/anti_hallucination.md` discipline. Treat **everything they
 return as unverified ideation/critique**, never as fact:
 
-- **No citations enter state from the panel.** Strip every `\cite{...}`, bibkey,
+- **No claims or citations enter evidence state from the panel.** Strip every `\cite{...}`, bibkey,
   author-year, "as shown by X (2019)", DOI, or arXiv id a member emits. If the idea
-  behind it is worth keeping, re-express it as a claim and mark it `[VERIFY]` with a
-  search query — exactly as the mode's own Anti-sycophancy step requires. A panel
-  member is **not** a source for prior-art or novelty claims.
+  behind it is worth keeping, re-express it as a hypothesis and persist a search query,
+  then run `shared/prompts/evidence_grounding.md`. A panel member is **not** a source
+  for prior-art or novelty claims.
 - **No theorem names, no numbers.** Drop invented theorem/lemma names and any numeric
   result a member asserts. Conjectures pass through only as `[CONJECTURE — not yet
   proved]`.
 - **Run merged output through the mode's existing gates** before it lands in
-  research-state: `gap-analysis`/`ideate` Anti-sycophancy, `paper-writer` bibkey
-  discipline (`refs/<slug>.bib`), and `shared/prompts/anti_hallucination.md`.
+  research-state: `gap-analysis`/`ideate` prior-art pressure,
+  `shared/prompts/evidence_grounding.md`, and
+  `shared/prompts/anti_hallucination.md`. A generated BibTeX key is not a gate.
 - **The chair owns correctness.** If a member's suggestion is wrong, stale, or
   out-of-scope, discard it and say why in one line. Do not launder a weak idea into
   the output just because two models agreed.
@@ -151,7 +163,8 @@ mode's body block:
 
 ```markdown
 **Council panel**: codex, gemini, claude, opencode — <date>. Panel items are
-ideation only; citations/claims marked [VERIFY] pending the normal audit.
+hypotheses/query seeds only; none entered the evidence packet without vault-first
+retrieval and passage verification.
 ```
 
 Do not add a frontmatter skip-block (unlike the grill) — the panel is re-run per
@@ -159,6 +172,7 @@ invocation when `--council` is passed; it is not a frozen interview.
 
 ## Cost note
 
-Each `council.py` call is one parallel fan-out (~10–60s, paced by the slowest member);
+Each `python3 "$PLUGIN_ROOT/shared/council.py"` call is one parallel fan-out
+(~10–60s, paced by the slowest member);
 a cross-review pass doubles that. Tell the user a `--council` run adds roughly a minute.
 If a member's subscription is rate-limited, it drops out gracefully — the rest proceed.

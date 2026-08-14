@@ -5,11 +5,15 @@ Enforces one consistent, colorblind-safe, vector-PDF style across the paper so
 figures match. Import and adapt to your `toy-design` / `ablation-plan` results;
 do not invent numbers — plot only data the user/experiments produced.
 
-Install:  uv sync --extra figures           # adds matplotlib + numpy
+Resolve PLUGIN_ROOT from the loaded paper-writer SKILL.md before running.
+Install:  uv sync --project "$PLUGIN_ROOT" --extra figures
 Smoke test (writes /tmp/paperfigs/_smoketest.pdf):
-          uv run --extra figures python skills/paper-writer/scripts/figs.py
+          uv run --project "$PLUGIN_ROOT" --extra figures python \
+            "$PLUGIN_ROOT/skills/paper-writer/scripts/figs.py"
 Typical use:
-          import sys; sys.path.insert(0, "skills/paper-writer/scripts")
+          import os, sys
+          sys.path.insert(0, os.path.join(os.environ["PLUGIN_ROOT"],
+                                         "skills/paper-writer/scripts"))
           import figs, matplotlib.pyplot as plt
           figs.apply_style()
           fig, ax = plt.subplots()

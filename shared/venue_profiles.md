@@ -4,7 +4,7 @@ Style parameters per submission target. `paper-writer` loads the relevant
 profile when the user sets `venue_target`. `algo-brainstorm`'s `red-team` mode
 uses these to predict reviewer concerns.
 
-**Maintenance**: edited only via `/write venue-calibration`
+**Maintenance**: edited only through `paper-writer` mode `venue-calibration`
 (`shared/prompts/venue_calibration.md`). Policy fields carry `sources` +
 `as_of`; anything resting on recall or community norms is listed in that
 venue's `unverified:` and never hard-FAILs a gate. User-supplied exemplar
@@ -34,11 +34,15 @@ the profile ↔ style-file ↔ token consistency and flags stale `as_of`.
 - **Empirical bar**: high. Multiple datasets, multiple seeds, baselines from the *last 12 months*. Lacking a recent baseline is a red flag.
 - **Reviewer profile**: split between empirical and theoretical; assume the empirical reviewer is dominant. Will ask: "did you compare to method X (current SOTA)?", "is the gain within seed noise?", "what's the compute cost?".
 - **Citation convention**: numbered `\cite{}` typical (~30–60 refs); the venue does not mandate a citation style (unverified).
-- **Common reviewer red flags**: insufficient ablations, single-seed runs, cherry-picked datasets, missing recent baselines, no compute reporting, vague reproducibility section, unfilled checklist items.
+- **Common reviewer red flags**: insufficient ablations, single-seed runs, cherry-picked datasets, missing recent baselines, no compute reporting, vague reproducibility section, unfilled checklist items, asymmetric adaptation/parameter budget between compared methods (our method fine-tuned or given target-resolution labels while the baseline is not).
 
 *Sources: neurips.cc/Conferences/2026/CallForPapers + MainTrackHandbook
 (as_of 2026-07-10); reviewer persona and red flags: recall/community
-experience (unverified).*
+experience (unverified). The "asymmetric adaptation/parameter budget" flag was
+added 2026-08-14 from a single observed NeurIPS rejection of one of this
+author's papers — single-paper evidence, `unverified` community-norm status,
+not a stated venue policy; re-verify or retire it at the next
+venue-calibration.*
 
 ## ICML
 
@@ -119,7 +123,7 @@ e-publications.org/ims/support/ims-instructions.html (as_of 2026-07-10);
 persona, length norm, section template: recall/community experience
 (unverified).*
 
-## Generic (used by `peer-reviewer` `/review --venue generic`)
+## Generic (used by `peer-reviewer` with `--venue generic`)
 
 Fallback persona when refereeing a paper for a venue not profiled above (a
 workshop, a journal not listed, an unspecified target).
@@ -152,6 +156,7 @@ neurips:
     - https://neurips.cc/Conferences/2026/CallForPapers
     - https://neurips.cc/Conferences/2026/MainTrackHandbook
   page_limit: 9
+  abstract_word_limit: null   # no stated limit found; see venue_calibration.md
   bib_style: numeric
   theory_depth: medium
   ablation_required: true
@@ -166,6 +171,7 @@ icml:
   sources:
     - https://icml.cc/Conferences/2026/CallForPapers
   page_limit: 8
+  abstract_word_limit: null   # no stated limit found; see venue_calibration.md
   bib_style: author_year
   theory_depth: medium
   ablation_required: true
@@ -180,6 +186,7 @@ jmlr:
   sources:
     - https://www.jmlr.org/author-info.html
   page_limit: 35
+  abstract_word_limit: 200   # stated in the JMLR author guidelines (see prose above)
   bib_style: author_year
   theory_depth: high
   ablation_required: medium
@@ -192,6 +199,7 @@ aistats:
   sources:
     - https://virtual.aistats.org/Conferences/2026/CallForPapers
   page_limit: 8
+  abstract_word_limit: null   # no stated limit found; see venue_calibration.md
   bib_style: numeric
   theory_depth: high
   ablation_required: true
@@ -205,6 +213,7 @@ annals_of_statistics:
     - https://imstat.org/journals-and-publications/annals-of-statistics/annals-of-statistics-manuscript-submission/
     - https://www.e-publications.org/ims/support/ims-instructions.html
   page_limit: null
+  abstract_word_limit: null   # no stated limit found; see venue_calibration.md
   bib_style: author_year
   theory_depth: maximum
   ablation_required: false

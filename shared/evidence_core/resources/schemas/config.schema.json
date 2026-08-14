@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-ai.local/schemas/evidence-config.schema.json",
+  "title": "Research evidence vault configuration",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "vault_id",
+    "name",
+    "created_at",
+    "canonical_format",
+    "derived_index"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "vault_id": {"type": "string", "pattern": "^vault-"},
+    "name": {"type": "string", "minLength": 1},
+    "created_at": {"type": "string"},
+    "canonical_format": {"const": "markdown-json-frontmatter"},
+    "derived_index": {
+      "type": "object",
+      "required": ["policy"],
+      "properties": {"policy": {"const": "outside-vault"}}
+    }
+  },
+  "additionalProperties": true
+}

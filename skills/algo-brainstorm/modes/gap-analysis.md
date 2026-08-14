@@ -1,129 +1,105 @@
 # Mode: gap-analysis
 
-**Purpose**: given a baseline method (or SOTA paper, or class of methods),
-identify *where it fails*, *what assumptions are unrealistic*, and *what's
-missing*. The output feeds `formalize` or `ideate`.
+**Purpose**: identify evidence-backed limitations and genuinely unresolved
+opportunities in a baseline method/class. The output feeds `formalize` or
+`ideate`.
 
-## Inputs
+Follow `shared/prompts/evidence_grounding.md`. Model knowledge, user intuition,
+and panel suggestions are query generators only.
 
-- A method name, paper, or class (e.g., "split conformal prediction",
-  "Tibshirani 2019", "weighted ERM under covariate shift")
-- Optional: the user's intuition about where it might fail
+## Inputs and gate
+
+- A method, paper, or sufficiently precise method class.
+- Optional user intuition about a failure regime.
+- Evidence vault/topic pointer from research state (legacy state is migrated
+  additively before use).
+
+- A `corpus_manifest:` pointer in state whose artifact hash validates.
+
+If the method cannot be identified precisely, ask for the paper or definition.
+If primary passages cannot be retrieved, emit an unranked verification queue;
+do **not** emit “top gaps.”
+
+**Corpus gate.** Without a corpus manifest, refuse to start and offer to run
+`literature-explorer` in `corpus-prefetch` mode first (one-time per topic,
+`skills/literature-explorer/corpus-prefetch.md`). If its `gathered:` date is
+more than 6 months old, refresh the recent-work axis before proceeding. The
+novelty reflex and drift detector in `skills/algo-brainstorm/SKILL.md` Hard
+discipline #2 run throughout this mode; corpus hits stay alarm evidence and
+never enter the evidence table.
 
 ## Procedure
 
-1. **Restate the method** in 3 sentences. Include: what it computes, what
-   inputs it needs, what guarantee it claims. If you cannot restate it
-   confidently, refuse and ask the user to clarify or point to the paper.
+1. **Canonicalize the baseline.** In at most three sentences state what it
+   computes, required inputs, and claimed guarantee. Persist these as atomic
+   claims to verify, not as facts recalled from the model.
 
-2. **Enumerate failure modes** across these axes (skip axes that don't
-   apply):
+2. **Retrieve before diagnosing.** For the baseline and every proposed failure
+   mode, query the vault first and persist the query-run. Retrieve externally
+   only for coverage gaps. Ingest canonical works/source versions and link each
+   limitation, assumption, or open-status claim to the actual passage.
 
-   - **Empirical failure regimes**: data scales, distributions, dimensions
-     where the method underperforms or breaks
-   - **Unrealistic assumptions**: i.i.d., bounded, Gaussian noise,
-     stationarity, exchangeability, identifiability, density support
-   - **Computational bottleneck**: time/memory/communication cost; what
-     happens at $n=10^6$, $d=10^5$
-   - **Sample complexity**: how much data does it need? Hidden constants?
-   - **Adversarial / OOD behavior**: distribution shift, noise, adversarial
-     perturbation
-   - **Calibration / coverage** (if uncertainty quantification): what gets
-     miscalibrated and when
-   - **Connection failures**: areas where this method is conceptually
-     disconnected from related literature it should engage with
+3. **Cover every applicable axis:** empirical failure regimes, unrealistic
+   assumptions, computational bottlenecks, sample complexity, adversarial/OOD
+   behavior, calibration/coverage, and disconnected adjacent literature. Mark
+   inapplicable axes `N/A — <reason>`.
 
-3. **Gap table** — produce a markdown table:
+4. **Pressure-test openness.** For every candidate gap, run targeted searches
+   for work that closes, weakens, or reframes it. Weakness analysis cannot
+   satisfy this prior-art step. A newly found near-neighbor restarts the
+   vault→external→passage-link loop before status is assigned.
+
+5. **Build the evidence table:**
 
    ```markdown
-   | # | Gap | Failure regime | Supporting evidence | Open? |
-   |---|-----|----------------|---------------------|-------|
-   | 1 | Exchangeability assumed | Time series, covariate shift | Tibshirani 2019 §3; Barber 2023 | Partially addressed |
-   | 2 | Heavy-tail miscalibration | Pareto-tailed residuals | own intuition; verify | Open |
+   | # | Atomic gap | Failure regime | Evidence links | Status |
+   |---|------------|----------------|----------------|--------|
+   | 1 | ... | ... | claim-... → evidence-... | Open / Partial / Solved / Unverified |
    ```
 
-   - "Supporting evidence" must be a bibkey from the verified set or marked
-     `[VERIFY]` with a search query to confirm.
-   - "Open?" = `Open` / `Partially addressed` / `Solved` (with citation).
+   `Open`, `Partial`, and `Solved` require passage evidence for both the
+   limitation and claimed coverage status. Abstract-only or unresolved items
+   remain `Unverified`; keep their query IDs visible.
 
-4. **Pick top 3 gaps** that are simultaneously:
-   - genuinely open (not fully solved by an existing paper)
-   - amenable to a Stats/ML contribution
-   - feasible to attack with the user's resources
+6. **Select top gaps only from verified rows.** Rank up to three that are open
+   or partial, attackable as a Stats/ML contribution, and feasible for the
+   user's resources. For each, give an attack sketch. An `Unverified` row can
+   never be promoted to the top list.
 
-   For each, write a one-paragraph "attack sketch": what would a new method
-   need to address to close this gap?
+7. **Freeze evidence.** Freeze/validate a topic packet covering the selected gap
+   claims and source versions. If analysis is tied to an existing candidate,
+   freeze a candidate-specific packet. Write packet ID/hash/status to state.
 
 ## Council panel (opt-in)
 
-When invoked with `--council`, widen the failure-mode search with a multi-model panel
-before building the gap table — diversity surfaces gaps one model misses. Follow
-`shared/prompts/council_panel.md`.
+With `--council`, ask members independently for failure hypotheses across the
+axes, without ranking. Deduplicate the union and convert every panel item into a
+persisted query. No panel claim enters the table until it completes passage
+verification. Follow `shared/prompts/council_panel.md`.
 
-- **Panel prompt**: the restated method (Step 1) plus the failure-mode axes (Step 2),
-  asking each member to **independently list distinct gaps / failure regimes / broken
-  assumptions**, one per line with the regime where each bites. No ranking — you want the
-  union.
-- **Synthesis**: merge member gaps into the Step 3 gap table, dedup (note convergence,
-  e.g. "3/4 flagged heavy-tail miscalibration"), and tag panel-sourced rows `source:
-  panel`. Every panel gap enters "Supporting evidence" as `[VERIFY]` with a search query —
-  a member is **not** a citation source. Then run the Anti-sycophancy prior-art check below
-  on the merged set before picking the top 3.
+## State update
 
-## Anti-sycophancy
-
-Required before emitting any "this is a promising gap" assessment:
-
-- For each candidate gap, **search for prior work that may have closed it**
-  (via `literature-explorer` or recall + [VERIFY]).
-- If you cannot rule out that the gap is already closed, flag it as
-  *novelty uncertain* — `novelty-check` will resolve it later.
-
-## Output (written to research_state)
-
-Append to body of `.research-state/<slug>.md`:
-
-```markdown
-## <date> — gap-analysis
-
-**Method analyzed**: <name>
-
-**Gap table**:
-<table>
-
-**Top 3 candidate gaps**:
-1. ...
-2. ...
-3. ...
-```
-
-And set:
-
-```yaml
-stage: gap   # if not further along
-open_questions:
-  - <gap 1>
-  - <gap 2>
-  - <gap 3>
-```
-
-## Failure conditions (refuse to emit)
-
-- Method too vaguely specified → ask for clarification
-- No retrieved literature available → suggest running `literature-explorer` first
-  (you can proceed but only with heavy `[VERIFY]` flagging)
+Append the evidence table, top verified gaps, attack sketches, claim/link/query
+IDs, and unresolved queue under `## <date> — gap-analysis`. Merge the atomic
+claims into `docs/claim-map-<slug>.md`, recompute its hash, and update
+`lifecycle_gates.atomic_claim_map`; follow
+`shared/prompts/research_lifecycle.md`. Set `research_phase: atomic_claim_map`
+when the gate passes and `stage: gap` only with confirmation.
+`open_questions` may include unresolved hypotheses, but label them unverified
+and do not represent them as selected gaps.
 
 ## Exit checklist
 
-Verify each item before emitting; fix violations first
-(`shared/prompts/execution_discipline.md` rule 2):
-
-- [ ] Step 1 restatement is ≤3 sentences and names what the method computes,
-      its inputs, and its claimed guarantee — or you refused and asked.
-- [ ] Every Step 2 axis has ≥1 failure mode or an explicit `N/A — <reason>`.
-- [ ] Every gap-table row's "Supporting evidence" is a verified bibkey or
-      `[VERIFY]` + a concrete search query.
-- [ ] Prior-art check ran on each candidate gap; unresolved ones are flagged
-      *novelty uncertain*, not presented as open.
-- [ ] Top-3 gaps each meet all three criteria and carry an attack sketch.
-- [ ] State updated: body entry + `stage` / `open_questions` per Output.
+- [ ] Corpus manifest validated (and refreshed if >6 months old), or the mode
+      refused and offered `corpus-prefetch`.
+- [ ] Every new element named its nearest corpus neighbor; out-of-envelope
+      elements triggered immediate retrieval and a manifest extension.
+- [ ] Baseline restatement is precise and grounded, or the mode refused.
+- [ ] Every axis is populated or explicitly `N/A`.
+- [ ] Vault was queried first; external and no-result query-runs were persisted.
+- [ ] Every status other than `Unverified` has atomic passage links.
+- [ ] Prior-art pressure ran for every candidate gap; weaknesses did not replace it.
+- [ ] No unverified/abstract-only item appears in the top gaps.
+- [ ] New near-neighbors triggered another retrieval iteration.
+- [ ] Current packet validates; state carries its ID/hash/status.
+- [ ] Claim-map lifecycle artifact/hash reflects the final gap dispositions.

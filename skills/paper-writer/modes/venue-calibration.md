@@ -14,7 +14,7 @@ work — the only mode allowed to edit `shared/venue_profiles.md` and
   fields and `bib_style` from recall to observed-in-sample (protocol's
   *Exemplar input* rules; they never substitute for official sources).
   Auto-gatherable for OpenReview venues via
-  `skills/literature-explorer/scripts/search_openreview.py`.
+  `$PLUGIN_ROOT/skills/literature-explorer/scripts/search_openreview.py`.
 - Web access (WebFetch/WebSearch). Without it the run still works but
   every policy field lands in `unverified:`.
 

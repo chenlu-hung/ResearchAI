@@ -15,26 +15,39 @@
    sections immediately before and after, so cross-references stay valid).
 
 2. **Read research state** so you know what has changed since the section
-   was last written (e.g., new theory targets, new ablation results).
+   was last written (e.g., new theory targets, new ablation results). Validate
+   the current evidence packet against the candidate fingerprint and claim set.
 
 3. **Plan the edit** as a list before writing:
    - What stays (don't gratuitously rewrite)
    - What changes and why
-   - What new claims/citations are added → verify in `.bib`
+   - What new atomic claims/citations are added → run
+     `shared/prompts/evidence_grounding.md`; a `.bib` lookup is not support
    - Any cross-references that need updating in other sections
 
-4. **Apply edit**. Prefer minimal-diff edits to wholesale rewrites — keeps
+4. **Ground before applying.** Query the vault first for every new/changed
+   literature claim and retrieve externally only for gaps. Persist source
+   versions and passage links, then freeze a replacement packet. If the edit
+   changes candidate primitives/components, objective/estimand, data regime,
+   assumptions, or material claim text, mark the old packet stale immediately.
+   A new/changed empirical claim must map to an existing audited result artifact,
+   metric/split/uncertainty, and frozen decision rule. If it does not, do not
+   write it: return to the experiment/protocol/results lifecycle gate and
+   invalidate downstream artifacts.
+
+5. **Apply edit**. Prefer minimal-diff edits to wholesale rewrites — keeps
    reviewer-response track clean and avoids regenerating bugs.
 
-5. **Coherence check**:
+6. **Coherence check**:
    - Notation still consistent
    - Theorem numbering unchanged unless intentional
-   - Bibliography keys all in `.bib`
+   - Bibliography keys all in the generated `.bib`, with every substantive
+     citing sentence linked to a current packet passage
    - Prose hygiene pass on edited text — `stop-slop` skill if available,
      then the academic overlay `shared/prompts/prose_hygiene.md` (structural
      AI tells and §F format tells, not just filler); mechanical subset via
-     `uv run python skills/paper-writer/scripts/check_prose.py <edited
-     file>` — paste its result line
+     `python3 "$PLUGIN_ROOT/skills/paper-writer/scripts/check_prose.py"
+     <edited-file>` — paste its result line
 
 ## Reviewer-response sub-mode
 
@@ -55,6 +68,8 @@ When the edit intent is "respond to reviewer X":
   edits hurts the paper.
 - Equally: do not stubbornly defend something that is wrong. If reviewer
   caught a real issue, acknowledge and fix.
+- Weaknesses or reviewer agreement cannot substitute for grounded prior art
+  when a revision changes a novelty/contribution claim.
 
 ## Output
 
@@ -63,8 +78,15 @@ When the edit intent is "respond to reviewer X":
 
 ## State update
 
-No stage change for routine revision. After full pass of all reviewer
-comments, advance `stage` to `revision` → `final`.
+No stage change for routine revision. After a full pass, keep/set
+`stage: revision`, then re-run self-review, citation-audit, and
+submission-check. Only submission-check may advance to `final`.
+
+After every edit, recompute the draft hash and update
+`lifecycle_gates.draft`. Mark `scientific_review` and `submission` stale even
+when the edit is prose-only, because both bind the prior draft hash. Apply the
+broader upstream invalidation rules in `shared/prompts/research_lifecycle.md`
+when scientific content changed.
 
 ## Exit checklist
 
@@ -74,9 +96,13 @@ Verify each item before emitting; fix violations first
 - [ ] Step 3 edit plan (stays / changes / new claims / cross-refs) was
       written *before* the file was touched.
 - [ ] Diff is minimal — untouched prose preserved verbatim.
-- [ ] Citations still resolve after the edit: `uv run python
-      skills/paper-writer/scripts/check_tex.py paper/main.tex --bib
+- [ ] Citations still resolve after the edit: `python3
+      "$PLUGIN_ROOT/skills/paper-writer/scripts/check_tex.py" paper/main.tex --bib
       refs/<slug>.bib` is clean (pasted, not eyeballed).
+- [ ] New/changed claims completed vault-first retrieval and passage linking;
+      any material candidate/claim change invalidated and replaced the packet.
+- [ ] Draft hash updated; scientific-review/submission gates marked stale, plus
+      all scientifically affected upstream/downstream gates invalidated.
 - [ ] Coherence check ran: notation, theorem numbering, prose hygiene on
       the edited text (`check_prose.py` on the edited file, result line
       pasted; blocking findings fixed or waived as a §F slot).

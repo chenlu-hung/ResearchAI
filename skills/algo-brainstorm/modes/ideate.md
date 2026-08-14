@@ -1,172 +1,137 @@
 # Mode: ideate
 
-**Purpose**: given a formalized problem, generate 3–5 distinct candidate
-algorithmic approaches. Force diversity — empirical vs. theoretical
-motivation, different primitives.
+**Purpose**: generate diverse candidate algorithms from a formalized problem,
+then retrieve targeted prior art before ranking or handing them to novelty
+review. Generated candidates are speculative until their evidence packets are
+current.
 
-## Inputs
+## Inputs and grill
 
-- A `formalize` block from research state (required)
-- Optional: user's preferred direction or constraint
+Require a non-empty `formalization:` block **and** a `corpus_manifest:` pointer
+whose artifact hash validates. Read state before questioning; if the
+formalization is absent, refuse and run `formalize`.
 
-## Pre-flight grill
+**Corpus gate.** Without a corpus manifest, refuse to start and offer to run
+`literature-explorer` in `corpus-prefetch` mode first (one-time per topic,
+`skills/literature-explorer/corpus-prefetch.md`); refresh the recent-work axis
+if its `gathered:` date is more than 6 months old. Every candidate this mode
+generates is a new algorithmic component entering the discussion, so the novelty
+reflex in `skills/algo-brainstorm/SKILL.md` Hard discipline #2 fires on each
+one: name its nearest corpus neighbor before it reaches the pool table, and
+treat an out-of-envelope primitive as a retrieval to run now, not at
+`novelty-check`. A corpus hit is alarm evidence — it can kill a candidate's
+ranking only after step 5's grounded retrieval confirms it.
 
-Run the interview protocol in `shared/prompts/grill_protocol.md` **after**
-Step 1 below (state read + refuse-if-blank check) and **before** Step 2
-(candidate generation). If `interview_ideate:` is already present in the
-research-state frontmatter, skip the interview and proceed.
+Then follow `shared/prompts/grill_protocol.md`. Use the host's interactive
+question mechanism (not a host-specific API contract), one question at a time:
 
-**Essentials** (ask in this order, one at a time):
+1. preferred primitive, grounded in `loss:`/`nuisance:`;
+2. contribution type (theoretical / empirical / methodological);
+3. hard constraints/no-go zones (free form); and
+4. diversity target (max diversity / deep dive / mixed).
 
-1. **Algorithmic primitive preference** — `AskUserQuestion`, header
-   "Primitive". Options drawn from Step 2's primitive list: proximal /
-   score-matching / conformal / DML / variational / Bayesian /
-   sampling-based. Recommended = the primitive most consistent with the
-   formalization's `loss:` and `nuisance:` fields (cite the grounding in
-   the option's `description`).
-2. **Contribution type** — `AskUserQuestion`, header "Contribution".
-   Options: theoretical (target theorem in mind) / empirical (fixing
-   observed failure) / methodological (new framework). Recommended =
-   `theoretical` if `theory_targets:` is non-empty, else `empirical` if
-   `gap-analysis` has populated failure modes, else `methodological`.
-3. **Hard constraints / no-go zones** — free-form. Recommended phrasing:
-   "Candidates must not rely on knowing the nuisance exactly; must
-   remain valid at finite-sample n." User can replace, extend, or accept.
-4. **Diversity target** — `AskUserQuestion`, header "Diversity".
-   Options: max diversity across primitives / deep dive within one
-   primitive / mixed (2 primitives, 2 variants each). Recommended = max
-   diversity (default, matches Step 3's existing diversity requirement).
-
-On `Proceed`, append an `interview_ideate:` block to research-state
-frontmatter per the protocol's persistence rules. Use the answers to
-constrain Step 2: the primitive answer narrows the primitive list, the
-contribution-type answer biases each candidate's `motivation:` field,
-constraints filter the candidate set, and diversity target shapes the
-spread (Step 3's `≥1 theoretical`, `≥1 empirical` requirements still
-apply under "max diversity"; under "deep dive" relax the
-distinct-primitive rule but keep the motivation diversity).
+Persist `interview_ideate:` on confirmation; skip when already present.
 
 ## Procedure
 
-1. **Read the formalization**. If `formalization:` is empty in research
-   state, refuse and run `formalize` first.
+1. **Generate a speculative pool.** Produce 3–5 candidates, each with name,
+   one-sentence core idea, algorithmic primitive/components, motivation,
+   objective/estimand, data regime/assumptions, claimed delta, expected
+   trade-off, and cost class. Model or panel output is a hypothesis—not novelty
+   evidence.
 
-2. **Generate candidates** — 3–5, each with:
+2. **Enforce diversity.** Normally require ≥1 theoretically motivated and ≥1
+   empirically motivated candidate, with no duplicate (primitive, motivation)
+   pair. Apply the confirmed deep-dive exception explicitly.
 
-   - **Name**: 3–7 words
-   - **Core idea** (one sentence): the *single* algorithmic primitive that
-     drives this approach
-   - **Primitive** (pick one or compose): proximal / score matching /
-     conformal / debiased ML / cross-fitting / sample splitting /
-     pseudo-labeling / two-stage / EM / variational / MCMC / kernel /
-     RKHS / influence function / one-step bias correction / sieve /
-     penalty / projection / online / bandit / RL
-   - **Motivation type**: `theoretical` (has a target theorem in mind) /
-     `empirical` (driven by observed failure) / `analogy` (porting from
-     adjacent field)
-   - **Expected trade-off**: what does this candidate give up to gain?
-     (e.g., "trades sample efficiency for distribution-free coverage")
-   - **Cost class**: $O(n)$ / $O(n \log n)$ / $O(n^2)$ / $O(n^3)$ / iterative
+3. **Reject non-contributions.** Drop cosmetic backbone swaps, unjustified
+   regularizer/kernel/Bayesian relabels, and “same method on a new
+   application/domain/dataset.” The last is an application delta, not method
+   novelty, unless a changed primitive/objective/regime creates a defensible
+   methodological claim.
 
-3. **Required diversity**: across the 3–5 candidates:
+4. **Register before searching.** Create a canonical candidate record for each
+   survivor. Persist its component/primitives hash, objective/estimand hash,
+   data-regime hash, and atomic claim IDs. Mirror only IDs/hashes in research
+   state.
 
-   - **≥1 candidate motivated theoretically** (you can already imagine the
-     proof technique)
-   - **≥1 candidate motivated empirically** (driven by a specific failure
-     mode from `gap-analysis`)
-   - **Distinct primitives** — no two candidates may share both primitive
-     and motivation
+5. **Targeted retrieval per candidate.** For “has someone done this?” and “why
+   has this not been done?”, generate explicit queries, query the vault first,
+   and retrieve externally for remaining gaps. Inspect passages and persist
+   prior-art, limitation, and delta links. Weaknesses alone cannot satisfy this
+   prior-art pressure.
 
-4. **Forbidden "candidates"**:
+6. **Loop on near-neighbors.** A new competing primitive, formulation, or gap
+   becomes another query. Update claims and repeat retrieval; any material
+   candidate change makes its old packet stale.
 
-   - "Same method but with a transformer/attention/diffusion backbone" —
-     not an algorithmic contribution
-   - "Same method with $L_2 \to L_1$ regularization" — only counts if there
-     is a *specific* analytic or empirical reason
-   - "Same method but Bayesian" — only counts if the prior structure does
-     real work in the analysis
-   - "Same method but with kernel" — only counts if the kernel choice
-     is principled (eigenfunction, RKHS embedding, etc.)
+7. **Freeze before ranking.** Freeze/validate a candidate-specific evidence
+   packet for every candidate to be ranked or handed off. If a packet cannot be
+   completed, show that candidate only in an **unranked speculative queue** with
+   the unresolved queries—it cannot receive `likely_novel`.
 
-5. **Output as ranked candidate table**:
+8. **Rank grounded candidates.** Output:
 
    ```markdown
-   | # | Name | Core idea | Primitive | Motivation | Trade-off | Cost |
-   |---|------|-----------|-----------|------------|-----------|------|
-   | 1 | Cross-fitted weighted conformal | Use DML to estimate w(x), then weighted quantile | weighted quantile + cross-fitting | theoretical | Needs $w$ estimation; gets $n^{-1/4}$ remainder | $O(n)$ + nuisance |
-   | 2 | ...
+   | # | Name | Primitive | Objective/regime | Motivation | Trade-off | Cost | Packet | Evidence status |
+   |---|------|-----------|------------------|------------|-----------|------|--------|-----------------|
    ```
+
+   State what retrieved evidence changed or eliminated. Better two grounded
+   candidates than five padded ones.
 
 ## Council panel (opt-in)
 
-When invoked with `--council`, run a multi-model brainstorm to widen Step 2's candidate
-pool — diversity is exactly what `ideate` optimizes for. Follow
-`shared/prompts/council_panel.md`. Run it after Step 1 (read formalization), feeding Step 2.
-
-- **Panel prompt**: the `formalize` block (loss, assumptions, nuisance, estimand) plus the
-  interview constraints, asking each member to propose **2–3 candidate algorithmic
-  approaches** in the Step 2 schema (name, core idea, primitive, motivation, trade-off,
-  cost). No ranking — collect the union.
-- **Synthesis**: pool member candidates with your own, dedup by (primitive, motivation),
-  then apply Step 4's forbidden-candidate filter and the Step 3 diversity requirements to
-  the merged pool. Tag panel-originated candidates `source: panel` in the state block. Run
-  the Anti-sycophancy check below on every survivor — a member's say-so is never novelty
-  evidence; unresolved prior art stays `novelty: uncertain`.
-
-## Anti-sycophancy
-
-For each candidate, **before** writing it, briefly check (one sentence
-each):
-
-- "Has someone done this?" — if you cannot rule out prior art with
-  reasonable confidence, mark `novelty: uncertain` next to the candidate
-- "Why hasn't this been done?" — if the answer is "it's obviously
-  worse than the existing approach", drop the candidate
-
-If you cannot generate 3 candidates that pass these checks, say so.
-Better to deliver 2 strong candidates than 5 weak ones.
+With `--council`, provide the formalization and interview constraints and take
+the union of candidate hypotheses. Apply the same filters, registration,
+targeted retrieval, and packet gates to panel and chair candidates. Member
+agreement is never prior-art evidence. Follow `shared/prompts/council_panel.md`.
 
 ## State update
 
 ```yaml
 stage: ideate
+research_phase: prior_art_audit
 candidates:
   - id: cand-1
+    evidence_candidate_id: candidate-cand-1
     name: "..."
     core_idea: "..."
-    primitive: "..."
-    motivation: theoretical
-    trade_off: "..."
-    cost: "O(n)"
-    novelty: uncertain   # uncertain | likely_novel | known_prior_art
+    primitives: ["..."]
+    objective: "..."
+    data_regime: "..."
+    component_hash: "<64-char-lowercase-sha256-hex>"
+    objective_hash: "<64-char-lowercase-sha256-hex>"
+    data_regime_hash: "<64-char-lowercase-sha256-hex>"
+    claim_ids: [claim-...]
+    evidence_packet_id: packet-...
+    evidence_packet_hash: "<64-char-lowercase-sha256-hex>"
+    evidence_packet_status: current
+    novelty: pending   # placeholder, never a verdict; only novelty-check may
+                       # replace it with novel | incremental | subsumed
     status: active
-  - id: cand-2
-    ...
 ```
 
-Append to body under `## <date> — ideate`.
-
-## Hand-off
-
-After ideate completes, the immediate next step is `novelty-check`, which
-resolves the `novelty: uncertain` flags. Do not advance to `theory-scoping`
-without a novelty pass.
+Append the ranked table, speculative queue, and retrieval summary under
+`## <date> — ideate`. Do not advance to `theory-scoping`; hand current packets
+to `novelty-check` next.
 
 ## Exit checklist
 
-Verify each item before emitting; fix violations first
-(`shared/prompts/execution_discipline.md` rule 2):
-
-- [ ] Grill ran, or the one-line skip notice was shown
-      (`interview_ideate` already in state).
-- [ ] 3–5 candidates; every Step 2 field filled for each (name, core idea,
-      primitive, motivation, trade-off, cost class).
-- [ ] Diversity holds: ≥1 theoretical, ≥1 empirical, no two candidates share
-      primitive+motivation (unless the interview chose deep-dive).
-- [ ] Step 4 forbidden-candidate filter applied; any near-miss says why it
-      is not a forbidden pattern.
-- [ ] Each candidate has a `novelty:` flag and one-line answers to
-      "has someone done this?" and "why hasn't this been done?".
-- [ ] If fewer than 3 candidates survived, that was said outright — no
-      padding with weak entries.
-- [ ] State updated with the full candidate schema + body entry.
+- [ ] Corpus manifest validated (and refreshed if >6 months old), or the mode
+      refused and offered `corpus-prefetch`.
+- [ ] Every surviving candidate named its nearest corpus neighbor with a
+      one-line same/different statement; out-of-envelope primitives triggered
+      immediate retrieval and a manifest extension.
+- [ ] No candidate was ranked, promoted, or dropped on a corpus hit alone.
+- [ ] Formalization exists; grill ran or its persisted-answer skip was stated.
+- [ ] All candidate fields and diversity constraints are satisfied.
+- [ ] Cosmetic/application-only deltas were rejected as method novelty.
+- [ ] Each survivor was registered with primitives/objective/regime/claim hashes.
+- [ ] Vault-first targeted prior-art retrieval ran per survivor.
+- [ ] New near-neighbors triggered another retrieval iteration.
+- [ ] Only candidates with validated current packets were ranked/handed off.
+- [ ] Unresolved candidates are visibly speculative and unranked.
+- [ ] State contains canonical IDs/hashes/status, not duplicated evidence.
+- [ ] Lifecycle points to `prior_art_audit`; no method-freeze gate was claimed
+      before novelty review and candidate selection.

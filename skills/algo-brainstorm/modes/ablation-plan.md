@@ -7,7 +7,8 @@ components are *necessary* vs. *helpful*, and pre-empt reviewer complaints.
 ## Inputs
 
 - The chosen candidate
-- Toy + theory results (so ablation runs target the *right* metrics)
+- Validated method-freeze and frozen experiment-contract artifacts/hashes
+- Toy design + theory targets/expected outcomes (no confirmatory results yet)
 
 ## Procedure
 
@@ -24,6 +25,25 @@ components are *necessary* vs. *helpful*, and pre-empt reviewer complaints.
 
    Each component should be ablatable — there is a meaningful "without
    this" version.
+
+   The inventory additionally covers two categories that are easy to overlook
+   because they do not look like "components":
+
+   - **Every hardcoded constant** — ranks, regularization strengths, thresholds,
+     truncation levels, latent dimensions. Each needs *either* a **selection
+     rule** (e.g. "rank chosen by 99% cumulative variance", "λ by 5-fold CV")
+     *or* a **sensitivity curve** in the ablation table. A number that appears in
+     the method with neither is a free parameter the reviewer will assume was
+     tuned on the test set.
+   - **Every discrete design choice** — downsampling operator, interpolation
+     scheme, projection variant, ordering, normalization scheme. Each needs
+     *either* an **ablated alternative** (at least one other reasonable choice,
+     run) *or* a **recorded justification** in the contract. "We use bilinear"
+     with no alternative and no reason is an arbitrary choice presented as a
+     design.
+
+   List these explicitly in the component inventory alongside the structural
+   components — do not fold them into a "hyperparameters" footnote.
 
 2. **Necessary vs. helpful triage**:
 
@@ -78,6 +98,19 @@ components are *necessary* vs. *helpful*, and pre-empt reviewer complaints.
      (validation set? cross-validation?)
    - For each baseline: identical tuning budget. Document.
 
+7. **Freeze the executable protocol.** Follow
+   `shared/prompts/research_lifecycle.md`. Write/hash
+   `docs/protocol-freeze-<slug>.md` binding the experiment-contract hash to the
+   code commit/immutable archive, environment/lockfile hash, dataset versions
+   and content hashes, splits/preprocessing, hyperparameter grids and equal
+   tuning budgets, seeds, analysis-code hash, and results-manifest schema. Any
+   claim-critical `TBD` leaves status `draft` and hard-stops the conductor; only
+   a fully concrete protocol can be `frozen`.
+
+   A newly selected recent baseline is a prior-art query: complete vault-first
+   passage grounding and refresh the candidate packet/method freeze if it
+   changes the claimed delta before freezing the protocol.
+
 ## Anti-sycophancy
 
 - Pre-commit to which components you *expect* to be necessary, before
@@ -119,7 +152,21 @@ ablation_plan:
   pre_commit:
     necessary: [cross_fitting, weighted_quantile]
     helpful: [clipping, DML]
+lifecycle_gates:
+  protocol_freeze:
+    status: frozen   # otherwise draft + hard stop
+    artifact: docs/protocol-freeze-<slug>.md
+    artifact_hash: "<64-char-lowercase-sha256-hex>"
+    experiment_contract_hash: "<64-char-lowercase-sha256-hex>"
+  results_ingested:
+    status: missing
+    manifest: results/<slug>/manifest.json
+research_phase: protocol_frozen
 ```
+
+Do not infer or invent results. After freeze, the next lifecycle action is an
+external-run hard stop until the real manifest and all run artifact hashes pass
+conductor validation.
 
 ## Exit checklist
 
@@ -127,6 +174,12 @@ Verify each item before emitting; fix violations first
 (`shared/prompts/execution_discipline.md` rule 2):
 
 - [ ] Every listed component has a meaningful "without this" variant.
+- [ ] Every hardcoded constant (ranks, regularizers, thresholds) has either a
+      stated selection rule or a sensitivity curve in the ablation table —
+      none left as a bare number.
+- [ ] Every discrete design choice (downsampling operator, interpolation
+      scheme, projection variant) has either an ablated alternative or a
+      recorded justification.
 - [ ] Pre-commit written: which components you expect necessary vs. helpful,
       before any results exist.
 - [ ] Baselines include the closest prior art, a ≤12-month method, and a
@@ -136,3 +189,7 @@ Verify each item before emitting; fix violations first
 - [ ] Every ablation row answers a specific reviewer question; rows that
       didn't were cut.
 - [ ] State updated: `ablation_plan:` block + body entry.
+- [ ] Protocol artifact binds every lifecycle-required code/data/environment/
+      seed/analysis field; `TBD` caused `draft` + hard stop, not a false freeze.
+- [ ] Results remain missing until real runs are ingested; no expected value was
+      recorded as an observed result.

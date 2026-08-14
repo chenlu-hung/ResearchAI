@@ -1,5 +1,10 @@
 # Reviewer Intel
 
+Inherit the absolute `PLUGIN_ROOT` resolved from the invoking skill. If this
+prompt is loaded directly, derive it from this file's absolute location
+(`.../shared/prompts/../..`). Never derive it from the user's working directory;
+the `.research-state/` outputs below stay relative to that working directory.
+
 Topic-scoped reviewer intelligence for the current project: what reviewers
 at `venue_target` actually wrote about papers similar to this one. This is
 a **project artifact** (lives in `.research-state/`), not venue knowledge —
@@ -27,7 +32,8 @@ re-gather only on user request or a new venue cycle.
    output:
 
    ```bash
-   uv run python skills/literature-explorer/scripts/search_openreview.py \
+   uv run --project "$PLUGIN_ROOT" python \
+     "$PLUGIN_ROOT/skills/literature-explorer/scripts/search_openreview.py" \
      "<topic + method keywords from research state>" \
      --venue <venue-id> --max 8 --include-reviews \
      > .research-state/<slug>-openreview-<cycle>.jsonl
@@ -40,7 +46,7 @@ re-gather only on user request or a new venue cycle.
    reading closely, and paste the result line:
 
    ```bash
-   uv run python skills/peer-reviewer/scripts/scan_injection.py \
+   python3 "$PLUGIN_ROOT/skills/peer-reviewer/scripts/scan_injection.py" \
      .research-state/<slug>-openreview-<cycle>.jsonl
    ```
 
@@ -75,6 +81,9 @@ re-gather only on user request or a new venue cycle.
 - `self-review` — sharpens the venue persona and red-flag walk.
 - `full-draft` pre-flight grill — feeds the proactive-weaknesses
   recommendation.
+- `post-mortem` — merges a real rejection's objections into this dossier's
+  format when it exists (theme groups, ≤25-word quotes, ids, caveats), rather
+  than starting a parallel record.
 
 ## Exit checklist
 
