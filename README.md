@@ -4,6 +4,10 @@ A host-portable research-agent plugin for Stats/ML researchers whose core output
 is **developing new algorithms**. Its prompts and persisted evidence workflow do
 not depend on a Codex-only or Claude-only API.
 
+What it refuses to do — and what kind of change would cross each of those
+lines — is recorded in [POSITIONING.md](POSITIONING.md). The mode surface is
+indexed in [shared/mode_registry.md](shared/mode_registry.md).
+
 ## Evidence before answers
 
 Literature-dependent modes use one ordered loop: model knowledge proposes

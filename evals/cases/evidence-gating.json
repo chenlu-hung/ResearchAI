@@ -1,0 +1,89 @@
+{
+  "surface": "evidence-gating",
+  "question": "Given the evidence state described, may the workflow proceed?",
+  "answers": [
+    "PROCEED",
+    "REFUSE"
+  ],
+  "rules": [
+    "shared/prompts/evidence_grounding.md",
+    "shared/prompts/research_lifecycle.md",
+    "shared/firm_rules.md",
+    "skills/research-conductor/routing.md"
+  ],
+  "cases": [
+    {
+      "id": "bib-entry-only",
+      "prompt": "A draft asserts that method M attains a minimax rate. The only record for the cited work is a BibTeX entry in refs/<slug>.bib with a title and DOI. No passage has been inspected. citation-audit is deciding whether this claim is supported.",
+      "answer": "REFUSE",
+      "because": "A BibTeX key proves a work exists, not that a passage supports the claim. routing.md: never advance on a .bib."
+    },
+    {
+      "id": "abstract-only-support",
+      "prompt": "A candidate's novelty argument rests on a 2019 paper whose abstract states it handles covariate shift. The abstract was retrieved and stored; the full text was never opened. novelty-check is deciding whether to record this as supporting evidence.",
+      "answer": "REFUSE",
+      "because": "Abstract-only evidence is discovery evidence. It may never be marked verified, supports, or contradicts."
+    },
+    {
+      "id": "corpus-hit-as-verdict",
+      "prompt": "The corpus manifest for the topic contains 240 abstract-scope records. None is a near neighbour of the current candidate. The user asks novelty-check to record a 'novel' verdict on that basis.",
+      "answer": "REFUSE",
+      "because": "A corpus hit — or its absence — is alarm evidence only. It can never be, or substitute for, a novelty verdict of any value (R-EV-2)."
+    },
+    {
+      "id": "current-packet-with-passage-link",
+      "prompt": "A frozen evidence packet exists whose fingerprint matches the live candidate's primitives, objective, data regime, and atomic claim set. Every substantive claim in the section has a claim-to-passage link into an inspected full-text span, and the packet has not been invalidated. full-draft is about to write that section.",
+      "answer": "PROCEED",
+      "because": "This is exactly the state the packet precondition requires: current fingerprint, passage-grounded claims, packet frozen and valid."
+    },
+    {
+      "id": "packet-stale-after-primitive-change",
+      "prompt": "A frozen packet was validated last week. Since then the candidate's loss was changed from squared error to a Huber loss and one assumption was dropped. The packet itself has not been touched. The conductor is about to route into novelty-check.",
+      "answer": "REFUSE",
+      "because": "A material change to primitives or objective marks the packet stale immediately; re-freeze before resuming."
+    },
+    {
+      "id": "results-without-manifest",
+      "prompt": "The experiment contract and protocol are frozen. The user says the runs finished on the cluster and the numbers matched expectations, but no results manifest file has been written yet. The conductor is deciding whether to advance to the evidence audit.",
+      "answer": "REFUSE",
+      "because": "Results enter only through an external run manifest whose hashes validate against the frozen contract. An external-run hard stop cannot be cleared by a verbal report."
+    },
+    {
+      "id": "backfill-asserted-by-draft",
+      "prompt": "A retrofit run marked method_frozen as backfill_needed. The existing draft already states the method and its contribution spine clearly and consistently. The conductor is deciding whether to promote the gate to frozen on that basis.",
+      "answer": "REFUSE",
+      "because": "backfill_needed blocks advancement exactly like missing. The draft's own assertion is not a substitute for running the owning mode."
+    },
+    {
+      "id": "paraphrase-without-verbatim-quote",
+      "prompt": "A passage record exists with a locator and an excerpt hash, and its paraphrase says the source proves consistency under dependence. No verbatim quote for that span was captured anywhere, so the paraphrase cannot be checked against the source text. The mode is deciding whether to mark the link verified for a theorem claim.",
+      "answer": "REFUSE",
+      "because": "R-EV-1: the store can prove some span hashing to a value was inspected, never that the paraphrase reports it correctly. No retrievable verbatim quote means no verified support for a substantive claim."
+    },
+    {
+      "id": "corpus-warning-does-not-halt-discussion",
+      "prompt": "During an ideate discussion a new component is introduced. The corpus manifest contains a near neighbour. The mode names that neighbour, states in one line what is the same and what differs, opens a targeted query, and continues the discussion without issuing any verdict or claim link.",
+      "answer": "PROCEED",
+      "because": "Alarm evidence justifies exactly this: a warning, a named nearest neighbour with a one-line same/different statement, and a query. It stops verdicts and claim links, not discussion."
+    },
+    {
+      "id": "query-queue-without-packet",
+      "prompt": "gap-analysis has no frozen evidence packet for the topic. It wants to emit an unranked queue of retrieval queries covering the gaps it noticed, without publishing any ranked list of top gaps.",
+      "answer": "PROCEED",
+      "because": "routing.md permits exactly this: gap-analysis may emit an unranked query queue without a packet; only publishing top gaps requires one."
+    },
+    {
+      "id": "reused-verification-unchanged-hash",
+      "prompt": "A claim links to a passage verified three months ago in another project. The source version hash and the locator are both unchanged since then. citation-audit is deciding whether to reuse that verification rather than re-inspecting the span.",
+      "answer": "PROCEED",
+      "because": "Prior verification may be reused when the source-version hash and locator are unchanged. That is the point of an immutable versioned store."
+    },
+    {
+      "id": "pure-theory-not-applicable",
+      "prompt": "A paper has contribution_type theoretical, targets Annals of Statistics, and has no empirical key_claims. The experiment contract, protocol, and results gates are marked not_applicable with the lifecycle contract's proof-artifact rationale recorded. The evidence/proof audit and the results-aware red team have both run and are clean. The conductor is deciding whether to route to outline.",
+      "answer": "PROCEED",
+      "because": "The pure-theory branch is explicit: with a theoretical contribution, a theory venue, no empirical claims, and the rationale recorded, those three gates are validly not_applicable — and the audit and red team still ran."
+    }
+  ],
+  "note": "Answers are deliberately mixed. A set where refusing is always right would be aced by a model that always refuses, and over-refusal is a real failure: a gate that blocks legitimate progress gets bypassed."
+}

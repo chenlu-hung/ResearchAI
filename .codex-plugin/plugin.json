@@ -1,6 +1,6 @@
 {
   "name": "research-ai",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "An evidence-grounded Stats/ML workflow for literature discovery, algorithm design, experiments, paper drafting, and peer review.",
   "author": {
     "name": "ResearchAI"

@@ -72,6 +72,24 @@ follow-up query. It must never be marked `verified`, `supports`, or
 experiment, or novelty claim. Prior verification
 may be reused only when the source-version hash and locator are unchanged.
 
+### The paraphrase is not the evidence (R-EV-1)
+
+A passage record's paraphrase is not the evidence; the inspected span is.
+`evidencectl passage add` stores a paraphrase and an excerpt hash — `--excerpt`
+is hashed in memory and never written — so the store can prove that some span
+hashing to a given value was inspected, but never that the paraphrase reports
+that span correctly. The paraphrase is the artifact that can be wrong.
+
+Capture the verbatim quote for every passage before calling `passage add`,
+in the source's own vault note and under the same locator, so the paraphrase
+stays checkable against it. A host-side reading skill may own that capture
+step; the requirement holds whether or not one is installed. Never mark a
+passage `verified`, `supports`, or `contradicts` for a substantive method,
+theorem, assumption, experiment, or novelty claim when no verbatim quote for
+it can be retrieved.
+
+Canonical wording: `shared/firm_rules.md` § R-EV-1.
+
 ### Two-fidelity rule (corpus hits vs. grounded evidence)
 
 The local corpus — `docs/corpus-manifest-<slug>.md` and its abstract-scope

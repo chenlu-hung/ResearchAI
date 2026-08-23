@@ -1,0 +1,53 @@
+{
+  "surface": "prose-hygiene",
+  "question": "Does this passage violate shared/prompts/prose_hygiene.md as written?",
+  "answers": ["FLAG", "ALLOW"],
+  "rules": [
+    "shared/prompts/prose_hygiene.md"
+  ],
+  "note": "Half of these are §E exceptions that must NOT be flagged. False positives are the failure that gets a prose gate overridden, so they are scored as heavily as misses.",
+  "cases": [
+    {
+      "id": "hedge-filler-and-ai-tell",
+      "prompt": "Passage (Method section): \"It is worth noting that our approach leverages a crucial insight about the geometry of the constraint set.\"",
+      "answer": "FLAG",
+      "because": "§A hedge filler (\"it is worth noting\"), AI-tell vocabulary (\"leverage\" as a verb, \"crucial\")."
+    },
+    {
+      "id": "binary-contrast",
+      "prompt": "Passage (Discussion): \"The estimator succeeds not because the model is larger, but because the calibration step removes the bias.\"",
+      "answer": "FLAG",
+      "because": "§B binary contrast / telegraphed reversal (\"not because X, but because Y\")."
+    },
+    {
+      "id": "false-agency",
+      "prompt": "Passage (Experiments): \"Our framework understands the underlying dependence structure and decides which blocks to resample.\"",
+      "answer": "FLAG",
+      "because": "§B false agency: an inanimate subject given a human verb (\"understands\", \"decides\")."
+    },
+    {
+      "id": "bullets-outside-conventional-slot",
+      "prompt": "Passage (Method section, mid-derivation): a four-bullet list, in running prose rather than an algorithm environment, giving the four steps of the estimator.",
+      "answer": "FLAG",
+      "because": "§F list budget: bullets belong in conventional slots (Intro contributions, assumption lists), not as a substitute for Method prose."
+    },
+    {
+      "id": "technical-adverbs",
+      "prompt": "Passage (Theory): \"The estimator is asymptotically normal under Assumption 2, and the rate is attained uniformly over the Hölder class.\"",
+      "answer": "ALLOW",
+      "because": "§E explicitly keeps technical adverbs (\"asymptotically\", \"uniformly\"). These are terms of art, not intensifiers."
+    },
+    {
+      "id": "conventional-passive",
+      "prompt": "Passage (Experiments): \"Samples were collected under the protocol of Section 4 and split by subject before any tuning.\"",
+      "answer": "ALLOW",
+      "because": "§E allows passive voice where the actor is conventional or irrelevant. Naming the actor here would add nothing."
+    },
+    {
+      "id": "three-contribution-bullets",
+      "prompt": "Passage (Introduction, final paragraph): three bullets, one per contribution, each a single sentence naming the result and the section that proves it.",
+      "answer": "ALLOW",
+      "because": "§E: three-item lists are fine, and §F names Intro contribution bullets as a conventional slot."
+    }
+  ]
+}
