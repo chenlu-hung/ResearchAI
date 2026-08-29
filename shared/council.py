@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# VENDORED — do not edit here. Upstream: my-skills/llm-council/council.py
+# VENDORED — do not edit here. Upstream: chenlu-hung/my-skills@llm-council-chatgpt-member llm-council/council.py
 # Re-sync with: shared/vendor-council.sh   Plugin usage: shared/prompts/council_panel.md
 """council.py — dispatch one prompt to the external LLM-council members in parallel.
 

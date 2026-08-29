@@ -301,6 +301,13 @@ turns `self-review` into a real multi-reviewer meta-review. Inspired by
 - Engine: `$PLUGIN_ROOT/shared/council.py` (stdlib-only). Protocol +
   anti-hallucination guardrails:
   `$PLUGIN_ROOT/shared/prompts/council_panel.md`.
+- The engine is **vendored** from the [`llm-council`
+  skill](https://github.com/chenlu-hung/my-skills/tree/main/llm-council) — the
+  plugin ships it because it installs where that checkout doesn't exist. Don't
+  edit `shared/council.py`: change it upstream, then run
+  `shared/vendor-council.sh`, which refetches it (and its schema) by URL. No
+  local copy of the upstream is required; set `COUNCIL_UPSTREAM` to one only if
+  you want to vendor work that isn't pushed yet.
 - Needs the member CLIs on PATH and signed in (`codex`, `agy`, `claude`,
   `opencode`); any missing one drops out of the panel. Without `--council`,
   every mode runs single-model exactly as before.
