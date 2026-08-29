@@ -1,0 +1,73 @@
+name: checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      # Provisions the interpreter pinned in .python-version and the dev group.
+      - name: Sync environment
+        run: uv sync
+
+      # Every check below runs even after an earlier one fails, so one CI run
+      # reports the whole picture instead of one failure at a time.
+      - name: Lint
+        if: ${{ !cancelled() }}
+        run: uv run ruff check .
+
+      - name: Tests
+        if: ${{ !cancelled() }}
+        run: uv run pytest -q
+
+      - name: Test-count ratchet
+        if: ${{ !cancelled() }}
+        run: uv run python3 scripts/check_test_count.py
+
+      # CLAUDE.md requires the same base version in both host manifests, the
+      # marketplace entry, and pyproject.toml. This is that rule, enforced.
+      - name: Host parity
+        if: ${{ !cancelled() }}
+        run: uv run python3 scripts/check_host_parity.py
+
+      # The four declarations of the mode surface (disk, SKILL.md, routing.md,
+      # registry) must agree; drift between them fails silently mid-run.
+      - name: Mode registry
+        if: ${{ !cancelled() }}
+        run: uv run python3 scripts/check_mode_registry.py
+
+      # Rules duplicated inline across runtime prompts must still say the same
+      # thing in every copy.
+      - name: Firm-rule wording
+        if: ${{ !cancelled() }}
+        run: uv run python3 scripts/check_firm_rules.py
+
+      # A boundary doc that points at renamed files reads exactly like one that
+      # doesn't.
+      - name: Governance doc references
+        if: ${{ !cancelled() }}
+        run: uv run python3 scripts/check_doc_refs.py
+
+      # Blocking findings only. Staleness is a warning here on purpose — a
+      # year-old CFP must not block an unrelated commit; the scheduled
+      # maintenance workflow is what makes staleness go red.
+      - name: Venue knowledge consistency
+        if: ${{ !cancelled() }}
+        run: uv run python3 skills/paper-writer/scripts/check_venues.py

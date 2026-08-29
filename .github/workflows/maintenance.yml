@@ -1,0 +1,39 @@
+name: maintenance
+
+# Time-based obligations that no commit triggers: provenance that ages out,
+# and a review that comes due. Both are written in CLAUDE.md / audits/README.md
+# as things the author is supposed to remember; this is what remembers them.
+#
+# Note: GitHub disables scheduled workflows on public repos after 60 days with
+# no repository activity. If this stops firing, re-enable it in the Actions tab.
+on:
+  schedule:
+    - cron: "0 1 1 * *" # 01:00 UTC on the 1st of each month
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  maintenance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Sync environment
+        run: uv sync
+
+      # Re-verify venue/NSTC ground truth before the next submission cycle,
+      # not after it. check_venues.py's own 365-day default is a full cycle
+      # too late to be useful as a reminder.
+      - name: Venue provenance freshness
+        if: ${{ !cancelled() }}
+        run: uv run python3 scripts/check_freshness.py --max-age-days 180
+
+      - name: Gate-retirement audit cadence
+        if: ${{ !cancelled() }}
+        run: uv run python3 scripts/check_audit_due.py --max-age-days 120

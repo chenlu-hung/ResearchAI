@@ -50,7 +50,7 @@ results-aware—an experiment plan or expected curve cannot satisfy it.
 If the arguments include `--council` (supported by `gap-analysis`, `ideate`,
 `novelty-check`, and `red-team`), additionally run the multi-model panel in
 `shared/prompts/council_panel.md` after the mode's gating — fan out to
-Codex / Gemini / Claude / DeepSeek via
+Codex / Gemini / Claude / opencode via
 `python3 "$PLUGIN_ROOT/shared/council.py"`, then
 chair the synthesis. For `gap-analysis`/`ideate` the panel is divergence (union of
 ideas); for `novelty-check`/`red-team` it is adversarial cross-examination (members

@@ -4,6 +4,10 @@ A host-portable research-agent plugin for Stats/ML researchers whose core output
 is **developing new algorithms**. Its prompts and persisted evidence workflow do
 not depend on a Codex-only or Claude-only API.
 
+What it refuses to do — and what kind of change would cross each of those
+lines — is recorded in [POSITIONING.md](POSITIONING.md). The mode surface is
+indexed in [shared/mode_registry.md](shared/mode_registry.md).
+
 ## Evidence before answers
 
 Literature-dependent modes use one ordered loop: model knowledge proposes
@@ -288,7 +292,7 @@ needed.
 
 Four modes — `algo gap-analysis`, `algo ideate`, `write outline`, `write
 self-review` — accept a `--council` flag that convenes a multi-model panel
-(Codex, Gemini, Claude, DeepSeek), each reached through its **own
+(Codex, Gemini, Claude, opencode), each reached through its **own
 subscription/sign-in CLI** rather than an API key, with the running session as
 chair. It widens divergent search (more gaps, more candidate algorithms) and
 turns `self-review` into a real multi-reviewer meta-review. Inspired by
@@ -297,6 +301,13 @@ turns `self-review` into a real multi-reviewer meta-review. Inspired by
 - Engine: `$PLUGIN_ROOT/shared/council.py` (stdlib-only). Protocol +
   anti-hallucination guardrails:
   `$PLUGIN_ROOT/shared/prompts/council_panel.md`.
+- The engine is **vendored** from the [`llm-council`
+  skill](https://github.com/chenlu-hung/my-skills/tree/main/llm-council) — the
+  plugin ships it because it installs where that checkout doesn't exist. Don't
+  edit `shared/council.py`: change it upstream, then run
+  `shared/vendor-council.sh`, which refetches it (and its schema) by URL. No
+  local copy of the upstream is required; set `COUNCIL_UPSTREAM` to one only if
+  you want to vendor work that isn't pushed yet.
 - Needs the member CLIs on PATH and signed in (`codex`, `agy`, `claude`,
   `opencode`); any missing one drops out of the panel. Without `--council`,
   every mode runs single-model exactly as before.

@@ -1,39 +1,59 @@
 #!/usr/bin/env python3
-"""council.py — dispatch one prompt to a multi-model panel in parallel.
+# VENDORED — do not edit here. Upstream: chenlu-hung/my-skills@llm-council-chatgpt-member llm-council/council.py
+# Re-sync with: shared/vendor-council.sh   Plugin usage: shared/prompts/council_panel.md
+"""council.py — dispatch one prompt to the external LLM-council members in parallel.
 
-Bundled into the research-assistant plugin (mirrors the standalone `llm-council` skill)
-so the `--council` panel works without external dependencies. Resolve the absolute
-plugin root from the loaded skill and run
-`python3 "$PLUGIN_ROOT/shared/council.py" ...` from the user's project cwd (stdlib
-only — no uv needed). The calling Claude Code
-session is the Chairman: it builds the panel prompt, runs this dispatcher, and synthesizes
-the results into the mode's structured output. This script only drives the member CLIs so
-they run concurrently with clean, parsed output. See `shared/prompts/council_panel.md`.
+Part of the `llm-council` Claude Code skill. The orchestrating Claude Code session is
+the Chairman and does not answer; this script drives every member CLI — including a
+separate headless `claude` — so they run concurrently with clean, parsed output.
 
 Each member authenticates through its own *subscription / sign-in*, not an API key:
   - codex     -> OpenAI Codex CLI, signed in with a ChatGPT subscription (`codex exec`)
   - gemini    -> Google Antigravity CLI `agy`, Gemini models (`agy -p`)
   - claude    -> Claude Code headless (`claude -p`) — Claude as an independent member,
                  separate from the orchestrating session that chairs the council
-  - opencode  -> opencode CLI (`opencode run`), default model DeepSeek V4 Flash (free)
+  - opencode  -> opencode CLI on free DeepSeek, so it costs no subscription quota
+  - chatgpt   -> the ChatGPT desktop app via `chatgpt-ask` (opt-in) — spends the
+                 conversation allowance rather than Codex quota
 
-Usage (with PLUGIN_ROOT already resolved from the loaded skill):
-    python3 "$PLUGIN_ROOT/shared/council.py" --prompt-file q.txt
-    python3 "$PLUGIN_ROOT/shared/council.py" --members codex,claude --prompt "..."
-    echo "question" | python3 "$PLUGIN_ROOT/shared/council.py"
+Usage:
+    python3 council.py --prompt-file q.txt                 # all members
+    python3 council.py --members codex,claude --prompt "..."   # a subset
+    echo "question" | python3 council.py                   # prompt via stdin
+    python3 council.py --prompt-file review.txt --workdir /path/to/repo
+        # members run *in* that repo so they can read real files (review work);
+        # they are hardened read-only and the directory is never deleted
+    python3 council.py --anonymize stage1.json --question-file q.txt
+        # no dispatch: shuffle + relabel the stage-1 answers deterministically,
+        # write review_prompt.txt (self-contained cross-review prompt) and
+        # label_map.json (private label→member mapping) next to stage1.json
 
 Output: JSON on stdout:
     {"members": {"codex": {ok, answer, model, elapsed_s, error}, "gemini": {...}}}
 
-The external CLIs run in a throwaway temp dir under a read-only sandbox so they
-cannot touch the user's repo while answering.
+By default every CLI runs in a throwaway temp dir, so it cannot see or touch the
+user's repo while answering. `--workdir` deliberately gives that up: members run in a
+directory the caller owns (review work, where the answer depends on real code), and
+the script instead hardens each one read-only. Those guarantees are NOT equal:
+
+  codex   OS-level sandbox (`-s read-only`)          — enforced
+  claude  write tools denied, no settings loaded     — enforced by the harness
+  gemini  `--mode plan`                              — an agent mode, not a sandbox
+
+Gemini's is the weakest link: `--mode plan` is a behavioural mode and it is paired with
+`--dangerously-skip-permissions` (without which agy cannot read anything headlessly). It
+held under test — told explicitly to create and overwrite files in a borrowed dir, it did
+neither — but it is a promise, not a wall. Review from a clean/committed tree so anything
+unexpected is recoverable.
 """
 
 import argparse
 import json
 import os
+import random
 import re
 import shutil
+import string
 import subprocess
 import sys
 import tempfile
@@ -44,88 +64,299 @@ DEFAULT_TIMEOUT = 300  # seconds, per member — matches agy's default --print-t
 DEFAULT_GEMINI_MODEL = "Gemini 3.1 Pro (High)"
 DEFAULT_CODEX_MODEL = ""  # empty = whatever the ChatGPT subscription defaults to
 DEFAULT_CLAUDE_MODEL = ""  # empty = whatever the Claude subscription defaults to
-DEFAULT_OPENCODE_MODEL = "opencode/deepseek-v4-flash-free"  # free DeepSeek V4 Flash
+# A free slug on opencode's own provider. These come and go: the previous default
+# (opencode/deepseek-v4-flash-free) was withdrawn and every call returned a server
+# error. `opencode models | grep free` lists what is currently live.
+DEFAULT_OPENCODE_MODEL = "opencode/mimo-v2.5-free"
 ALL_MEMBERS = "codex,gemini,claude,opencode"
 
 ANSI = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")  # strip terminal color codes from CLI stdout
 
 
-def run_codex(prompt, model, timeout, workdir):
-    """Codex CLI (ChatGPT subscription). `-o` writes only the final message — clean capture."""
-    outfile = os.path.join(workdir, "codex_answer.txt")
+HERE = os.path.dirname(os.path.abspath(__file__))
+DEFAULT_SCHEMA = os.path.join(HERE, "schema", "answer.schema.json")
+
+
+def load_schema(path):
+    """Read a JSON Schema file -> (path, compact_json_string). Both forms are needed:
+    codex and agy take a FILE, claude takes an inline JSON STRING."""
+    with open(path, encoding="utf-8") as fh:
+        obj = json.load(fh)
+    return path, json.dumps(obj, separators=(",", ":"), ensure_ascii=False)
+
+
+def render_structured(obj):
+    """Turn a schema-shaped answer back into Markdown.
+
+    Structured output is only useful if it does not cost us the prose: Stage-3 synthesis and
+    `--anonymize` read `answer` as text, and so does the human. So every member's JSON is
+    rendered here and the raw object is kept alongside it under `structured`.
+    """
+    if not isinstance(obj, dict):
+        return ""
+    parts = [(obj.get("answer") or obj.get("summary") or "").strip()]
+    for key, heading in (("key_points", "重點"), ("caveats", "限制"),
+                         ("files_changed", "改動的檔案"), ("tests_run", "跑過的測試"),
+                         ("blockers", "卡住的地方"), ("followups", "留給後續")):
+        items = obj.get(key)
+        if isinstance(items, list) and items:
+            parts.append(f"**{heading}**\n" + "\n".join(f"- {i}" for i in items))
+    conf = obj.get("confidence")
+    if conf:
+        parts.append(f"_confidence: {conf}_")
+    return "\n\n".join(x for x in parts if x).strip()
+
+
+FENCED = re.compile(r"\A```[A-Za-z]*\s*\n(.*?)\n?```\s*\Z", re.S)
+
+
+def unfence(text):
+    """Strip a Markdown code fence from around a JSON payload.
+
+    Members handed a schema through the prompt rather than a flag (`opencode`,
+    `chatgpt`) wrap the object in ```json often enough to matter, and that stops
+    parse_structured at the very first character.
+    """
+    stripped = (text or "").strip()
+    match = FENCED.match(stripped)
+    return match.group(1).strip() if match else stripped
+
+
+def parse_structured(text):
+    """(rendered_markdown, raw_obj) from a member's stdout/-o payload.
+
+    Falls back to (text, None) when the payload is not schema-shaped JSON — a member that
+    ignored the schema must still contribute its prose rather than being dropped.
+    """
+    stripped = (text or "").strip()
+    if not stripped.startswith("{"):
+        return stripped, None
+    try:
+        obj = json.loads(stripped)
+    except json.JSONDecodeError:
+        return stripped, None
+    rendered = render_structured(obj)
+    return (rendered or stripped), (obj if rendered else None)
+
+def codex_rollout_fallback(started_at):
+    """Last-resort recovery of a codex answer whose stdout/`-o` capture came back empty.
+
+    `codex exec` always persists the full turn to ~/.codex/sessions/YYYY/MM/DD/rollout-*.jsonl,
+    so a lost final message is recoverable. Returns "" when nothing usable is found.
+    """
+    root = os.path.expanduser("~/.codex/sessions")
+    if not os.path.isdir(root):
+        return ""
+    newest, newest_mtime = None, started_at - 5
+    for dirpath, _dirs, files in os.walk(root):
+        for name in files:
+            if not (name.startswith("rollout-") and name.endswith(".jsonl")):
+                continue
+            path = os.path.join(dirpath, name)
+            try:
+                mtime = os.path.getmtime(path)
+            except OSError:
+                continue
+            if mtime > newest_mtime:
+                newest, newest_mtime = path, mtime
+    if not newest:
+        return ""
+    texts = []
+    try:
+        with open(newest, encoding="utf-8") as fh:
+            for line in fh:
+                try:
+                    rec = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                payload = rec.get("payload", rec)
+                if payload.get("role") != "assistant":
+                    continue
+                for chunk in payload.get("content") or []:
+                    if chunk.get("type") == "output_text" and chunk.get("text"):
+                        texts.append(chunk["text"])
+    except OSError:
+        return ""
+    return texts[-1].strip() if texts else ""
+
+
+def run_codex(prompt, model, timeout, workdir, borrowed, schema=None):
+    """Codex CLI (ChatGPT subscription). `-o` writes only the final message — clean capture.
+
+    The `-o` file goes to its own temp dir, never into `workdir`: when the caller borrows a
+    real repo (`--workdir`), dropping `codex_answer.txt` in it would dirty their tree.
+
+    `stdin=DEVNULL` is load-bearing: when stdin is a pipe rather than a TTY (which is the
+    case for every call from an agent harness), `codex exec` prints
+    "Reading additional input from stdin..." and tries to read a SECOND prompt from it.
+    The turn then gets truncated — stdout holds one status line and `-o` is never written,
+    while `codex doctor` reports everything healthy. Verified: same prompt, 39 bytes of
+    stdout and no `-o` file without DEVNULL; 622 bytes and a correct `-o` file with it.
+    """
+    outdir = tempfile.mkdtemp(prefix="council-codex-")
+    outfile = os.path.join(outdir, "codex_answer.txt")
     cmd = [
         "codex", "exec",
-        "--skip-git-repo-check",   # temp workdir is not a git repo
+        "--skip-git-repo-check",   # a temp workdir is not a git repo
         "-s", "read-only",         # cannot write/execute against the filesystem
         "--cd", workdir,
         "-o", outfile,
     ]
     if model:
         cmd += ["-m", model]
+    if schema:
+        cmd += ["--output-schema", schema[0]]   # codex wants a FILE
     cmd.append(prompt)
 
     t0 = time.time()
-    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
-    elapsed = round(time.time() - t0, 1)
+    try:
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout,
+                              stdin=subprocess.DEVNULL)
+        elapsed = round(time.time() - t0, 1)
+        answer = ""
+        if os.path.exists(outfile):
+            with open(outfile, encoding="utf-8") as fh:
+                answer = fh.read().strip()
+        if not answer:
+            answer = codex_rollout_fallback(t0)
+    finally:
+        shutil.rmtree(outdir, ignore_errors=True)
 
-    answer = ""
-    if os.path.exists(outfile):
-        with open(outfile, encoding="utf-8") as fh:
-            answer = fh.read().strip()
+    answer, structured = parse_structured(answer)
     ok = bool(answer) and proc.returncode == 0
     err = "" if ok else ((proc.stderr or "").strip()[-600:] or f"exit {proc.returncode}, empty answer")
-    return {"ok": ok, "answer": answer, "model": model or "default", "elapsed_s": elapsed, "error": err}
+    return {"ok": ok, "answer": answer, "structured": structured,
+            "model": model or "default", "elapsed_s": elapsed, "error": err}
 
 
-def run_gemini(prompt, model, timeout, workdir):
-    """Antigravity CLI `agy` in print mode. `--model` must precede `-p` (Go flag parsing)."""
+def run_gemini(prompt, model, timeout, workdir, borrowed, schema=None):
+    """Antigravity CLI `agy` in print mode. `--model` must precede `-p` (Go flag parsing).
+
+    On a borrowed workdir the pair of flags is deliberate and must stay together:
+      --mode plan                     the actual write protection — verified by test: agy
+                                      read the directory but created no file and clobbered
+                                      nothing when explicitly told to
+      --dangerously-skip-permissions  without it agy cannot read *anything* here — its read
+                                      tools need the "command" permission, and headless mode
+                                      has no way to prompt, so every call auto-denies and
+                                      returns empty. It only suppresses the prompt; plan mode
+                                      still forbids the writes.
+    """
     cmd = ["agy"]
     if model:
         cmd += ["--model", model]
+    # agy's own print-mode deadline defaults to 5m and is INDEPENDENT of our subprocess
+    # timeout: without this, a --timeout 900 review still has agy give up at 300s.
+    cmd += ["--print-timeout", f"{timeout}s"]
+    if schema:
+        # agy rejects --json-schema unless the output format is json; the envelope then
+        # carries the parsed object under "structured_output".
+        cmd += ["--output-format", "json", "--json-schema", schema[0]]
+    if borrowed:
+        cmd += ["--mode", "plan", "--dangerously-skip-permissions"]
     cmd += ["-p", prompt]
 
     t0 = time.time()
-    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, cwd=workdir)
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, cwd=workdir,
+                          stdin=subprocess.DEVNULL)
     elapsed = round(time.time() - t0, 1)
 
-    answer = ANSI.sub("", proc.stdout or "").strip()
+    raw = ANSI.sub("", proc.stdout or "").strip()
+    structured = None
+    if schema and raw.startswith("{"):
+        try:  # unwrap agy's envelope before parsing the payload
+            env = json.loads(raw)
+            inner = env.get("structured_output")
+            if inner is not None:
+                raw = json.dumps(inner, ensure_ascii=False)
+            elif isinstance(env.get("response"), str):
+                raw = env["response"]
+        except json.JSONDecodeError:
+            pass
+    answer, structured = parse_structured(raw)
     ok = bool(answer) and proc.returncode == 0
     err = "" if ok else ((proc.stderr or "").strip()[-600:] or f"exit {proc.returncode}, empty answer")
-    return {"ok": ok, "answer": answer, "model": model or "default", "elapsed_s": elapsed, "error": err}
+    return {"ok": ok, "answer": answer, "structured": structured,
+            "model": model or "default", "elapsed_s": elapsed, "error": err}
 
 
-def run_claude(prompt, model, timeout, workdir):
+def run_claude(prompt, model, timeout, workdir, borrowed, schema=None):
     """Claude Code headless (`claude -p`); stdout is the clean answer.
 
     `--setting-sources project` keeps OAuth/keychain auth but skips *user* settings, so the
     member doesn't fire the user's SessionStart hooks (e.g. the handoff notice) into its
-    answer. Run in the empty temp `workdir`, so no project/local settings load either.
+    answer. In the default temp `workdir` no project/local settings load either.
     (`--bare` would also drop hooks but it skips keychain reads too, which breaks sub auth.)
+
+    On a borrowed workdir two things change:
+
+    1. `--setting-sources ""` — load NO settings at all. `project` was safe only while the cwd
+       was an empty temp dir; pointed at a real repo it loads that repo's `.claude/settings.json`
+       and *runs its hooks*. Verified: a repo with a SessionStart hook echoing a marker had that
+       marker land in the member's answer. Hooks are arbitrary shell commands, so this is an
+       execution path, not just output noise. The empty value still keeps OAuth/keychain auth.
+    2. The write tools are denied, so the member can read the caller's repo but not touch it.
+       Bash is denied too — it is a write path (`>`, `rm`) the other denials miss; Read/Grep/Glob
+       are enough to review with. Keep `--disallowedTools` LAST: it is variadic and will swallow
+       whatever follows it.
+
+    The prompt goes in on **stdin**, not as an argument, for that same variadic reason: a
+    trailing positional prompt gets eaten as more tool names ("Permission deny rule \"the\"
+    matches no known tool"), then the call dies for having no prompt.
     """
-    cmd = ["claude", "-p", "--setting-sources", "project"]
+    cmd = ["claude", "-p"]
+    cmd += ["--setting-sources", "" if borrowed else "project"]
     if model:
         cmd += ["--model", model]
-    cmd.append(prompt)
+    if schema:
+        cmd += ["--json-schema", schema[1]]   # claude wants an inline JSON STRING, not a path
+    if borrowed:
+        cmd += ["--disallowedTools", "Write", "Edit", "NotebookEdit", "Bash"]
 
     t0 = time.time()
-    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, cwd=workdir)
+    proc = subprocess.run(cmd, input=prompt, capture_output=True, text=True,
+                          timeout=timeout, cwd=workdir)
     elapsed = round(time.time() - t0, 1)
 
-    answer = (proc.stdout or "").strip()
+    answer, structured = parse_structured(proc.stdout or "")
     ok = bool(answer) and proc.returncode == 0
     err = "" if ok else ((proc.stderr or "").strip()[-600:] or f"exit {proc.returncode}, empty answer")
-    return {"ok": ok, "answer": answer, "model": model or "default", "elapsed_s": elapsed, "error": err}
+    return {"ok": ok, "answer": answer, "structured": structured,
+            "model": model or "default", "elapsed_s": elapsed, "error": err}
 
 
-def run_opencode(prompt, model, timeout, workdir):
-    """opencode `run` in JSON mode; the answer is the concatenation of `type:text` events."""
+def run_opencode(prompt, model, timeout, workdir, borrowed, schema=None):
+    """opencode `run` in JSON mode; the answer is the concatenation of `type:text` events.
+
+    Free DeepSeek by default, so this member costs no subscription quota — which is why
+    it is in the default set rather than opt-in.
+
+    It is refused on a borrowed workdir. The other members each have something real
+    behind their read-only promise (an OS sandbox, denied tools, plan mode); opencode
+    has no equivalent flag here, and a member that cannot be constrained should not be
+    pointed at the caller's repo just because the others can.
+
+    Schemas are requested in the prompt rather than enforced — there is no
+    `--output-schema` equivalent — and `parse_structured` degrades to prose if ignored.
+    """
+    if borrowed:
+        return {"ok": False, "answer": "", "structured": None,
+                "model": model or DEFAULT_OPENCODE_MODEL, "elapsed_s": 0,
+                "error": "opencode member has no read-only mode, so it is refused on --workdir"}
+
+    if schema:
+        prompt = (f"{prompt}\n\nRespond with ONLY a JSON object that CONFORMS to this JSON "
+                  f"Schema. Return an instance of it, not the schema itself, and emit raw "
+                  f"JSON with no code fence:\n{schema[1]}")
+
     cmd = ["opencode", "run", "--format", "json"]
     if model:
         cmd += ["-m", model]
     cmd.append(prompt)
 
     t0 = time.time()
-    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, cwd=workdir)
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, cwd=workdir,
+                          stdin=subprocess.DEVNULL)
     elapsed = round(time.time() - t0, 1)
 
     texts = []
@@ -141,22 +372,123 @@ def run_opencode(prompt, model, timeout, workdir):
             chunk = (obj.get("part") or {}).get("text")
             if chunk:
                 texts.append(chunk)
-    answer = "\n".join(texts).strip()
+
+    answer, structured = parse_structured(unfence("\n".join(texts)))
     ok = bool(answer) and proc.returncode == 0
     err = "" if ok else ((proc.stderr or "").strip()[-600:] or f"exit {proc.returncode}, empty answer")
-    return {"ok": ok, "answer": answer, "model": model or DEFAULT_OPENCODE_MODEL, "elapsed_s": elapsed, "error": err}
+    return {"ok": ok, "answer": answer, "structured": structured,
+            "model": model or DEFAULT_OPENCODE_MODEL, "elapsed_s": elapsed, "error": err}
 
 
-RUNNERS = {"codex": run_codex, "gemini": run_gemini, "claude": run_claude, "opencode": run_opencode}
+def chatgpt_ask_command():
+    """How to invoke the ChatGPT bridge, or None if it isn't installed.
+
+    The bridge lives in its own directory (chatgpt-bridge/) because this skill is
+    not its only consumer, and a copy per consumer is how the other shared pieces
+    here drifted apart. PATH is checked first so every consumer resolves the one
+    install; the sibling fallback only covers a checkout with no symlink yet.
+    """
+    on_path = shutil.which("chatgpt-ask")
+    if on_path:
+        return [on_path]  # PEP 723 shebang; uv resolves its own dependencies
+    sibling = os.path.join(os.path.dirname(HERE), "chatgpt-bridge", "chatgpt_ask.py")
+    if os.path.exists(sibling):
+        uv = shutil.which("uv")
+        return [uv, "run", "--quiet", sibling] if uv else [sys.executable, sibling]
+    return None
+
+
+def run_chatgpt(prompt, model, timeout, workdir, borrowed, schema=None):
+    """ChatGPT desktop app, driven over its debugging port by the `chatgpt-ask` bridge.
+
+    This member answers out of the ChatGPT **conversation** allowance instead of the Codex
+    quota `run_codex` spends, which is the whole reason it exists. The bridge starts and
+    stops the app itself and asks in a temporary chat, so nothing has to be set up
+    beforehand and no thread is left in the user's history.
+
+    Two things it cannot do that the CLI members can:
+
+    1. Read a borrowed `--workdir`. It answers from inside the app and has no filesystem, so
+       it refuses rather than answering from the prompt alone while the caller believes it
+       reviewed their repo.
+    2. Enforce a schema. There is no `--output-schema` equivalent in the UI, so the schema is
+       appended to the prompt as a request. `parse_structured` already degrades to prose when
+       a member ignores it, so a non-JSON reply still counts as an answer.
+    """
+    if borrowed:
+        return {"ok": False, "answer": "", "structured": None, "model": "desktop app",
+                "elapsed_s": 0,
+                "error": "chatgpt member cannot read a borrowed --workdir (it has no filesystem)"}
+
+    bridge = chatgpt_ask_command()
+    if bridge is None:
+        return {"ok": False, "answer": "", "structured": None, "model": "desktop app",
+                "elapsed_s": 0,
+                "error": "`chatgpt-ask` not found — link chatgpt-bridge/chatgpt_ask.py "
+                         "into PATH (see chatgpt-bridge/README.md)"}
+
+    if schema:
+        # "matching this schema" reads to the app as "fill this template in", and it
+        # answers by echoing the schema with the reply buried in a `description`.
+        # Asking for an instance explicitly is what stops that.
+        prompt = (f"{prompt}\n\nRespond with ONLY a JSON object that CONFORMS to this JSON "
+                  f"Schema. Return an instance of it, not the schema itself:\n{schema[1]}\n\n"
+                  f"Emit raw JSON: no code fence, and no backslash-escaping of Markdown "
+                  f"punctuation such as underscores.")
+
+    promptdir = tempfile.mkdtemp(prefix="council-chatgpt-")
+    promptfile = os.path.join(promptdir, "question.txt")
+    try:
+        with open(promptfile, "w", encoding="utf-8") as fh:
+            fh.write(prompt)
+        cmd = bridge + ["--prompt-file", promptfile, "--json", "--timeout", str(timeout)]
+        t0 = time.time()
+        # +60: the script may have to relaunch the app before it can ask, and
+        # a cold start costs about 15s on top of the model's own timeout.
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout + 60,
+                              stdin=subprocess.DEVNULL)
+        elapsed = round(time.time() - t0, 1)
+    finally:
+        shutil.rmtree(promptdir, ignore_errors=True)
+
+    try:
+        result = json.loads(proc.stdout)
+    except (TypeError, ValueError):
+        err = (proc.stderr or "").strip()[-600:] or f"exit {proc.returncode}, unreadable output"
+        return {"ok": False, "answer": "", "structured": None, "model": "desktop app",
+                "elapsed_s": elapsed, "error": err}
+
+    raw = unfence(result.get("answer", ""))
+    answer, structured = parse_structured(raw)
+    if schema and structured is None:
+        # Asked for JSON, got JSON-shaped prose: the app writes answers as
+        # Markdown, so it escapes punctuation ("COUNCIL\_UV\_OK") and `\_` is
+        # not a defined JSON escape. Drop backslashes before characters JSON
+        # gives no meaning to, keeping the seven real escapes intact.
+        answer, structured = parse_structured(re.sub(r'\\([^"\\/bfnrtu])', r"\1", raw))
+    if isinstance(structured, dict) and "properties" in structured and \
+            structured.get("type") == "object":
+        # It echoed the schema back instead of instantiating it. Treat that as
+        # unstructured rather than letting a schema document travel downstream
+        # as if it were an answer.
+        structured = None
+    return {"ok": bool(result.get("ok")) and bool(answer), "answer": answer,
+            "structured": structured, "model": model or "desktop app",
+            "elapsed_s": result.get("elapsed_s", elapsed), "error": result.get("error", "")}
+
+
+RUNNERS = {"codex": run_codex, "gemini": run_gemini, "claude": run_claude,
+           "opencode": run_opencode, "chatgpt": run_chatgpt}
 
 # CLI binary each member shells out to — used for the "not installed" error message.
-CLI_BIN = {"codex": "codex", "gemini": "agy", "claude": "claude", "opencode": "opencode"}
+CLI_BIN = {"codex": "codex", "gemini": "agy", "claude": "claude",
+           "opencode": "opencode", "chatgpt": "chatgpt-ask"}
 
 
-def dispatch(name, prompt, model, timeout, workdir):
+def dispatch(name, prompt, model, timeout, workdir, borrowed, schema=None):
     """Wrap a runner so a missing CLI / timeout / crash becomes a structured error, never an exception."""
     try:
-        return RUNNERS[name](prompt, model, timeout, workdir)
+        return RUNNERS[name](prompt, model, timeout, workdir, borrowed, schema=schema)
     except subprocess.TimeoutExpired:
         return {"ok": False, "answer": "", "model": model or "default", "elapsed_s": timeout,
                 "error": f"timed out after {timeout}s"}
@@ -166,6 +498,56 @@ def dispatch(name, prompt, model, timeout, workdir):
     except Exception as exc:  # noqa: BLE001 — surface anything else as a member error
         return {"ok": False, "answer": "", "model": model or "default", "elapsed_s": 0,
                 "error": f"{type(exc).__name__}: {exc}"}
+
+
+def anonymize(stage1_path, question_file):
+    """Turn a saved stage-1 JSON into a shuffled, relabelled cross-review prompt.
+
+    Doing the shuffle + labelling here (not in the orchestrating LLM) means the
+    label→member mapping never has to enter the chair's context before synthesis,
+    so it cannot leak into a reviewer prompt.
+    """
+    with open(stage1_path, encoding="utf-8") as fh:
+        data = json.load(fh)
+    with open(question_file, encoding="utf-8") as fh:
+        question = fh.read().strip()
+
+    members = data.get("members", {})
+    answered = [(m, (r.get("answer") or "").strip()) for m, r in members.items()
+                if r.get("ok") and (r.get("answer") or "").strip()]
+    dropouts = sorted(set(members) - {m for m, _ in answered})
+    if len(answered) < 2:
+        sys.exit("council.py: fewer than 2 usable answers — nothing to cross-review; "
+                 "skip Stage 2 and synthesize directly from the answers you have")
+    if len(answered) > len(string.ascii_uppercase):
+        sys.exit("council.py: too many answers to label A–Z")
+
+    random.shuffle(answered)
+    labels = string.ascii_uppercase[: len(answered)]
+    mapping = {labels[i]: m for i, (m, _) in enumerate(answered)}
+
+    blocks = "\n\n".join(f"--- Response {labels[i]} ---\n{a}" for i, (_, a) in enumerate(answered))
+    prompt = (
+        f"Question: {question}\n\n"
+        "Below are anonymous responses to this question. Evaluate each for correctness,\n"
+        "depth, and usefulness, then rank them best-to-worst with a one-line justification\n"
+        "each. If a response contains a specific factual or correctness error, quote the\n"
+        "erroneous claim and say why it is wrong.\n\n"
+        f"{blocks}\n"
+    )
+
+    outdir = os.path.dirname(os.path.abspath(stage1_path))
+    prompt_path = os.path.join(outdir, "review_prompt.txt")
+    map_path = os.path.join(outdir, "label_map.json")
+    with open(prompt_path, "w", encoding="utf-8") as fh:
+        fh.write(prompt)
+    with open(map_path, "w", encoding="utf-8") as fh:
+        json.dump(mapping, fh, ensure_ascii=False, indent=2)
+
+    json.dump({"review_prompt": prompt_path, "label_map": map_path,
+               "responses": len(answered), "dropouts": dropouts},
+              sys.stdout, ensure_ascii=False, indent=2)
+    sys.stdout.write("\n")
 
 
 def read_prompt(args):
@@ -182,15 +564,40 @@ def read_prompt(args):
 def main():
     ap = argparse.ArgumentParser(description="Dispatch a prompt to external LLM-council members in parallel.")
     ap.add_argument("--members", default=ALL_MEMBERS,
-                    help=f"comma-separated subset of: {ALL_MEMBERS} (default: all)")
+                    help=f"comma-separated subset of: {', '.join(RUNNERS)} "
+                         f"(default: {ALL_MEMBERS}). `chatgpt` is opt-in: it needs the desktop "
+                         "app already running on a debugging port, and it cannot read --workdir")
     ap.add_argument("--prompt", help="prompt text (else --prompt-file, else stdin)")
     ap.add_argument("--prompt-file", help="file containing the prompt")
     ap.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT, help="per-member timeout in seconds")
+    ap.add_argument("--workdir", help="directory the members run in (default: a throwaway temp dir). "
+                    "Point it at a repo so members can READ real files — needed for review work, "
+                    "where the answer depends on code the prompt cannot fully carry. Members are "
+                    "hardened read-only in this mode and the directory is never deleted.")
     ap.add_argument("--gemini-model", default=DEFAULT_GEMINI_MODEL, help="Antigravity model name")
     ap.add_argument("--codex-model", default=DEFAULT_CODEX_MODEL, help="Codex model (empty = subscription default)")
+    ap.add_argument("--output-schema", metavar="FILE", default=DEFAULT_SCHEMA,
+                    help="JSON Schema every member's final answer must match "
+                         f"(default: {os.path.relpath(DEFAULT_SCHEMA, HERE)}). All three CLIs "
+                         "support it — codex `--output-schema`, agy `--json-schema` (needs "
+                         "`--output-format json`), claude `--json-schema` — so members stay "
+                         "comparable. The JSON is rendered back to Markdown into `answer`, "
+                         "with the raw object kept under `structured`, so synthesis and "
+                         "--anonymize are unaffected.")
+    ap.add_argument("--no-output-schema", action="store_true",
+                    help="disable structured output; every member returns free prose")
     ap.add_argument("--claude-model", default=DEFAULT_CLAUDE_MODEL, help="Claude model (empty = subscription default)")
-    ap.add_argument("--opencode-model", default=DEFAULT_OPENCODE_MODEL, help="opencode model as provider/model")
+    ap.add_argument("--opencode-model", default=DEFAULT_OPENCODE_MODEL, help="opencode model slug")
+    ap.add_argument("--anonymize", metavar="STAGE1_JSON",
+                    help="don't dispatch; build an anonymized cross-review prompt from a saved stage-1 JSON")
+    ap.add_argument("--question-file", help="original question file (required with --anonymize)")
     args = ap.parse_args()
+
+    if args.anonymize:
+        if not args.question_file:
+            sys.exit("council.py: --anonymize requires --question-file")
+        anonymize(args.anonymize, args.question_file)
+        return
 
     members = [m.strip() for m in args.members.split(",") if m.strip()]
     unknown = [m for m in members if m not in RUNNERS]
@@ -198,20 +605,42 @@ def main():
         sys.exit(f"council.py: unknown member(s): {', '.join(unknown)} (valid: {', '.join(RUNNERS)})")
 
     prompt = read_prompt(args)
+
+    schema = None
+    if not args.no_output_schema:
+        try:
+            schema = load_schema(args.output_schema)
+        except (OSError, json.JSONDecodeError) as exc:
+            sys.exit(f"council.py: --output-schema unreadable ({args.output_schema}): {exc}")
+
     models = {
         "codex": args.codex_model,
         "gemini": args.gemini_model,
         "claude": args.claude_model,
         "opencode": args.opencode_model,
+        # the chatgpt member uses whatever model is selected in the app's own UI
+        "chatgpt": "",
     }
 
-    workdir = tempfile.mkdtemp(prefix="llm-council-")
+    # `borrowed` = the caller handed us a directory we do not own. It gates two things:
+    # the read-only hardening above, and (critically) whether we may delete the dir.
+    borrowed = bool(args.workdir)
+    if borrowed:
+        workdir = os.path.abspath(os.path.expanduser(args.workdir))
+        if not os.path.isdir(workdir):
+            sys.exit(f"council.py: --workdir is not a directory: {workdir}")
+    else:
+        workdir = tempfile.mkdtemp(prefix="llm-council-")
+
     try:
         with ThreadPoolExecutor(max_workers=len(members)) as pool:
-            futures = {m: pool.submit(dispatch, m, prompt, models[m], args.timeout, workdir) for m in members}
+            futures = {m: pool.submit(dispatch, m, prompt, models[m], args.timeout, workdir,
+                                      borrowed, schema)
+                       for m in members}
             results = {m: f.result() for m, f in futures.items()}
     finally:
-        shutil.rmtree(workdir, ignore_errors=True)
+        if not borrowed:  # never rmtree a directory the caller owns
+            shutil.rmtree(workdir, ignore_errors=True)
 
     json.dump({"members": results}, sys.stdout, ensure_ascii=False, indent=2)
     sys.stdout.write("\n")

@@ -32,7 +32,7 @@ panel **suggests**, it never writes to research-state directly.
 | Codex | `codex exec` | ChatGPT subscription |
 | Gemini | `agy -p` | Antigravity sign-in |
 | Claude | `claude -p` | Claude subscription (independent of the chair) |
-| DeepSeek | `opencode run` | opencode (free DeepSeek V4 Flash) |
+| opencode | `opencode run` | opencode's own free tier — the free model slugs rotate, so `opencode models` is what lists the live ones |
 
 **The invoking host session is the Chair.** Whether hosted by Codex, Claude
 Code, or another compatible runner, it builds the same persisted panel prompt,

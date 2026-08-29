@@ -217,7 +217,7 @@ load `shared/venue_profiles.md` to tailor expectations.
 ## Council panel (opt-in)
 
 `gap-analysis`, `ideate`, `novelty-check`, and `red-team` can widen their search with a
-multi-model panel — Codex, Gemini, Claude, and DeepSeek, each reached through its **own
+multi-model panel — Codex, Gemini, Claude, and opencode, each reached through its **own
 subscription/sign-in CLI** (no API keys), merged by this session as chair. Pass `--council`
 (for example, Claude Code `/research-assistant:algo ideate --council`, or ask
 `$research-ai:algo-brainstorm` for `red-team` with a council in Codex) to

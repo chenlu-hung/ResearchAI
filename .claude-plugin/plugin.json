@@ -1,6 +1,6 @@
 {
   "name": "research-assistant",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "An evidence-grounded Stats/ML research plugin for Claude Code. It reuses versioned literature records, gates algorithm novelty and experiments on evidence packets, and carries projects through drafting and peer review.",
   "author": {
     "name": "Lu-Hung Chen",

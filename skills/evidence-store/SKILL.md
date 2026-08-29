@@ -18,6 +18,24 @@ Use the repository-bundled `scripts/evidencectl.py` from either Claude Code or C
 7. Freeze a candidate-specific packet before giving novelty advice, freezing a method, designing confirmatory experiments, or drafting a contribution claim. Record the result with `audit add`.
 8. Re-freeze after a candidate component, claim, evidence link, source version, selected work/dataset, or topic query changes. New links invalidate only packets selecting that claim; new queries invalidate packets for that topic. Use `packet invalidate --reason` for other material discoveries. A stale or invalidated packet does not pass the gate. Its audit remains an immutable historical verdict, but is not current or gate-eligible once the referenced packet is no longer frozen.
 
+## The paraphrase is not the evidence (R-EV-1)
+
+A passage record's paraphrase is not the evidence; the inspected span is.
+`evidencectl passage add` stores a paraphrase and an excerpt hash — `--excerpt`
+is hashed in memory and never written — so the store can prove that some span
+hashing to a given value was inspected, but never that the paraphrase reports
+that span correctly. The paraphrase is the artifact that can be wrong.
+
+Capture the verbatim quote for every passage before calling `passage add`,
+in the source's own vault note and under the same locator, so the paraphrase
+stays checkable against it. A host-side reading skill may own that capture
+step; the requirement holds whether or not one is installed. Never mark a
+passage `verified`, `supports`, or `contradicts` for a substantive method,
+theorem, assumption, experiment, or novelty claim when no verbatim quote for
+it can be retrieved.
+
+Canonical wording: `shared/firm_rules.md` § R-EV-1.
+
 ## Evidence rules
 
 - Use `verified` only after inspecting the cited full-text, supplement, or dataset location. Supply both locator and excerpt hash; verified full-text support/contradiction also requires `passage_id`.
