@@ -226,7 +226,7 @@ Reads everything else.
 ## Council panel (opt-in)
 
 `outline` and `self-review` can convene a multi-model panel — Codex, Gemini, Claude, and
-DeepSeek, each reached through its **own subscription/sign-in CLI** (no API keys), with this
+opencode, each reached through its **own subscription/sign-in CLI** (no API keys), with this
 session as chair. Pass `--council` (for example, Claude Code
 `/research-assistant:write self-review --council`, or ask
 `$research-ai:paper-writer` for `self-review` with a council in Codex) to turn

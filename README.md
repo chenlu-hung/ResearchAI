@@ -292,7 +292,7 @@ needed.
 
 Four modes — `algo gap-analysis`, `algo ideate`, `write outline`, `write
 self-review` — accept a `--council` flag that convenes a multi-model panel
-(Codex, Gemini, Claude, DeepSeek), each reached through its **own
+(Codex, Gemini, Claude, opencode), each reached through its **own
 subscription/sign-in CLI** rather than an API key, with the running session as
 chair. It widens divergent search (more gaps, more candidate algorithms) and
 turns `self-review` into a real multi-reviewer meta-review. Inspired by

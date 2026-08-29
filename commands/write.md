@@ -60,7 +60,7 @@ files in `skills/paper-writer/style/` for tone and structure.
 If the arguments include `--council` (supported by `outline` and
 `self-review`), additionally run the multi-model panel in
 `shared/prompts/council_panel.md` after the mode's gating — fan out to
-Codex / Gemini / Claude / DeepSeek via
+Codex / Gemini / Claude / opencode via
 `python3 "$PLUGIN_ROOT/shared/council.py"`, then chair
 the synthesis (`self-review` becomes a multi-reviewer meta-review; `outline`
 becomes a structure bake-off). Panel claims/citations become queries and cannot
